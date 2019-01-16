@@ -61,7 +61,7 @@ class CnOpts(object):
                                      '(cnopts.hostkeys.load(filename)) or '
                                      'disable HostKey checking '
                                      '(cnopts.hostkeys = None).')
-                                     .format(knownhosts))
+                                    .format(knownhosts))
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
@@ -165,8 +165,8 @@ class Connection(object):
                             raise CredentialException(('Unable to identify '
                                                        'key type from file '
                                                        'provided, [{0}]!')
-                                                       .format(
-                                                           private_key_file))
+                                                      .format(
+                                                          private_key_file))
                     except PermissionError as err:
                         raise err
                     finally:
@@ -683,9 +683,9 @@ class Connection(object):
         for tld in paths.keys():
             for local, remote in paths[tld]:
                 self.put_d(local, remote, callback=callback, confirm=confirm,
-                           preserve_mtime=preserve_mtime, exceptions=exceptions,
-                           tries=tries, backoff=backoff, delay=delay,
-                           logger=logger, silent=silent)
+                           preserve_mtime=preserve_mtime,
+                           exceptions=exceptions, tries=tries, backoff=backoff,
+                           delay=delay, logger=logger, silent=silent)
 
     def putfo(self, flo, remotepath=None, file_size=0, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
@@ -798,10 +798,10 @@ class Connection(object):
 
         try:
             if remotepath is not None:
-                self.cwd(remotepath)
+                self.chdir(remotepath)
             yield
         finally:
-            self.cwd(original_path)
+            self.chdir(original_path)
 
     def chdir(self, remotepath):
         '''Change the current working directory on the remote

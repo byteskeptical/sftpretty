@@ -51,7 +51,7 @@ def test_get_r_pathed(sftpserver):
     '''test the get_r for localpath, starting deeper then pwd '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            sftp.getcwd('pub/foo2')
+            sftp.chdir('pub/foo2')
             localpath = mkdtemp()
             sftp.get_r('./bar1', localpath)
 

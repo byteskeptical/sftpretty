@@ -17,7 +17,7 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 
 def hash(filename, algorithm=None, blocksize=65536):
     if not algorithm:
-        hasher = sha3_512() 
+        hasher = sha3_512()
     if isinstance(filename, str):
         try:
             with open(filename, 'rb') as filestream:
@@ -56,9 +56,9 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
             message = 'Retry: [DISABLED]'
             if not silent:
                 if logger:
-                   logger.debug(message)
+                    logger.debug(message)
                 else:
-                   print(message)
+                    print(message)
             return f
 
         @wraps(f)
@@ -68,15 +68,16 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                 try:
                     return f(*args, **kwargs)
                 except all_exception_types as e:
-                    if (not any(x for x in exception_types if isinstance(e, x))
-                        and not any(x for x in exception_instances 
-                                    if type(x) == type(e) and 
-                                    x.args == e.args)):
+                    if (not any(x for x in exception_types
+                                if isinstance(e, x)) and
+                                not any(x for x in exception_instances
+                                if type(x) == type(e) and
+                                x.args == e.args)):
                         raise
                     msg = ('Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} '
-                          'second(s)...').format(mtries, tries, str(e)
-                                                 if str(e) != ''
-                                                 else repr(e), mdelay)
+                           'second(s)...').format(mtries, tries, str(e)
+                                                  if str(e) != ''
+                                                  else repr(e), mdelay)
                     if not silent:
                         if logger:
                             logger.warning(msg)

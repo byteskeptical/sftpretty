@@ -10,7 +10,7 @@ def test_get_d(sftpserver):
     '''test the get_d for remotepath is pwd '.' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            sftp.getcwd('pub')
+            sftp.chdir('pub')
             localpath = mkdtemp()
             sftp.get_d('.', localpath)
 
@@ -27,7 +27,7 @@ def test_get_d_pathed(sftpserver):
     '''test the get_d for localpath, starting deeper then pwd '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            sftp.getcwd('pub')
+            sftp.chdir('pub')
             localpath = mkdtemp()
             sftp.get_d('foo1', localpath)
 

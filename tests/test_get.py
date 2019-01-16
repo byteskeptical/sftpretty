@@ -12,7 +12,7 @@ def test_get(sftpserver):
     '''download a file'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.getcwd('pub/foo1')
+            psftp.chdir('pub/foo1')
             with tempfile_containing('') as fname:
                 psftp.get('foo1.txt', fname)
                 assert open(fname, 'rb').read() == b'content of foo1.txt'
@@ -22,7 +22,7 @@ def test_get_callback(sftpserver):
     '''test .get callback'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.getcwd('pub/foo1')
+            psftp.chdir('pub/foo1')
             cback = Mock(return_value=None)
             with tempfile_containing('') as fname:
                 result = psftp.get('foo1.txt', fname, callback=cback)
@@ -37,7 +37,7 @@ def test_get_bad_remote(sftpserver):
     '''download a file'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.getcwd('pub/foo1')
+            psftp.chdir('pub/foo1')
             with tempfile_containing('') as fname:
                 with pytest.raises(IOError):
                     psftp.get('readme-not-there.txt', fname)
@@ -48,7 +48,7 @@ def test_get_preserve_mtime(sftpserver):
     '''test that m_time is preserved from local to remote, when get'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.getcwd('pub/foo1')
+            psftp.chdir('pub/foo1')
             rfile = 'foo1.txt'
             with tempfile_containing('') as localfile:
                 r_stat = psftp.stat(rfile)
@@ -60,7 +60,7 @@ def test_get_glob_fails(sftpserver):
     '''try and use get a file with a pattern - Fails'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.getcwd('pub/foo1')
+            psftp.chdir('pub/foo1')
             with tempfile_containing('') as fname:
                 with pytest.raises(IOError):
                     psftp.get('*', fname)
