@@ -6,9 +6,9 @@ from time import sleep
 
 
 def _callback(filename, bytes_so_far, bytes_total, logger=None):
-    message = 'Transfer of File: [{0}] @ {1:d}/{2:d} bytes ({3:.1f}%)'
-              .format(filename, bytes_so_far, bytes_total,
-                      100.0 * bytes_so_far / bytes_total)
+    message = ('Transfer of File: [{0}] @ {1:d}/{2:d} bytes '
+               '({3:.1f}%)').format(filename, bytes_so_far, bytes_total,
+                                    100.0 * bytes_so_far / bytes_total)
     if logger:
         logger.info(message)
     else:
@@ -46,7 +46,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
         len(exceptions)
     except TypeError:
         exceptions = (exceptions,)
-    all_exception_types = tuple(set(x if type(x) == type else x.__class__ 
+    all_exception_types = tuple(set(x if type(x) == type else x.__class__
                                     for x in exceptions))
     exception_types = tuple(x for x in exceptions if type(x) == type)
     exception_instances = tuple(x for x in exceptions if type(x) != type)
