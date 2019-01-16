@@ -2,11 +2,12 @@
 
 import pytest
 
-from common import VFS, conn, SKIP_IF_CI, STARS8192, tempfile_containing
+from common import conn, SKIP_IF_CI, STARS8192, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep
 from unittest.mock import Mock
+
 
 @SKIP_IF_CI
 def test_put_callback(lsftp):

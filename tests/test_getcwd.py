@@ -1,6 +1,5 @@
-'''test sftpretty.getcwd'''
-
-'''until you issue a .chdir/cwd command paramiko returns None for .getcwd,
+'''test sftpretty.getcwd
+until you issue a .chdir/cwd command paramiko returns None for .getcwd,
 unless you have set default_path in the Connection args'''
 
 from common import conn, VFS

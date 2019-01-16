@@ -49,18 +49,3 @@ def test_cd_bad_path(sftpserver):
                 with sftp.cd('not-there'):
                     pass
             assert home == sftp.pwd
-
-
-def test_cd_local():
-    '''test sftpretty.cd on local directories'''
-    original = Path.cwd().as_posix()
-    with cd('docs'):
-        assert Path.cwd().as_posix() == Path(original).joinpath('docs').as_posix()
-    assert Path.cwd().as_posix() == original
-
-
-def test_cd_local_bad():
-    '''test sftpretty.cd on non-existing local directory'''
-    with pytest.raises(OSError):
-        with cd('not-there'):
-            pass

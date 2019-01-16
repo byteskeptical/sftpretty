@@ -4,12 +4,16 @@ from io import BytesIO, IOBase
 from stat import S_IMODE
 from time import sleep
 
+
 def _callback(filename, bytes_so_far, bytes_total, logger=None):
-    message = 'Transfer of File: [{0}] @ {1:d}/{2:d} bytes ({3:.1f}%)'.format(filename, bytes_so_far, bytes_total, 100.0 * bytes_so_far / bytes_total)
+    message = 'Transfer of File: [{0}] @ {1:d}/{2:d} bytes ({3:.1f}%)'
+              .format(filename, bytes_so_far, bytes_total,
+                      100.0 * bytes_so_far / bytes_total)
     if logger:
         logger.info(message)
     else:
         print(message)
+
 
 def hash(filename, algorithm=None, blocksize=65536):
     if not algorithm:
@@ -36,12 +40,14 @@ def hash(filename, algorithm=None, blocksize=65536):
 
     return hasher.hexdigest()
 
+
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     try:
         len(exceptions)
     except TypeError:
         exceptions = (exceptions,)
-    all_exception_types = tuple(set(x if type(x) == type else x.__class__ for x in exceptions))
+    all_exception_types = tuple(set(x if type(x) == type else x.__class__ 
+                                    for x in exceptions))
     exception_types = tuple(x for x in exceptions if type(x) == type)
     exception_instances = tuple(x for x in exceptions if type(x) != type)
 
@@ -63,9 +69,14 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                     return f(*args, **kwargs)
                 except all_exception_types as e:
                     if (not any(x for x in exception_types if isinstance(e, x))
-                        and not any(x for x in exception_instances if type(x) == type(e) and x.args == e.args)):
+                        and not any(x for x in exception_instances 
+                                    if type(x) == type(e) and 
+                                    x.args == e.args)):
                         raise
-                    msg = 'Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} second(s)...'.format(mtries, tries, str(e) if str(e) != '' else repr(e), mdelay)
+                    msg = ('Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} '
+                          'second(s)...').format(mtries, tries, str(e)
+                                                 if str(e) != ''
+                                                 else repr(e), mdelay)
                     if not silent:
                         if logger:
                             logger.warning(msg)
@@ -79,6 +90,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
         return _retry
 
     return wrapper
+
 
 def st_mode_to_int(val):
     '''SFTAttributes st_mode returns an stat type that shows more than what

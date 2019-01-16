@@ -1,16 +1,15 @@
 '''test sftpretty.put_r'''
 
-from tempfile import mkdtemp
-
 import pytest
 
 from blddirs import build_dir_struct
 from common import SKIP_IF_CI
+from pathlib import Path
 from tempfile import mkdtemp
 
-# TODO #2
-#@SKIP_IF_CI
-#def test_put_r(lsftp):
+# TODO 2
+# @SKIP_IF_CI
+# def test_put_r(lsftp):
 #    '''test put_r'''
 #    localpath = mkdtemp()
 #    print(localpath)

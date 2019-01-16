@@ -20,7 +20,8 @@ def test_get_r(sftpserver):
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                       ]
             for pth, fls in checks:
-                assert sorted(Path(Path(localpath).joinpath(*pth).as_posix()).iterdir()) == fls
+                assert sorted(Path(Path(localpath).joinpath(
+                              *pth).as_posix()).iterdir()) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -39,7 +40,8 @@ def test_get_r_pwd(sftpserver):
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                       ]
             for pth, fls in checks:
-                assert sorted(Path(Path(localpath).joinpath(*pth).as_posix()).iterdir()) == fls
+                assert sorted(Path(Path(localpath).joinpath(
+                              *pth).as_posix()).iterdir()) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -49,7 +51,7 @@ def test_get_r_pathed(sftpserver):
     '''test the get_r for localpath, starting deeper then pwd '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            sftp.cwd('pub/foo2')
+            sftp.getcwd('pub/foo2')
             localpath = mkdtemp()
             sftp.get_r('./bar1', localpath)
 
@@ -57,7 +59,8 @@ def test_get_r_pathed(sftpserver):
                       (['', 'bar1'], ['bar1.txt', ]),
                       ]
             for pth, fls in checks:
-                assert sorted(Path(Path(localpath).joinpath(*pth).as_posix()).iterdir()) == fls
+                assert sorted(Path(Path(localpath).joinpath(
+                              *pth).as_posix()).iterdir()) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -75,7 +78,8 @@ def test_get_r_cdd(sftpserver):
                       (['bar1', ], ['bar1.txt', ])
                       ]
             for pth, fls in checks:
-                assert sorted(Path(Path(localpath).joinpath(*pth).as_posix()).iterdir()) == fls
+                assert sorted(Path(Path(localpath).joinpath(
+                              *pth).as_posix()).iterdir()) == fls
 
             # cleanup local
             Path(localpath).rmdir()

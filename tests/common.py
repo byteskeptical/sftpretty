@@ -4,6 +4,7 @@ import pytest
 
 from contextlib import contextmanager
 from os import close, getenv
+from pathlib import Path
 from sftpretty import CnOpts
 from tempfile import mkstemp
 
@@ -29,6 +30,7 @@ def conn(sftpsrv):
     return {'host': sftpsrv.host, 'port': sftpsrv.port, 'username': 'user',
             'password': 'pw', 'default_path': '/home/test', 'cnopts': cnopts}
 
+
 @contextmanager
 def tempfile_containing(contents='', suffix=''):
     '''create a temporary file, with optional suffix and return the filename,
@@ -44,6 +46,7 @@ def tempfile_containing(contents='', suffix=''):
         yield temp_path
     finally:
         Path(temp_path).unlink()
+
 
 # filesystem served by pytest-sftpserver plugin
 VFS = {

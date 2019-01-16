@@ -8,7 +8,7 @@ def test_listdir(sftpserver):
     '''test listdir'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.cwd('pub')
+            psftp.getcwd('pub')
             assert psftp.listdir() == ['foo1', 'foo2', 'make.txt']
 
 
@@ -16,7 +16,7 @@ def test_listdir_attr(sftpserver):
     '''test listdir'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.cwd('pub')
+            psftp.getcwd('pub')
             attrs = psftp.listdir_attr()
             assert len(attrs) == 3
             # test they are in filename order

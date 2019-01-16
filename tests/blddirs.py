@@ -21,11 +21,13 @@ def build_dir_struct(local_path):
     for dparts in DIR_LIST:
         Path(local_path).joinpath(*dparts).mkdir()
     for fparts in FILE_LIST:
-        with open(Path(local_path).joinpath(*fparts).as_posix(), 'wb') as fhndl:
+        with open(Path(local_path).joinpath(*fparts).as_posix(),
+                  'wb') as fhndl:
             try:
                 fhndl.write(STARS8192)
             except TypeError:
                 fhndl.write(bytes(STARS8192, 'UTF-8'))
+
 
 def remove_dir_struct(local_path):
     '''clean up directory struct'''

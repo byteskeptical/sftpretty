@@ -1,13 +1,15 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from functools import partial
-from logging import basicConfig, getLogger, DEBUG, debug, ERROR, error, INFO, info
+from logging import basicConfig, getLogger, DEBUG, debug, ERROR, error,
+                    INFO, info
 from os import environ, utime
 from paramiko import hostkeys, SFTPClient, Transport, util
 from paramiko import SSHException, AuthenticationException
 from paramiko import AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey
 from pathlib import Path
-from sftpretty.exceptions import CredentialException, ConnectionException, HostKeysException
+from sftpretty.exceptions import CredentialException, ConnectionException,
+                                 HostKeysException
 from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
@@ -18,6 +20,7 @@ __version__ = '0.0.1'
 
 basicConfig(level=INFO)
 log = getLogger(__name__)
+
 
 class CnOpts(object):
     '''additional connection options beyond authentication
@@ -52,11 +55,13 @@ class CnOpts(object):
             self.hostkeys.load(knownhosts)
         except IOError:
             # Can't find known_hosts in the standard place
-            raise HostKeysException('Failed to load HostKeys from [{0}]. You \
-                                    will need to explicitly load HostKeys \
-                                    (cnopts.hostkeys.load(filename)) or disable \
-                                    HostKey checking (cnopts.hostkeys = None).'
-                                    .format(knownhosts))
+            raise HostKeysException(('Failed to load HostKeys from [{0}]. '
+                                     'You will need to explicitly load '
+                                     'host keys '
+                                     '(cnopts.hostkeys.load(filename)) or '
+                                     'disable HostKey checking
+                                     '(cnopts.hostkeys = None).')
+                                     .format(knownhosts))
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
@@ -157,25 +162,30 @@ class Connection(object):
                         elif 'RSA' in key_head:
                             key_type = RSAKey
                         else:
-                            raise CredentialException('Unable to identify key \
-                                                      type from file provided, \
-                                                      [{0}]!'
-                                                      .format(private_key_file))
+                            raise CredentialException(('Unable to identify '
+                                                       'key type from file '
+                                                       'provided, [{0}]!')
+                                                       .format(
+                                                           private_key_file))
                     except PermissionError as err:
                         raise err
                     finally:
                         try:
                             if not private_key_pass:
-                                self._tconnect['pkey'] = key_type.from_private_key_file(private_key_file)
+                                self._tconnect['pkey'] = 
+                                    key_type.from_private_key_file(
+                                        private_key_file)
                             else:
-                                self._tconnect['pkey'] = key_type.from_private_key_file(private_key_file, private_key_pass)
+                                self._tconnect['pkey'] = 
+                                    key_type.from_private_key_file(
+                                        private_key_file, private_key_pass)
                         except SSHException as err:
                             raise err
                 else:
-                    raise CredentialException('Path provided is not a file or \
-                                               does not exist, please revise \
-                                               and provide a path to a valid \
-                                               private key')
+                    raise CredentialException(('Path provided is not a file or'
+                                               'does not exist, please revise'
+                                               'and provide a path to a valid'
+                                               'private key'))
 
     def _set_logging(self):
         '''Set logging for connection'''
@@ -339,30 +349,32 @@ class Connection(object):
         if not pattern:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                     Path(localdir).joinpath(attribute.filename).as_posix(),
-                     callback, preserve_mtime, exceptions, tries, backoff, delay,
-                     logger, silent)
+                      Path(localdir).joinpath(attribute.filename).as_posix(),
+                      callback, preserve_mtime, exceptions, tries, backoff,
+                      delay, logger, silent)
                      for attribute in self._sftp.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                     Path(localdir).joinpath(attribute.filename).as_posix(),
-                     callback, preserve_mtime, exceptions, tries, backoff, delay,
-                     logger, silent)
+                      Path(localdir).joinpath(attribute.filename).as_posix(),
+                      callback, preserve_mtime, exceptions, tries, backoff,
+                      delay, logger, silent)
                      for attribute in self._sftp.listdir_attr(remotedir)
-                     if S_ISREG(attribute.st_mode)
-                     and '{0}'.format(pattern) in attribute.filename
+                     if S_ISREG(attribute.st_mode) and '{0}'
+                     .format(pattern) in attribute.filename
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as executor:
+            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as queue:
                 threads = {
-                           executor.submit(self.get, remote, local,
-                           callback=callback, preserve_mtime=preserve_mtime,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent): remote
+                           queue.submit(self.get, remote, local,
+                                        callback=callback,
+                                        preserve_mtime=preserve_mtime,
+                                        exceptions=exceptions, tries=tries,
+                                        backoff=backoff, delay=delay,
+                                        logger=logger, silent=silent): remote
                            for remote, local, callback, preserve_mtime,
                            exceptions, tries, backoff, delay, logger, silent in
                            paths
@@ -589,23 +601,26 @@ class Connection(object):
 
         paths = [
                  (localpath.as_posix(),
-                 Path(remotedir).joinpath(localpath.relative_to('/').as_posix()).as_posix(),
-                 callback, confirm, preserve_mtime, exceptions, tries, backoff,
-                 delay, logger, silent)
-                 for localpath in Path(localdir).iterdir() if localpath.is_file()
+                  Path(remotedir).joinpath(
+                      localpath.relative_to('/').as_posix()).as_posix(),
+                  callback, confirm, preserve_mtime, exceptions, tries,
+                  backoff, delay, logger, silent)
+                 for localpath in Path(localdir).iterdir()
+                 if localpath.is_file()
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as executor:
+            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as queue:
                 threads = {
-                           executor.submit(self.put, local, remote,
-                           callback=callback, confirm=confirm,
-                           preserve_mtime=preserve_mtime, exceptions=exceptions,
-                           tries=tries, backoff=backoff, delay=delay,
-                           logger=logger, silent=silent): local
-                           for local, remote, callback, confirm, preserve_mtime,
-                           exceptions, tries, backoff, delay, logger, silent
-                           in paths
+                           queue.submit(self.put, local, remote,
+                                        callback=callback, confirm=confirm,
+                                        preserve_mtime=preserve_mtime,
+                                        exceptions=exceptions, tries=tries,
+                                        backoff=backoff, delay=delay,
+                                        logger=logger, silent=silent): local
+                           for local, remote, callback, confirm,
+                           preserve_mtime, exceptions, tries, backoff, delay,
+                           logger, silent in paths
                           }
                 for future in as_completed(threads):
                     name = threads[future]
@@ -780,15 +795,13 @@ class Connection(object):
         :raises: IOError, if remote path doesn't exist
         '''
         original_path = self.pwd
+
         try:
             if remotepath is not None:
-                self.chdir(remotepath)
+                self.cwd(remotepath)
             yield
-        except IOError as err:
-            self.mkdir_p(remotepath)
-            self.cd(remotepath)
         finally:
-            self.chdir(original_path)
+            self.cwd(original_path)
 
     def chdir(self, remotepath):
         '''Change the current working directory on the remote
@@ -1000,7 +1013,7 @@ class Connection(object):
             root of local directory to descend, use '.' to start at
             :attr:`.pwd`
         :param str remotedir:
-            root of remote directory to append localdir to create new 
+            root of remote directory to append localdir to create new
             path
         :param bool recurse: *Default: True* - should it recurse
 
@@ -1013,7 +1026,8 @@ class Connection(object):
             for localpath in Path(localdir).iterdir():
                 if localpath.is_dir():
                     local = localpath.as_posix()
-                    remote = Path(remotedir).joinpath(localpath.relative_to('/').as_posix()).as_posix()
+                    remote = Path(remotedir).joinpath(
+                        localpath.relative_to('/').as_posix()).as_posix()
                     if localdir in container.keys():
                         container[localdir].append((local, remote))
                     else:
@@ -1162,8 +1176,10 @@ class Connection(object):
         try:
             for attribute in self.listdir_attr(remotedir):
                 if S_ISDIR(attribute.st_mode):
-                    remote = Path(remotedir).joinpath(attribute.filename).as_posix()
-                    local = Path(localdir).joinpath(Path(remote).relative_to('/').as_posix()).as_posix()
+                    remote = Path(remotedir).joinpath(
+                        attribute.filename).as_posix()
+                    local = Path(localdir).joinpath(
+                        Path(remote).relative_to('/').as_posix()).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
