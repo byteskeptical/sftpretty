@@ -1,15 +1,15 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import basicConfig, getLogger
-from logging import DEBUG, debug, ERROR, error, INFO, info
+from logging import basicConfig, getLogger,
+DEBUG, debug, ERROR, error, INFO, info
 from os import environ, utime
-from paramiko import hostkeys, SFTPClient, Transport, util
-from paramiko import SSHException, AuthenticationException
-from paramiko import AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey
+from paramiko import hostkeys, SFTPClient, Transport, util,
+AuthenticationException, SSHException,
+AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey
 from pathlib import Path
 from sftpretty.exceptions import CredentialException, ConnectionException,
-                                 HostKeysException
+HostKeysException
 from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
