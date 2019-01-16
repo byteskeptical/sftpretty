@@ -1,8 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from functools import partial
-from logging import basicConfig, getLogger, DEBUG, debug, ERROR, error,
-                    INFO, info
+from logging import basicConfig, getLogger
+from logging import DEBUG, debug, ERROR, error, INFO, info
 from os import environ, utime
 from paramiko import hostkeys, SFTPClient, Transport, util
 from paramiko import SSHException, AuthenticationException
