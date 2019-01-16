@@ -59,7 +59,7 @@ class CnOpts(object):
                                      'You will need to explicitly load '
                                      'host keys '
                                      '(cnopts.hostkeys.load(filename)) or '
-                                     'disable HostKey checking
+                                     'disable HostKey checking '
                                      '(cnopts.hostkeys = None).')
                                      .format(knownhosts))
         else:
