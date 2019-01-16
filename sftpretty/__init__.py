@@ -172,13 +172,13 @@ class Connection(object):
                     finally:
                         try:
                             if not private_key_pass:
-                                self._tconnect['pkey'] = 
+                                self._tconnect['pkey'] = (
                                     key_type.from_private_key_file(
-                                        private_key_file)
+                                        private_key_file))
                             else:
-                                self._tconnect['pkey'] = 
+                                self._tconnect['pkey'] = (
                                     key_type.from_private_key_file(
-                                        private_key_file, private_key_pass)
+                                        private_key_file, private_key_pass))
                         except SSHException as err:
                             raise err
                 else:
