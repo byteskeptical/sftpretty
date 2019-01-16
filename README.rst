@@ -26,6 +26,8 @@ Example
 
 Supports
 --------
+[![Build Status](https://travis-ci.org/bornwitbugs/sftpretty.svg?branch=master)](https://travis-ci.org/bornwitbugs/sftpretty)
+
 Tested on Python 3.3, 3.4, 3.5, 3.6, 3.7
 
 
