@@ -800,6 +800,8 @@ class Connection(object):
             if remotepath is not None:
                 self.chdir(remotepath)
             yield
+        except Exception as err:
+            raise err
         finally:
             self.chdir(original_path)
 
@@ -815,7 +817,13 @@ class Connection(object):
         '''
         self._sftp_connect()
 
-        self._sftp.chdir(remotepath)
+        try:
+            if remotepath is not None:
+                self._default_path = Path(self._default_path).joinpath(
+                                          remotepath).as_posix()
+            self._sftp.chdir(remotepath)
+        except Exception as err:
+            raise err
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
