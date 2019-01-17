@@ -12,8 +12,9 @@ def test_get(sftpserver):
     '''download a file'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as psftp:
-            psftp.cd('pub/foo1')
+            #psftp.chdir('pub/foo1')
             with tempfile_containing('') as fname:
+                psftp.chdir('pub/foo1')
                 psftp.get('foo1.txt', fname)
                 assert open(fname, 'rb').read() == b'content of foo1.txt'
 
