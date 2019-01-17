@@ -342,6 +342,13 @@ class Connection(object):
         channel = self._sftp.get_channel()
         channel.set_name(Path(remotedir).stem)
 
+        if remotedir == '.':
+            remotedir = self.getcwd()
+            if not remotedir:
+                log.error(('Remote path not set, `cd` or `chdir` to desired '
+                           'remote directory first or provide full path as '
+                           'argument instead of [.]'))
+
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
@@ -429,6 +436,13 @@ class Connection(object):
 
         '''
         directories = {}
+
+        if remotedir == '.':
+            remotedir = self.getcwd()
+            if not remotedir:
+                log.error(('Remote path not set, `cd` or `chdir` to desired '
+                           'remote directory first or provide full path as '
+                           'argument instead of [.]'))
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
         paths['root'] = [(remotedir, localdir)]
@@ -597,6 +611,9 @@ class Connection(object):
         channel = self._sftp.get_channel()
         channel.set_name(Path(localdir).stem)
 
+        if localdir == '.':
+            localdir = Path.cwd().as_posix()
+
         self.mkdir_p(remotedir)
 
         paths = [
@@ -676,6 +693,9 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         directories = {}
+
+        if localdir == '.':
+            localdir = Path.cwd().as_posix()
 
         paths = self.localtree(directories, localdir, remotedir, recurse=True)
         paths['root'] = [(localdir, remotedir)]
