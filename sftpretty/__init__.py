@@ -342,12 +342,12 @@ class Connection(object):
         channel = self._sftp.get_channel()
         channel.set_name(Path(remotedir).stem)
 
-        if remotedir == '.':
-            remotedir = self.getcwd()
-            if not remotedir:
-                log.error(('Remote path not set, `cd` or `chdir` to desired '
-                           'remote directory first or provide full path as '
-                           'argument instead of [.]'))
+        # if remotedir == '.':
+        #    remotedir = self.getcwd()
+        #    if not remotedir:
+        #        log.error(('Remote path not set, `cd` or `chdir` to desired '
+        #                   'remote directory first or provide full path as '
+        #                   'argument instead of [.]'))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -437,12 +437,12 @@ class Connection(object):
         '''
         directories = {}
 
-        if remotedir == '.':
-            remotedir = self.getcwd()
-            if not remotedir:
-                log.error(('Remote path not set, `cd` or `chdir` to desired '
-                           'remote directory first or provide full path as '
-                           'argument instead of [.]'))
+        # if remotedir == '.':
+        #    remotedir = self.getcwd()
+        #    if not remotedir:
+        #        log.error(('Remote path not set, `cd` or `chdir` to desired '
+        #                   'remote directory first or provide full path as '
+        #                   'argument instead of [.]'))
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
         paths['root'] = [(remotedir, localdir)]
@@ -837,9 +837,10 @@ class Connection(object):
         '''
         self._sftp_connect()
 
-        # if self._default_path is not None:
-        #    self._default_path = Path(self._default_path).joinpath(
-        #                              remotepath).as_posix()
+        if self._default_path is not None:
+            self._default_path = Path(self._default_path).joinpath(
+                                      remotepath).as_posix()
+
         self._sftp.chdir(remotepath)
 
     def chmod(self, remotepath, mode=777):
@@ -931,9 +932,7 @@ class Connection(object):
         return True
 
     def getcwd(self):
-        '''Return the current working directory on the remote. This is a wrapper
-        for paramiko's method and not to be confused with the SFTP command,
-        cwd.
+        '''Return the current working directory on the remote.
 
         :returns: (str) the current remote path. None, if not set.
 
