@@ -18,7 +18,7 @@ def test_get_r(sftpserver):
                       (['', 'pub', 'foo1'], ['foo1.txt', 'image01.jpg']),
                       (['', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
-                      ]
+                     ]
             for pth, fls in checks:
                 assert sorted(Path(localpath).joinpath(
                               *pth).iterdir()) == fls
@@ -53,7 +53,7 @@ def test_get_r_pathed(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo2')
             localpath = mkdtemp()
-            sftp.get_r('./bar1', localpath)
+            sftp.get_r('/bar1', localpath)
 
             checks = [(['', ], ['bar1', ]),
                       (['', 'bar1'], ['bar1.txt', ]),
