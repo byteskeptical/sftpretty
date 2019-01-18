@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import VFS, conn
+from common import conn, VFS
 from sftpretty import Connection
 
 
