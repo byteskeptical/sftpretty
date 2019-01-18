@@ -1,5 +1,5 @@
 from functools import wraps
-from hashlib import blake2b, blake2s, sha3_256, sha3_384, sha3_512
+from hashlib import sha3_512
 from io import BytesIO, IOBase
 from stat import S_IMODE
 from time import sleep

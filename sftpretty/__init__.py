@@ -837,9 +837,9 @@ class Connection(object):
         '''
         self._sftp_connect()
 
-        if self._default_path is not None:
-            self._default_path = Path(self._default_path).joinpath(
-                                      remotepath).as_posix()
+        # if self._default_path is not None:
+        #    self._default_path = Path(self._default_path).joinpath(
+        #                              remotepath).as_posix()
         self._sftp.chdir(remotepath)
 
     def chmod(self, remotepath, mode=777):
