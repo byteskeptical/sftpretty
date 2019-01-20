@@ -297,7 +297,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self.normalize('.')
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -504,7 +504,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self.normalize('.')
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -566,7 +566,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self.normalize('.')
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
@@ -778,7 +778,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self.normalize('.')
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
