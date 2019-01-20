@@ -31,6 +31,15 @@ def conn(sftpsrv):
             'password': 'pw', 'default_path': '/home/test', 'cnopts': cnopts}
 
 
+def rmdir(dir):
+    dir = Path(dir)
+    for item in dir.iterdir():
+        if item.is_dir():
+            rmdir(item)
+        else:
+            item.unlink()
+    dir.rmdir()
+
 @contextmanager
 def tempfile_containing(contents='', suffix=''):
     '''create a temporary file, with optional suffix and return the filename,

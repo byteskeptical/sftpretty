@@ -59,13 +59,11 @@ class CnOpts(object):
             self.hostkeys.load(knownhosts)
         except IOError:
             # Can't find known_hosts in the standard place
-            raise HostKeysException(('Failed to load HostKeys from [{0}]. '
-                                     'You will need to explicitly load '
-                                     'host keys '
-                                     '(cnopts.hostkeys.load(filename)) or '
-                                     'disable HostKey checking '
-                                     '(cnopts.hostkeys = None).')
-                                    .format(knownhosts))
+            raise UserWarning(('Failed to load HostKeys from [{0}]. You will '
+                               'need to explicitly load host keys '
+                               '(cnopts.hostkeys.load(filename)) or '
+                               'disable HostKey checking '
+                               '(cnopts.hostkeys = None).').format(knownhosts))
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
@@ -299,7 +297,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp.getcwd()
+            cwd = self.pwd
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -506,7 +504,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp.getcwd()
+            cwd = self.pwd
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -568,7 +566,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self._sftp.getcwd()
+            cwd = self.pwd
 
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
@@ -780,7 +778,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self._sftp.getcwd()
+            cwd = self.pwd
 
             if not callback:
                 callback = partial(_callback, flo, logger=logger)

@@ -24,28 +24,6 @@ def test_log_cnopt_user_file(sftpserver):
         Path(logfile).unlink()
 
 
-def test_log_param_user_file(sftpserver):
-    '''test .logfile returns temp filename when log param is set to True'''
-    copts = conn(sftpserver)
-    # copts['log'] = Path('~/my-logfile.txt').expanduser().as_posix()
-    copts['cnopts'].log = Path('~/my-logfile.txt').expanduser().as_posix()
-    with sftpserver.serve_content(VFS):
-        with Connection(**copts) as sftp:
-            # assert sftp.logfile == copts['log']
-            assert sftp.logfile == copts['cnopts'].log
-            assert Path(sftp.logfile).exists()
-            logfile = sftp.logfile
-        # cleanup
-        Path(logfile).unlink()
-
-
-def test_log_param_false(sftpserver):
-    '''test .logfile returns false when logging is set to false'''
-    with sftpserver.serve_content(VFS):
-        with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.logfile is False
-
-
 def test_log_cnopts_explicit_false(sftpserver):
     '''test .logfile returns false when CnOpts.log is set to false'''
     copts = conn(sftpserver)
@@ -55,20 +33,6 @@ def test_log_cnopts_explicit_false(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
             assert sftp.logfile is False
-
-
-def test_log_param_true(sftpserver):
-    '''test .logfile returns temp filename when log param is set to True'''
-    copts = conn(sftpserver)
-    copts['log'] = True
-    with sftpserver.serve_content(VFS):
-        with Connection(**copts) as sftp:
-            assert Path(sftp.logfile).exists()
-            # and we are not writing to a file named 'True'
-            assert sftp.logfile != copts['log']
-            logfile = sftp.logfile
-        # cleanup
-        Path(logfile).unlink()
 
 
 def test_log_cnopts_true(sftpserver):

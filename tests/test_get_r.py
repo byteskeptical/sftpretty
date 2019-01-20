@@ -1,6 +1,6 @@
 '''test sftpretty.get_r'''
 
-from common import conn, VFS
+from common import conn, rmdir, VFS
 from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
@@ -26,7 +26,7 @@ def test_get_r(sftpserver):
                                                 *pth).iterdir()]) == fls
 
             # cleanup local
-            Path(localpath).rmdir()
+            rmdir(localpath)
 
 
 def test_get_r_pwd(sftpserver):
@@ -48,7 +48,7 @@ def test_get_r_pwd(sftpserver):
                                                 *pth).iterdir()]) == fls
 
             # cleanup local
-            Path(localpath).rmdir()
+            rmdir(localpath)
 
 
 def test_get_r_pathed(sftpserver):
@@ -69,7 +69,7 @@ def test_get_r_pathed(sftpserver):
                                                 *pth).iterdir()]) == fls
 
             # cleanup local
-            Path(localpath).rmdir()
+            rmdir(localpath)
 
 
 def test_get_r_cdd(sftpserver):
@@ -90,4 +90,4 @@ def test_get_r_cdd(sftpserver):
                                                 *pth).iterdir()]) == fls
 
             # cleanup local
-            Path(localpath).rmdir()
+            rmdir(localpath)
