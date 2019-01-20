@@ -210,8 +210,10 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
-    def _sftp_channel(self, cwd=self.pwd):
+    def _sftp_channel(self, cwd=None):
         '''Establish new SFTP channel.'''
+        if not cwd:
+           cwd = self.pwd
         self._sftp = SFTPClient.from_transport(self._transport)
         if self._default_path is not None and cwd is not None:
             if cwd != self._default_path:
