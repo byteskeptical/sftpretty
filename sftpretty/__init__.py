@@ -212,7 +212,7 @@ class Connection(object):
 
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        current = self.pwd
+        current = self._sftp.getcwd()
         self._sftp = SFTPClient.from_transport(self._transport)
         if self._default_path is not None and current is not None:
             if current != self._default_path:
