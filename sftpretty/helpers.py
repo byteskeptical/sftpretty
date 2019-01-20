@@ -1,5 +1,8 @@
 from functools import wraps
-from hashlib import sha3_512
+try:
+    from hashlib import sha3_512 as hashbrown
+except ImportError as err:
+    from hashlib import sha_512 as hashbrown
 from io import BytesIO, IOBase
 from stat import S_IMODE
 from time import sleep
@@ -17,25 +20,25 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 
 def hash(filename, algorithm=None, blocksize=65536):
     if not algorithm:
-        hasher = sha3_512()
+         algorithm = hashbrown
     if isinstance(filename, str):
         try:
             with open(filename, 'rb') as filestream:
                 buffer = filestream.read(blocksize)
                 while len(buffer) > 0:
-                    hasher.update(buffer)
+                    algorithm.update(buffer)
                     buffer = filestream.read(blocksize)
         except FileNotFoundError:
-            hasher.update(bytes(filename.encode('utf-8')))
+            algorithm.update(bytes(filename.encode('utf-8')))
     elif isinstance(filename, BytesIO):
         buffer = filename.read1(blocksize)
         while len(buffer) > 0:
-            hasher.update(buffer)
+            algorithm.update(buffer)
             buffer = filename.read1(blocksize)
     elif isinstance(filename, IOBase):
         buffer = filename.read(blocksize)
         while len(buffer) > 0:
-            hasher.update(buffer)
+            algorithm.update(buffer)
             buffer = filename.read(blocksize)
 
     return hasher.hexdigest()
@@ -71,9 +74,9 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                 except all_exception_types as e:
                     if (not any(x for x in exception_types
                                 if isinstance(e, x)) and not any(x
-                                    for x in exception_instances
-                                        if type(x) == type(e) and
-                                            x.args == e.args)):
+                                        for x in exception_instances
+                                                if type(x) == type(e) and
+                                                x.args == e.args)):
                         raise
                     msg = ('Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} '
                            'second(s)...').format(mtries, tries, str(e)

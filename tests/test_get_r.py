@@ -13,15 +13,17 @@ def test_get_r(sftpserver):
             localpath = mkdtemp()
             sftp.get_r('.', localpath)
 
-            checks = [([''], ['pub', 'read.me']),
+            checks = [
+                      ([''], ['pub', 'read.me']),
                       (['', 'pub'], ['foo1', 'foo2', 'make.txt']),
                       (['', 'pub', 'foo1'], ['foo1.txt', 'image01.jpg']),
                       (['', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                assert sorted(Path(localpath).joinpath(
-                              *pth).iterdir()) == fls
+                assert sorted([path.name
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -34,14 +36,16 @@ def test_get_r_pwd(sftpserver):
             localpath = mkdtemp()
             sftp.get_r('pub/foo2', localpath)
 
-            checks = [(['', ], ['pub', ]),
+            checks = [
+                      (['', ], ['pub', ]),
                       (['', 'pub', ], ['foo2', ]),
                       (['', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                assert sorted(Path(localpath).joinpath(
-                              *pth).iterdir()) == fls
+                assert sorted([path.name
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -55,12 +59,14 @@ def test_get_r_pathed(sftpserver):
             localpath = mkdtemp()
             sftp.get_r('./bar1', localpath)
 
-            checks = [(['', ], ['bar1', ]),
+            checks = [
+                      (['', ], ['bar1', ]),
                       (['', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                assert sorted(Path(localpath).joinpath(
-                              *pth).iterdir()) == fls
+                assert sorted([path.name
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             Path(localpath).rmdir()
@@ -74,12 +80,14 @@ def test_get_r_cdd(sftpserver):
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 
-            checks = [(['', ], ['bar1', 'foo2.txt']),
+            checks = [
+                      (['', ], ['bar1', 'foo2.txt']),
                       (['bar1', ], ['bar1.txt', ])
                      ]
             for pth, fls in checks:
-                assert sorted(Path(localpath).joinpath(
-                              *pth).iterdir()) == fls
+                assert sorted([path.name
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             Path(localpath).rmdir()

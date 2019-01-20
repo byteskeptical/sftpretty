@@ -210,14 +210,13 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
-    def _sftp_channel(self, current=None):
+    def _sftp_channel(self, cwd=self.pwd):
         '''Establish new SFTP channel.'''
-        current = self._sftp.getcwd()
         self._sftp = SFTPClient.from_transport(self._transport)
-        if self._default_path is not None and current is not None:
-            if current != self._default_path:
-                log.info('Default Path: [{0}]'.format(current))
-                self._sftp.chdir(current)
+        if self._default_path is not None and cwd is not None:
+            if cwd != self._default_path:
+                log.info('Default Path: [{0}]'.format(cwd))
+                self._sftp.chdir(cwd)
             else:
                 log.info('Default Path: [{0}]'.format(self._default_path))
                 self._sftp.chdir(self._default_path)
@@ -293,16 +292,21 @@ class Connection(object):
         def _get(self, remotepath, localpath=None, callback=None,
                  preserve_mtime=False):
 
-            self._sftp_channel(current=self.pwd)
+            self._sftp_channel()
 
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
+
+            cwd = self._sftp_getcwd()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
             if not localpath:
                 localpath = Path(remotepath).name
+
+            if not cwd:
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             self._sftp.get(remotepath, localpath=localpath, callback=callback)
 
@@ -347,7 +351,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        self._sftp_channel(current=self.pwd)
+        self._sftp_channel()
 
         channel = self._sftp.get_channel()
         channel.set_name(Path(remotedir).stem)
@@ -495,13 +499,18 @@ class Connection(object):
                logger=logger, silent=silent)
         def _getfo(self, remotepath, flo, callback=None):
 
-            self._sftp_channel(current=self.pwd)
+            self._sftp_channel()
 
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
+            cwd = self._sftp.getcwd()
+
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
+
+            if not cwd:
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             return self._sftp.getfo(remotepath, flo, callback=callback)
 
@@ -557,11 +566,16 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
+            cwd = self._sftp.getcwd()
+
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
 
             if not remotepath:
                 remotepath = Path(localpath).name
+ 
+            if not cwd:
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             remote_attributes = self._sftp.put(localpath,
                                                remotepath=remotepath,
@@ -764,8 +778,16 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
+            cwd = self._sftp.getcwd()
+
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
+
+            if not remotepath:
+                remotepath = Path(flo.name).name
+
+            if not cwd:
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             return self._sftp.putfo(flo, remotepath=remotepath,
                                     file_size=file_size,

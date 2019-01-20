@@ -27,11 +27,11 @@ def test_log_cnopt_user_file(sftpserver):
 def test_log_param_user_file(sftpserver):
     '''test .logfile returns temp filename when log param is set to True'''
     copts = conn(sftpserver)
-    #copts['log'] = Path('~/my-logfile.txt').expanduser().as_posix()
+    # copts['log'] = Path('~/my-logfile.txt').expanduser().as_posix()
     copts['cnopts'].log = Path('~/my-logfile.txt').expanduser().as_posix()
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
-            #assert sftp.logfile == copts['log']
+            # assert sftp.logfile == copts['log']
             assert sftp.logfile == copts['cnopts'].log
             assert Path(sftp.logfile).exists()
             logfile = sftp.logfile
