@@ -210,7 +210,7 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
-    def _sftp_channel(self):
+    def _sftp_channel(self, current=None):
         '''Establish new SFTP channel.'''
         current = self._sftp.getcwd()
         self._sftp = SFTPClient.from_transport(self._transport)
@@ -293,7 +293,7 @@ class Connection(object):
         def _get(self, remotepath, localpath=None, callback=None,
                  preserve_mtime=False):
 
-            self._sftp_channel()
+            self._sftp_channel(current=self.pwd)
 
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
@@ -347,7 +347,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        self._sftp_channel()
+        self._sftp_channel(current=self.pwd)
 
         channel = self._sftp.get_channel()
         channel.set_name(Path(remotedir).stem)
@@ -495,7 +495,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _getfo(self, remotepath, flo, callback=None):
 
-            self._sftp_channel()
+            self._sftp_channel(current=self.pwd)
 
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
