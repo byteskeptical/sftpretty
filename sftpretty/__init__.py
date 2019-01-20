@@ -839,7 +839,7 @@ class Connection(object):
 
         # if self._default_path is not None:
         #    self._default_path = Path(self._default_path).joinpath(
-                                      remotepath).as_posix()
+        #                              remotepath).as_posix()
 
         self._sftp.chdir(remotepath)
 
