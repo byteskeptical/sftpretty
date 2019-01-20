@@ -34,6 +34,10 @@ class CnOpts(object):
         transport, if set to True.
     :ivar list|None ciphers: initial value: None -
         List of ciphers to use in order.
+    :ivar list|None digests: initial value: None -
+        List of digests to use in order.
+    :ivar list|None kex: initial value: None -
+        List of key exchange algorithms to use in order.
     :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object to use for
         host key checking.
     :param filepath|None knownhosts: initial value: None - file to load
@@ -210,8 +214,13 @@ class Connection(object):
         '''Establish new SFTP channel.'''
         self._sftp = SFTPClient.from_transport(self._transport)
         if self._default_path is not None:
-            log.info('Default Path: [{0}]'.format(self._default_path))
-            self._sftp.chdir(self._default_path)
+            current = self.getcwd()
+            if current != self._default_path:
+                log.info('Default Path: [{0}]'.format(current))
+                self._sftp.chdir(current)
+            else:
+                log.info('Default Path: [{0}]'.format(self._default_path))
+                self._sftp.chdir(self._default_path)
         self._sftp_live = True
 
     def _sftp_connect(self):
@@ -283,6 +292,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _get(self, remotepath, localpath=None, callback=None,
                  preserve_mtime=False):
+
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
@@ -484,6 +494,7 @@ class Connection(object):
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
         def _getfo(self, remotepath, flo, callback=None):
+
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
@@ -540,6 +551,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _put(self, localpath, remotepath=None, callback=None,
                  confirm=True, preserve_mtime=False):
+
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
@@ -746,6 +758,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
                    confirm=True):
+
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
@@ -836,10 +849,6 @@ class Connection(object):
 
         '''
         self._sftp_connect()
-
-        # if self._default_path is not None:
-        #    self._default_path = Path(self._default_path).joinpath(
-        #                              remotepath).as_posix()
 
         self._sftp.chdir(remotepath)
 
