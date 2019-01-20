@@ -40,6 +40,7 @@ def rmdir(dir):
             item.unlink()
     dir.rmdir()
 
+
 @contextmanager
 def tempfile_containing(contents='', suffix=''):
     '''create a temporary file, with optional suffix and return the filename,
