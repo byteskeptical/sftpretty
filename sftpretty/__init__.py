@@ -214,8 +214,8 @@ class Connection(object):
         '''Establish new SFTP channel.'''
         self._sftp = SFTPClient.from_transport(self._transport)
         if self._default_path is not None:
-            current = self._sftp.getcwd()
-            if current != self._default_path:
+            current = self.pwd
+            if current is not None and current != self._default_path:
                 log.info('Default Path: [{0}]'.format(current))
                 self._sftp.chdir(current)
             else:
