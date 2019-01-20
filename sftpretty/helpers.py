@@ -2,7 +2,7 @@ from functools import wraps
 try:
     from hashlib import sha3_512 as hashbrown
 except ImportError as err:
-    from hashlib import sha_512 as hashbrown
+    from hashlib import sha512 as hashbrown
 from io import BytesIO, IOBase
 from stat import S_IMODE
 from time import sleep
