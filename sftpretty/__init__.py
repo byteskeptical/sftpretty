@@ -611,8 +611,8 @@ class Connection(object):
         channel = self._sftp.get_channel()
         channel.set_name(Path(localdir).stem)
 
-        if localdir == '.':
-            localdir = Path.cwd().as_posix()
+        # if localdir == '.':
+        #    localdir = Path.cwd().as_posix()
 
         self.mkdir_p(remotedir)
 
@@ -694,8 +694,8 @@ class Connection(object):
         '''
         directories = {}
 
-        if localdir == '.':
-            localdir = Path.cwd().as_posix()
+        # if localdir == '.':
+        #    localdir = Path.cwd().as_posix()
 
         paths = self.localtree(directories, localdir, remotedir, recurse=True)
         paths['root'] = [(localdir, remotedir)]
@@ -837,8 +837,8 @@ class Connection(object):
         '''
         self._sftp_connect()
 
-        if self._default_path is not None:
-            self._default_path = Path(self._default_path).joinpath(
+        # if self._default_path is not None:
+        #    self._default_path = Path(self._default_path).joinpath(
                                       remotepath).as_posix()
 
         self._sftp.chdir(remotepath)
