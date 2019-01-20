@@ -213,7 +213,7 @@ class Connection(object):
     def _sftp_channel(self, cwd=None):
         '''Establish new SFTP channel.'''
         if not cwd:
-           cwd = self.pwd
+            cwd = self.pwd
         self._sftp = SFTPClient.from_transport(self._transport)
         if self._default_path is not None and cwd is not None:
             if cwd != self._default_path:
@@ -299,7 +299,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp_getcwd()
+            cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -575,7 +575,7 @@ class Connection(object):
 
             if not remotepath:
                 remotepath = Path(localpath).name
- 
+
             if not cwd:
                 remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
@@ -1236,7 +1236,7 @@ class Connection(object):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
-                        Path(remote).relative_to('/').as_posix()).as_posix()
+                        Path(remote).relative_to(Path(remotedir).root).as_posix()).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
