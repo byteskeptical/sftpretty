@@ -32,8 +32,7 @@ def test_get_d_pathed(sftpserver):
             localpath = mkdtemp()
             sftp.get_d('foo1', localpath)
 
-            checks = [(['', ],
-                     ['foo1.txt', 'image01.jpg']), ]
+            checks = [(['', ], ['foo1.txt', 'image01.jpg']), ]
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(

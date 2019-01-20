@@ -20,7 +20,7 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 
 def hash(filename, algorithm=None, blocksize=65536):
     if not algorithm:
-        algorithm = hashbrown
+        algorithm = hashbrown()
     if isinstance(filename, str):
         try:
             with open(filename, 'rb') as filestream:
@@ -73,10 +73,10 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                     return f(*args, **kwargs)
                 except all_exception_types as e:
                     if (not any(x for x in exception_types
-                                if isinstance(e, x)) and not any(x
-                                            for x in exception_instances
-                                                    if type(x) == type(e) and
-                                                    x.args == e.args)):
+                                if isinstance(e, x)) and
+                                not any(x for x in exception_instances
+                                            if type(x) == type(e) and
+                                            x.args == e.args)):
                         raise
                     msg = ('Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} '
                            'second(s)...').format(mtries, tries, str(e)
