@@ -307,7 +307,7 @@ class Connection(object):
             if not localpath:
                 localpath = Path(remotepath).name
 
-            if not cwd:
+            if not remotepath.startswith(cwd):
                 remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             self._sftp.get(remotepath, localpath=localpath, callback=callback)
@@ -511,7 +511,7 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
-            if not cwd:
+            if not remotepath.startswith(cwd):
                 remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             return self._sftp.getfo(remotepath, flo, callback=callback)
@@ -576,7 +576,7 @@ class Connection(object):
             if not remotepath:
                 remotepath = Path(localpath).name
 
-            if not cwd:
+            if not remotepath.startswith(cwd):
                 remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             remote_attributes = self._sftp.put(localpath,
@@ -780,7 +780,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self._sftp.getcwd()
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
@@ -788,7 +788,7 @@ class Connection(object):
             if not remotepath:
                 remotepath = Path(flo.name).name
 
-            if not cwd:
+            if not remotepath.startswith(cwd):
                 remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             return self._sftp.putfo(flo, remotepath=remotepath,
@@ -875,7 +875,7 @@ class Connection(object):
         self._sftp_connect()
 
         self._sftp.chdir(remotepath)
-        self._channel_cwd = self._sftp.getcwd()
+        self._channel_cwd = self._sftp.normalize('.')
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
