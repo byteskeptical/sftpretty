@@ -122,7 +122,7 @@ class Connection(object):
                           'username': username, 'password': password,
                           'hostkey': None, 'pkey': None
                          }
-        self._cwd = None
+        self._channel_cwd = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         # Check that we have a hostkey to verify
@@ -131,7 +131,7 @@ class Connection(object):
 
         self._sftp_live = False
         self._sftp = None
-        self._set_logging()
+        self._set_logging(id=hash(self._tconnect))
         self._set_username()
         # Begin the SSH transport.
         self._transport = None
@@ -190,15 +190,13 @@ class Connection(object):
                                                'and provide a path to a valid'
                                                'private key'))
 
-    def _set_logging(self):
+    def _set_logging(self, id=None):
         '''Set logging for connection'''
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
-                self._cnopts.log = Path('/tmp/sftpretty-{0}.txt'
-                                        .format(uuid4())).touch()
-            elif isinstance(self._cnopts.log, str):
-                self._cnopts.log = Path(self._cnopts.log).touch()
+                self._cnopts.log = Path('sftpretty-{0}.log'.format(id[-8:])
+                                       ).as_posix()
             util.log_to_file(self._cnopts.log)
 
     def _set_username(self):
@@ -211,15 +209,19 @@ class Connection(object):
 
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        cwd = self._cwd
+        cwd = self._channel_cwd
         self._sftp = SFTPClient.from_transport(self._transport)
-        if self._default_path is not None and cwd is not None:
-            if cwd != self._default_path:
+        if self._default_path is not None:
+            if cwd is not None and cwd != self._default_path:
                 log.info('Default Path: [{0}]'.format(cwd))
                 self._sftp.chdir(cwd)
             else:
                 log.info('Default Path: [{0}]'.format(self._default_path))
                 self._sftp.chdir(self._default_path)
+        else:
+            if cwd is not None:
+                log.info('Default Path: [{0}]'.format(cwd))
+                self._sftp.chdir(cwd)
         self._sftp_live = True
 
     def _sftp_connect(self):
@@ -873,7 +875,7 @@ class Connection(object):
         self._sftp_connect()
 
         self._sftp.chdir(remotepath)
-        self._cwd = self._sftp.getcwd()
+        self._channel_cwd = self._sftp.getcwd()
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
@@ -953,14 +955,10 @@ class Connection(object):
 
         try:
             self._sftp.stat(remotepath)
-        except IOError as err:
-            if err.errno == 2:
-                return False
-            else:
-                raise err
-        finally:
             channel.close()
-
+        except IOError as err:
+            return False
+        
         return True
 
     def getcwd(self):
