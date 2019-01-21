@@ -356,10 +356,10 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(Path(remotedir).stem)
+        #channel.set_name(Path(remotedir).stem)
 
         # if remotedir == '.':
-        #    remotedir = self.getcwd()
+        #    remotedir = self._sftp.normalize('.')
         #    if not remotedir:
         #        log.error(('Remote path not set, `cd` or `chdir` to desired '
         #                   'remote directory first or provide full path as '
