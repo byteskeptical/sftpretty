@@ -74,9 +74,9 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                 except all_exception_types as e:
                     if (not any(x for x in exception_types
                                 if isinstance(e, x)) and
-                            not any(x for x in exception_instances
+                                not any(x for x in exception_instances
                                 if type(x) == type(e) and
-                            x.args == e.args)):
+                                x.args == e.args)):
                         raise
                     msg = ('Retry ({0:d}/{1:d}):\n {2}\n Retrying in {3} '
                            'second(s)...').format(mtries, tries, str(e)

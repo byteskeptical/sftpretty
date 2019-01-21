@@ -208,11 +208,13 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
+    @contextmanager
     def _sftp_channel(self, cwd=None):
         '''Establish new SFTP channel.'''
         if not cwd:
-            cwd = self._sftp.normalize('.')
+            cwd = self.pwd
         self._sftp = SFTPClient.from_transport(self._transport)
+        yield self._sftp
         if self._default_path is not None and cwd is not None:
             if cwd != self._default_path:
                 log.info('Default Path: [{0}]'.format(cwd))
@@ -297,7 +299,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp.normalize('.')
+            cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -504,7 +506,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp.normalize('.')
+            cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -566,7 +568,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self._sftp.normalize('.')
+            cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
@@ -778,7 +780,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(localpath).name)
 
-            cwd = self._sftp.normalize('.')
+            cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
