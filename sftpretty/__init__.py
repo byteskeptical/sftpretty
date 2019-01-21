@@ -297,7 +297,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(Path(remotepath).name)
 
-            cwd = self._sftp.getcwd()
+            # cwd = self._sftp.getcwd()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -305,8 +305,8 @@ class Connection(object):
             if not localpath:
                 localpath = Path(remotepath).name
 
-            if not cwd:
-                remotepath = Path(cwd).joinpath(remotepath).as_posix()
+            # if not cwd:
+            #    remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             self._sftp.get(remotepath, localpath=localpath, callback=callback)
 
