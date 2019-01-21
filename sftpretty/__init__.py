@@ -122,6 +122,7 @@ class Connection(object):
                           'username': username, 'password': password,
                           'hostkey': None, 'pkey': None
                          }
+        self._cwd = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         # Check that we have a hostkey to verify
@@ -208,13 +209,10 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
-    @contextmanager
-    def _sftp_channel(self, cwd=None):
+    def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        if not cwd:
-            cwd = self.pwd
+        cwd = self._cwd
         self._sftp = SFTPClient.from_transport(self._transport)
-        yield self._sftp
         if self._default_path is not None and cwd is not None:
             if cwd != self._default_path:
                 log.info('Default Path: [{0}]'.format(cwd))
@@ -875,6 +873,7 @@ class Connection(object):
         self._sftp_connect()
 
         self._sftp.chdir(remotepath)
+        self._cwd = self._sftp.getcwd()
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
