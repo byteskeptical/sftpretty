@@ -13,7 +13,6 @@ from sftpretty.exceptions import (CredentialException, ConnectionException,
 from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
-from uuid import uuid4
 
 __version__ = '0.0.1'
 # pylint: disable = R0913,C0302
@@ -185,10 +184,10 @@ class Connection(object):
                         except SSHException as err:
                             raise err
                 else:
-                    raise CredentialException(('Path provided is not a file or'
-                                               'does not exist, please revise'
-                                               'and provide a path to a valid'
-                                               'private key'))
+                    raise CredentialException(('Path provided is not a file '
+                                               'or does not exist, please '
+                                               'revise and provide a path to '
+                                               'a valid private key'))
 
     def _set_logging(self, id=None):
         '''Set logging for connection'''
@@ -297,7 +296,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(Path(remotepath).name)
+            channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -356,14 +355,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        #channel.set_name(Path(remotedir).stem)
-
-        # if remotedir == '.':
-        #    remotedir = self._sftp.normalize('.')
-        #    if not remotedir:
-        #        log.error(('Remote path not set, `cd` or `chdir` to desired '
-        #                   'remote directory first or provide full path as '
-        #                   'argument instead of [.]'))
+        channel.set_name(hash(Path(remotedir).name))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -453,13 +445,6 @@ class Connection(object):
         '''
         directories = {}
 
-        # if remotedir == '.':
-        #    remotedir = self.getcwd()
-        #    if not remotedir:
-        #        log.error(('Remote path not set, `cd` or `chdir` to desired '
-        #                   'remote directory first or provide full path as '
-        #                   'argument instead of [.]'))
-
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
         paths['root'] = [(remotedir, localdir)]
 
@@ -504,7 +489,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(Path(remotepath).name)
+            channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -566,9 +551,9 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(Path(localpath).name)
+            channel.set_name(hash(Path(localpath).name))
 
-            cwd = self._sftp.getcwd()
+            cwd = self._sftp.normalize('.')
 
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
@@ -637,10 +622,10 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(Path(localdir).stem)
+        channel.set_name(hash(Path(localdir).stem))
 
-        # if localdir == '.':
-        #    localdir = Path.cwd().as_posix()
+        if localdir == '.':
+            localdir = Path.cwd().as_posix()
 
         self.mkdir_p(remotedir)
 
@@ -722,8 +707,8 @@ class Connection(object):
         '''
         directories = {}
 
-        # if localdir == '.':
-        #    localdir = Path.cwd().as_posix()
+        if localdir == '.':
+            localdir = Path.cwd().as_posix()
 
         paths = self.localtree(directories, localdir, remotedir, recurse=True)
         paths['root'] = [(localdir, remotedir)]
@@ -778,7 +763,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(Path(localpath).name)
+            channel.set_name(hash(Path(localpath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -951,7 +936,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(Path(remotepath).name)
+        channel.set_name(hash(Path(remotepath).name))
 
         try:
             self._sftp.stat(remotepath)
@@ -1145,8 +1130,8 @@ class Connection(object):
             if self.isdir(remotedir):
                 pass
             elif self.isfile(remotedir):
-                raise OSError('A file with the same name as the remotedir, \
-                               [{0}], already exists.'.format(remotedir))
+                raise OSError(('A file with the same name as the remotedir, '
+                               '[{0}], already exists.').format(remotedir))
             else:
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
@@ -1225,7 +1210,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(Path(localdir).joinpath(remotedir).as_posix())
+        channel.set_name(hash(Path(remotedir).stem))
 
         try:
             for attribute in self.listdir_attr(remotedir):
