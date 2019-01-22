@@ -362,7 +362,8 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                     (Path(self._sftp.normalize(
+                           remotedir)).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
@@ -371,7 +372,8 @@ class Connection(object):
                     ]
         else:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                     (Path(self._sftp.normalize(
+                           remotedir)).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
