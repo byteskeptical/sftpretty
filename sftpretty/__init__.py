@@ -296,15 +296,15 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            # channel.set_name(hash(Path(remotepath).name))
+            channel.set_name(hash(Path(remotepath).name))
 
-            # cwd = self._sftp.normalize('.')
+            cwd = self._sftp.normalize('.')
 
             if not localpath:
                 localpath = Path(remotepath).name
 
-            # if not remotepath.startswith(cwd):
-            #    remotepath = Path(cwd).joinpath(remotepath).as_posix()
+            if not remotepath.startswith(cwd):
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -355,7 +355,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        # channel.set_name(hash(Path(remotedir).name))
+        channel.set_name(hash(Path(remotedir).name))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
