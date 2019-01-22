@@ -446,7 +446,7 @@ class Connection(object):
         directories = {}
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
-        paths['root'] = [(remotedir, localdir)]
+        #paths['root'] = [(remotedir, localdir)]
 
         for tld in paths.keys():
             for remote, local in paths[tld]:
