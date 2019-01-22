@@ -551,7 +551,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(localpath).name))
+            #channel.set_name(hash(Path(localpath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -622,7 +622,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(localdir).stem))
+        #channel.set_name(hash(Path(localdir).stem))
 
         if localdir == '.':
             localdir = Path.cwd().as_posix()
@@ -763,7 +763,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(localpath).name))
+            #channel.set_name(hash(Path(localpath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -936,7 +936,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(remotepath).name))
+        #channel.set_name(hash(Path(remotepath).name))
 
         try:
             self._sftp.stat(remotepath)
@@ -1210,7 +1210,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(remotedir).stem))
+        #channel.set_name(hash(Path(remotedir).stem))
 
         try:
             for attribute in self.listdir_attr(remotedir):
