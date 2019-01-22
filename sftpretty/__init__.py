@@ -14,7 +14,7 @@ from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 # pylint: disable = R0913,C0302
 
 basicConfig(level=INFO)
@@ -195,7 +195,7 @@ class Connection(object):
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
                 self._cnopts.log = Path('sftpretty-{0}.log'.format(id[-8:])
-                                       ).as_posix()
+                                        ).as_posix()
             util.log_to_file(self._cnopts.log)
 
     def _set_username(self):
@@ -296,7 +296,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(remotepath).name))
+            #channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -355,7 +355,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(remotedir).name))
+        #channel.set_name(hash(Path(remotedir).name))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -943,7 +943,7 @@ class Connection(object):
             channel.close()
         except IOError as err:
             return False
-        
+
         return True
 
     def getcwd(self):
