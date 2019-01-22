@@ -382,7 +382,7 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as queue:
+            with ThreadPoolExecutor() as queue:
                 threads = {
                            queue.submit(self.get, remote, local,
                                         callback=callback,
@@ -489,7 +489,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(remotepath).name))
+            #channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -640,7 +640,7 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=hash(paths)) as queue:
+            with ThreadPoolExecutor() as queue:
                 threads = {
                            queue.submit(self.put, local, remote,
                                         callback=callback, confirm=confirm,
