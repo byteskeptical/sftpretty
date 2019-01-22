@@ -123,11 +123,10 @@ class Connection(object):
                          }
         self._cwd = None
         self._cnopts = cnopts or CnOpts()
-        self._default_path = default_path
         # Check that we have a hostkey to verify
         if self._cnopts.hostkeys is not None:
             self._tconnect['hostkey'] = self._cnopts.get_hostkey(host)
-
+        self._default_path = default_path
         self._sftp_live = False
         self._sftp = None
         self._set_logging(id=hash(self._tconnect))
@@ -298,13 +297,13 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(hash(Path(remotepath).name))
 
-            cwd = self._sftp.normalize('.')
+            # cwd = self._sftp.normalize('.')
 
             if not localpath:
                 localpath = Path(remotepath).name
 
-            if not remotepath.startswith(cwd):
-                remotepath = Path(cwd).joinpath(remotepath).as_posix()
+            # if not remotepath.startswith(cwd):
+            #    remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -355,7 +354,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(remotedir).name))
+        # channel.set_name(hash(Path(remotedir).name))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -446,7 +445,7 @@ class Connection(object):
         directories = {}
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
-        paths['root'] = [(remotedir, localdir)]
+        # paths['root'] = [(remotedir, localdir)]
 
         for tld in paths.keys():
             for remote, local in paths[tld]:
