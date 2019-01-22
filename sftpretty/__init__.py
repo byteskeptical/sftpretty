@@ -297,7 +297,7 @@ class Connection(object):
             channel = self._sftp.get_channel()
             channel.set_name(hash(Path(remotepath).name))
 
-            cwd = self._cwd
+            cwd = self._sftp.normalize('.')
 
             if not localpath:
                 localpath = Path(remotepath).name
