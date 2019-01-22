@@ -296,7 +296,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(remotepath).name))
+            # channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
@@ -355,7 +355,7 @@ class Connection(object):
         self._sftp_channel()
 
         channel = self._sftp.get_channel()
-        channel.set_name(hash(Path(remotedir).name))
+        # channel.set_name(hash(Path(remotedir).name))
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -489,7 +489,7 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(remotepath).name))
+            # channel.set_name(hash(Path(remotepath).name))
 
             cwd = self._sftp.normalize('.')
 
