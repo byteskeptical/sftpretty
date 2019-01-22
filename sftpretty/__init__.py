@@ -295,15 +295,15 @@ class Connection(object):
             self._sftp_channel()
 
             channel = self._sftp.get_channel()
-            channel.set_name(hash(Path(remotepath).name))
+            # channel.set_name(hash(Path(remotepath).name))
 
-            # cwd = self._sftp.normalize('.')
+            cwd = self._sftp.getcwd()
 
             if not localpath:
                 localpath = Path(remotepath).name
 
-            # if not remotepath.startswith(cwd):
-            #    remotepath = Path(cwd).joinpath(remotepath).as_posix()
+            if not cwd and not remotepath.startswith(cwd):
+                remotepath = Path(cwd).joinpath(remotepath).as_posix()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -445,7 +445,7 @@ class Connection(object):
         directories = {}
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
-        # paths['root'] = [(remotedir, localdir)]
+        paths['root'] = [(remotedir, localdir)]
 
         for tld in paths.keys():
             for remote, local in paths[tld]:
@@ -859,7 +859,7 @@ class Connection(object):
         self._sftp_connect()
 
         self._sftp.chdir(remotepath)
-        self._cwd = self._sftp.getcwd()
+        self._cwd = self.pwd
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
