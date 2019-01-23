@@ -226,6 +226,7 @@ class Connection(object):
             if cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._channel.chdir(cwd)
+        self._sftp_live = True
 
         return channel
 
@@ -359,7 +360,7 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(remotedir).joinpath(
+                     (Path(self._channel.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
