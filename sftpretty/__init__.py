@@ -1124,9 +1124,12 @@ class Connection(object):
 
         :raises: IOError, if remotepath can't be resolved
         '''
-        self._sftp_connect()
+        channel = self._sftp_channel()
 
-        return self._sftp.normalize(remotepath)
+        cwd = self._channel.normalize(remotepath)
+        channel.close()
+
+        return cwd
 
     def open(self, remote_file, mode='r', bufsize=-1):
         '''Open a file on the remote server.
