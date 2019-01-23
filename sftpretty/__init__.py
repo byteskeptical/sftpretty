@@ -225,7 +225,6 @@ class Connection(object):
             if cwd is not None:
                 log.info('Default Path: [{0}]'.format(cwd))
                 self._channel.chdir(cwd)
-        self._sftp_live = True
 
         return channel
 
@@ -307,7 +306,8 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
-            self._channel.get(remotepath, localpath=localpath, callback=callback)
+            self._channel.get(remotepath, localpath=localpath,
+                              callback=callback)
 
             if preserve_mtime:
                 remote_attributes = self._channel.stat(remotepath)
@@ -360,7 +360,7 @@ class Connection(object):
             paths = [
                      (Path(self.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
-                      Path(localir).joinpath(attribute.filename).as_posix(),
+                      Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
                      for attribute in self.listdir_attr(remotedir)
