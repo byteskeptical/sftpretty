@@ -212,20 +212,19 @@ class Connection(object):
 
         channel = self._sftp.get_channel()
         channel.set_name(uuid().hex)
-        cwd = self._cwd
 
         if self._default_path is not None:
-            if cwd is not None and cwd != self._default_path:
-                log.info('Default Channel Path: [{0}]'.format(cwd))
-                self._sftp.chdir(cwd)
+            if self._cwd is not None and self._cwd != self._default_path:
+                log.info('Default Channel Path: [{0}]'.format(self._cwd))
+                self._sftp.chdir(self._cwd)
             else:
                 log.info('Default Channel Path: [{0}]'.format(
                          self._default_path))
                 self._sftp.chdir(self._default_path)
         else:
-            if cwd is not None:
-                log.info('Default Channel Path: [{0}]'.format(cwd))
-                self._sftp.chdir(cwd)
+            if self._cwd is not None:
+                log.info('Default Channel Path: [{0}]'.format(self._cwd))
+                self._sftp.chdir(self._cwd)
         # self._sftp_live = True
 
         return channel
@@ -358,7 +357,7 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self._sftp.normalize(remotedir)
+        # remotedir = self._sftp.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
