@@ -359,7 +359,7 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(self.normalize(remotedir)).joinpath(
+                     (Path(remotedir).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
@@ -369,7 +369,7 @@ class Connection(object):
                     ]
         else:
             paths = [
-                     (Path(self.normalize(remotedir)).joinpath(
+                     (Path(remotedir).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
@@ -1124,12 +1124,9 @@ class Connection(object):
 
         :raises: IOError, if remotepath can't be resolved
         '''
-        channel = self._sftp_channel()
+        self._sftp_connect()
 
-        cwd = self._channel.normalize(remotepath)
-        channel.close()
-
-        return cwd
+        return self._sftp.normalize(remotepath)
 
     def open(self, remote_file, mode='r', bufsize=-1):
         '''Open a file on the remote server.
