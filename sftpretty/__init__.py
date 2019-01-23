@@ -216,14 +216,15 @@ class Connection(object):
 
         if self._default_path is not None:
             if cwd is not None and cwd != self._default_path:
-                log.info('Default Path: [{0}]'.format(cwd))
+                log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._channel.chdir(cwd)
             else:
-                log.info('Default Path: [{0}]'.format(self._default_path))
+                log.info('Default Channel Path: [{0}]'.format(
+                         self._default_path))
                 self._channel.chdir(self._default_path)
         else:
             if cwd is not None:
-                log.info('Default Path: [{0}]'.format(cwd))
+                log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._channel.chdir(cwd)
 
         return channel
@@ -358,22 +359,22 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(self._channel.normalize(remotedir)).joinpath(
+                     (Path(self.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self._channel.listdir_attr(remotedir)
+                     for attribute in self.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
-                     (Path(self._channel.normalize(remotedir)).joinpath(
+                     (Path(self.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self._channel.listdir_attr(remotedir)
+                     for attribute in self.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode) and '{0}'
                      .format(pattern) in attribute.filename
                     ]
@@ -832,7 +833,7 @@ class Connection(object):
 
         self._sftp.chdir(remotepath)
 
-        self._cwd = self._sftp.normalize('.')
+        self._cwd = self.pwd
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
