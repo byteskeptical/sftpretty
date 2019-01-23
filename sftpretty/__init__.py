@@ -364,7 +364,7 @@ class Connection(object):
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self.listdir_attr(remotedir)
+                     for attribute in self._channel.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode)
                     ]
         else:
@@ -374,7 +374,7 @@ class Connection(object):
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self.listdir_attr(remotedir)
+                     for attribute in self._channel.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode) and '{0}'
                      .format(pattern) in attribute.filename
                     ]
