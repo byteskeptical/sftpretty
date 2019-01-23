@@ -226,7 +226,7 @@ class Connection(object):
             if cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._sftp.chdir(cwd)
-        self._sftp_live = True
+        # self._sftp_live = True
 
         return channel
 
@@ -358,8 +358,8 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self.normalize(remotedir)
-        filelist = self.listdir_attr(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
+        filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
             paths = [
