@@ -130,7 +130,7 @@ class Connection(object):
         self._default_path = default_path
         self._sftp_live = False
         self._sftp = None
-        self._set_logging(id=hash(self._tconnect))
+        self._set_logging()
         self._set_username()
         # Begin the SSH transport.
         self._transport = None
@@ -194,7 +194,7 @@ class Connection(object):
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
-                self._cnopts.log = Path('sftpretty-{0}.log'.format(id[-8:])
+                self._cnopts.log = Path('sftpretty-{0}.log'.format(uuid().hex)
                                         ).as_posix()
             util.log_to_file(self._cnopts.log)
 
@@ -209,6 +209,7 @@ class Connection(object):
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         self._channel = SFTPClient.from_transport(self._transport)
+
         channel = self._channel.get_channel()
         channel.set_name(uuid().hex)
         cwd = self._cwd
@@ -357,22 +358,22 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(self._channel.normalize(
-                           remotedir)).joinpath(attribute.filename).as_posix(),
-                      Path(localdir).joinpath(attribute.filename).as_posix(),
+                     (Path(self.normalize(remotedir)).joinpath(
+                             attribute.filename).as_posix(),
+                      Path(localir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self._channel.listdir_attr(remotedir)
+                     for attribute in self.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
-                     (Path(self._channel.normalize(
-                           remotedir)).joinpath(attribute.filename).as_posix(),
+                     (Path(self.normalize(remotedir)).joinpath(
+                             attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self._channel.listdir_attr(remotedir)
+                     for attribute in self.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode) and '{0}'
                      .format(pattern) in attribute.filename
                     ]
