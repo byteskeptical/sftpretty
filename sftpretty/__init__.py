@@ -208,24 +208,24 @@ class Connection(object):
 
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        self._channel = SFTPClient.from_transport(self._transport)
+        self._sftp = SFTPClient.from_transport(self._transport)
 
-        channel = self._channel.get_channel()
+        channel = self._sftp.get_channel()
         channel.set_name(uuid().hex)
         cwd = self._cwd
 
         if self._default_path is not None:
             if cwd is not None and cwd != self._default_path:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
-                self._channel.chdir(cwd)
+                self._sftp.chdir(cwd)
             else:
                 log.info('Default Channel Path: [{0}]'.format(
                          self._default_path))
-                self._channel.chdir(self._default_path)
+                self._sftp.chdir(self._default_path)
         else:
             if cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
-                self._channel.chdir(cwd)
+                self._sftp.chdir(cwd)
 
         return channel
 
@@ -307,11 +307,11 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
-            self._channel.get(remotepath, localpath=localpath,
+            self._sftp.get(remotepath, localpath=localpath,
                               callback=callback)
 
             if preserve_mtime:
-                remote_attributes = self._channel.stat(remotepath)
+                remote_attributes = self._sftp.stat(remotepath)
                 utime(localpath, (remote_attributes.st_atime,
                                   remote_attributes.st_mtime))
 
@@ -357,8 +357,8 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self._channel.normalize(remotedir)
-        filelist = self._channel.listdir_attr(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
+        filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
             paths = [
@@ -488,7 +488,7 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
-            bytez = self._channel.getfo(remotepath, flo, callback=callback)
+            bytez = self._sftp.getfo(remotepath, flo, callback=callback)
             channel.close()
 
             return bytez
@@ -546,7 +546,7 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, localpath, logger=logger)
 
-            remote_attributes = self._channel.put(localpath,
+            remote_attributes = self._sftp.put(localpath,
                                                   remotepath=remotepath,
                                                   callback=callback,
                                                   confirm=confirm)
@@ -556,7 +556,7 @@ class Connection(object):
                 local_times = (local_attributes.st_atime,
                                local_attributes.st_mtime)
                 self._sftp.utime(remotepath, local_times)
-                remote_attributes = self._channel.stat(remotepath)
+                remote_attributes = self._sftp.stat(remotepath)
 
             channel.close()
 
@@ -748,7 +748,7 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
 
-            return self._channel.putfo(flo, remotepath=remotepath,
+            return self._sftp.putfo(flo, remotepath=remotepath,
                                        file_size=file_size,
                                        callback=callback, confirm=confirm)
 
@@ -1181,7 +1181,7 @@ class Connection(object):
         channel = self._sftp_channel()
 
         try:
-            for attribute in self._channel.listdir_attr(remotedir):
+            for attribute in self._sftp.listdir_attr(remotedir):
                 if S_ISDIR(attribute.st_mode):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
