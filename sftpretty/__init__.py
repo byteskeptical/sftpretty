@@ -226,6 +226,7 @@ class Connection(object):
             if cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._channel.chdir(cwd)
+        self._sftp_live = True
 
         return channel
 
@@ -357,8 +358,8 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self._channel.normalize(remotedir)
-        filelist = self._channel.listdir_attr(remotedir)
+        remotedir = self.normalize(remotedir)
+        filelist = self.listdir_attr(remotedir)
 
         if not pattern:
             paths = [
@@ -440,6 +441,8 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
+        self._sftp.connect()
+
         directories = {}
 
         paths = self.remotetree(directories, remotedir, localdir, recurse=True)
@@ -883,7 +886,7 @@ class Connection(object):
         '''Closes the connection and cleans up.'''
         # Close SFTP Connection.
         if self._sftp_live:
-            self._sftp.close()
+            self._sftp.close() or self._channel.close()
             self._sftp_live = False
         # Close the SSH Transport.
         if self._transport:
