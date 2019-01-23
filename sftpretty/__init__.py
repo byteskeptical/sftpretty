@@ -358,22 +358,22 @@ class Connection(object):
 
         if not pattern:
             paths = [
-                     (Path(self.normalize(remotedir)).joinpath(
+                     (Path(self._channel.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self.listdir_attr(remotedir)
+                     for attribute in self._channel.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
-                     (Path(self.normalize(remotedir)).joinpath(
+                     (Path(self._channel.normalize(remotedir)).joinpath(
                              attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
-                     for attribute in self.listdir_attr(remotedir)
+                     for attribute in self._channel.listdir_attr(remotedir)
                      if S_ISREG(attribute.st_mode) and '{0}'
                      .format(pattern) in attribute.filename
                     ]
