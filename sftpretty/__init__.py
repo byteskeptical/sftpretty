@@ -226,6 +226,7 @@ class Connection(object):
             if cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(cwd))
                 self._sftp.chdir(cwd)
+        self._sftp_live = True
 
         return channel
 
