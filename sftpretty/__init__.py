@@ -351,15 +351,13 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        remotedir = self.pwd
-
         channel = self._sftp_channel()
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        # remotedir = self._sftp.normalize(remotedir)
+        remotedir = self.pwd
         filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
