@@ -351,7 +351,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        remotedir = self.normalize(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
 
         channel = self._sftp_channel()
 
