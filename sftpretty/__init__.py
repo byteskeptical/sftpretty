@@ -308,7 +308,7 @@ class Connection(object):
                 callback = partial(_callback, remotepath, logger=logger)
 
             self._sftp.get(remotepath, localpath=localpath,
-                              callback=callback)
+                           callback=callback)
 
             if preserve_mtime:
                 remote_attributes = self._sftp.stat(remotepath)
@@ -351,6 +351,8 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
+        remotedir = self.normalize(remotedir)
+
         channel = self._sftp_channel()
 
         if not Path(localdir).is_dir():
@@ -547,9 +549,9 @@ class Connection(object):
                 callback = partial(_callback, localpath, logger=logger)
 
             remote_attributes = self._sftp.put(localpath,
-                                                  remotepath=remotepath,
-                                                  callback=callback,
-                                                  confirm=confirm)
+                                               remotepath=remotepath,
+                                               callback=callback,
+                                               confirm=confirm)
 
             if preserve_mtime:
                 local_attributes = Path(localpath).stat()
@@ -749,8 +751,8 @@ class Connection(object):
                 callback = partial(_callback, flo, logger=logger)
 
             return self._sftp.putfo(flo, remotepath=remotepath,
-                                       file_size=file_size,
-                                       callback=callback, confirm=confirm)
+                                    file_size=file_size,
+                                    callback=callback, confirm=confirm)
 
             channel.close()
 
