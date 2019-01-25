@@ -358,8 +358,8 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self._sftp.normalize(remotedir)
-        filelist = self._sftp.listdir_attr(remotedir)
+        remotedir = self.normalize(remotedir)
+        filelist = self.listdir_attr(remotedir)
 
         if not pattern:
             paths = [
