@@ -128,8 +128,8 @@ class Connection(object):
         if self._cnopts.hostkeys is not None:
             self._tconnect['hostkey'] = self._cnopts.get_hostkey(host)
         self._default_path = default_path
-        self._sftp_live = False
         self._sftp = None
+        self._sftp_live = False
         self._set_logging()
         self._set_username()
         # Begin the SSH transport.
@@ -206,6 +206,7 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
+    @property
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         self._sftp = SFTPClient.from_transport(self._transport)
@@ -299,7 +300,7 @@ class Connection(object):
         def _get(self, remotepath, localpath=None, callback=None,
                  preserve_mtime=False):
 
-            channel = self._sftp_channel()
+            channel = self._sftp_channel
 
             if not localpath:
                 localpath = Path(remotepath).name
@@ -351,14 +352,13 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        channel = self._sftp_channel()
+        channel = self._sftp_channel
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        client = self.sftp_client()
-        remotedir = client.normalize(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
@@ -484,7 +484,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _getfo(self, remotepath, flo, callback=None):
 
-            channel = self._sftp_channel()
+            channel = self._sftp_channel
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
@@ -539,7 +539,7 @@ class Connection(object):
         def _put(self, localpath, remotepath=None, callback=None,
                  confirm=True, preserve_mtime=False):
 
-            channel = self._sftp_channel()
+            channel = self._sftp_channel
 
             if not remotepath:
                 remotepath = Path(localpath).name
@@ -602,7 +602,7 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        channel = self._sftp_channel()
+        channel = self._sftp_channel
 
         if localdir == '.':
             localdir = Path.cwd().as_posix()
@@ -741,7 +741,7 @@ class Connection(object):
         def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
                    confirm=True):
 
-            channel = self._sftp_channel()
+            channel = self._sftp_channel
 
             if not remotepath:
                 remotepath = Path(flo.name).name
@@ -1182,7 +1182,7 @@ class Connection(object):
         :raises: Exception
 
         '''
-        channel = self._sftp_channel()
+        channel = self._sftp_channel
 
         try:
             for attribute in self._sftp.listdir_attr(remotedir):
