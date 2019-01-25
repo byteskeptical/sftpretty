@@ -357,7 +357,7 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self.pwd
+        remotedir = self.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
@@ -379,7 +379,7 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor() as queue:
+            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as queue:
                 threads = {
                            queue.submit(self.get, remote, local,
                                         callback=callback,
@@ -396,12 +396,12 @@ class Connection(object):
                     try:
                         future.result()
                     except Exception as err:
-                        log.error('{0} Thread: [{1}] [FAILED]'
+                        log.error('Get Thread [{0}]: [{1}] [FAILED]'
                                   .format(channel.get_name(), name))
                         channel.close()
                         raise err
                     else:
-                        log.info('{0} Thread: [{1}] [COMPLETE]'
+                        log.info('Get Thread [{0}]: [{1}] [COMPLETE]'
                                  .format(channel.get_name(), name))
                         channel.close()
         else:
@@ -488,10 +488,10 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
-            bytez = self._sftp.getfo(remotepath, flo, callback=callback)
+            flo_size = self._sftp.getfo(remotepath, flo, callback=callback)
             channel.close()
 
-            return bytez
+            return flo_size
 
         return _getfo(self, remotepath, flo, callback=callback)
 
@@ -620,7 +620,7 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor() as queue:
+            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as queue:
                 threads = {
                            queue.submit(self.put, local, remote,
                                         callback=callback, confirm=confirm,
@@ -637,12 +637,12 @@ class Connection(object):
                     try:
                         future.result()
                     except Exception as err:
-                        log.error('{0} Thread: [{1}] [FAILED]'
+                        log.error('Put Thread [{0}]: [{1}] [FAILED]'
                                   .format(channel.get_name(), name))
                         channel.close()
                         raise err
                     else:
-                        log.info('{0} Thread: [{1}] [COMPLETE]'
+                        log.info('Put Thread [{0}]: [{1}] [COMPLETE]'
                                  .format(channel.get_name(), name))
                         channel.close()
         else:
@@ -748,11 +748,14 @@ class Connection(object):
             if not callback:
                 callback = partial(_callback, flo, logger=logger)
 
-            return self._sftp.putfo(flo, remotepath=remotepath,
-                                    file_size=file_size,
-                                    callback=callback, confirm=confirm)
+            flo_attributes = self._sftp.putfo(flo, remotepath=remotepath,
+                                              file_size=file_size,
+                                              callback=callback,
+                                               confirm=confirm)
 
             channel.close()
+
+            return flo_attributes
 
         return _putfo(self, flo, remotepath=remotepath, file_size=file_size,
                       callback=callback, confirm=confirm)
@@ -1113,6 +1116,7 @@ class Connection(object):
         except Exception as err:
             raise err
 
+    @property
     def normalize(self, remotepath):
         '''Return the expanded path, w.r.t the server, of a given path.  This
         can be used to resolve symlinks or determine what the server believes
