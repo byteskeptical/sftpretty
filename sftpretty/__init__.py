@@ -206,6 +206,7 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
+    @property
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         self._sftp = SFTPClient.from_transport(self._transport)
@@ -229,6 +230,7 @@ class Connection(object):
 
         return channel
 
+    @property
     def _sftp_connect(self):
         '''Establish the SFTP connection.'''
         if not self._sftp_live:
@@ -357,7 +359,7 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        remotedir = self.normalize(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
