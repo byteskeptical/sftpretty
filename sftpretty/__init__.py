@@ -358,7 +358,7 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        self.pwd(remotedir)
+        self.pwd.setter(remotedir)
         remotedir = self.pwd
         filelist = self.listdir_attr(remotedir)
 
