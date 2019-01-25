@@ -751,7 +751,7 @@ class Connection(object):
             flo_attributes = self._sftp.putfo(flo, remotepath=remotepath,
                                               file_size=file_size,
                                               callback=callback,
-                                               confirm=confirm)
+                                              confirm=confirm)
 
             channel.close()
 
@@ -1116,7 +1116,6 @@ class Connection(object):
         except Exception as err:
             raise err
 
-    @property
     def normalize(self, remotepath):
         '''Return the expanded path, w.r.t the server, of a given path.  This
         can be used to resolve symlinks or determine what the server believes
