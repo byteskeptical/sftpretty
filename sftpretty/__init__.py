@@ -361,7 +361,7 @@ class Connection(object):
         if not remotedir.startswith(self._cwd) and self._cwd is not None:
             remotedir = Path(self._cwd).joinpath(remotedir).as_posix()
 
-        filelist = self.listdir_attr(remotedir)
+        filelist = self._sftp.listdir_attr(remotedir)
 
         if not pattern:
             paths = [
