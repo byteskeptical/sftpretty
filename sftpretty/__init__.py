@@ -358,8 +358,9 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        self.pwd.setter(remotedir)
-        remotedir = self.pwd
+        if not remotedir.startswith(self._cwd) and self._cwd is not None:
+            remotedir = Path(self._cwd).joinpath(remotedir).as_posix()
+
         filelist = self.listdir_attr(remotedir)
 
         if not pattern:
@@ -1341,13 +1342,6 @@ class Connection(object):
         self._sftp_connect()
 
         return self._sftp.normalize('.')
-
-    @pwd.setter
-    def pwd(self, val):
-        '''setter for timeout'''
-        self._sftp_connect()
-
-        return self._sftp.normalize(val)
 
     @property
     def remote_server_key(self):
