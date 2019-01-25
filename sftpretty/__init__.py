@@ -230,7 +230,6 @@ class Connection(object):
 
         return channel
 
-    @property
     def _sftp_connect(self):
         '''Establish the SFTP connection.'''
         if not self._sftp_live:
