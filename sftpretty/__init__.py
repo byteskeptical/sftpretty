@@ -361,7 +361,7 @@ class Connection(object):
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        cwd = self._sftp.getcwd()
+        cwd = self.pwd
 
         if not remotedir.startswith(cwd):
             remotedir = Path(cwd).joinpath(remotedir).as_posix()
