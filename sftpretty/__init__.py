@@ -134,8 +134,8 @@ class Connection(object):
         self._set_username()
         # Begin the SSH transport.
         self._transport = None
-        self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
+        self._start_transport(host, port)
         self._transport.connect(**self._tconnect)
 
     def _set_authentication(self, password, private_key, private_key_pass):
@@ -194,8 +194,9 @@ class Connection(object):
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
-                self._cnopts.log = Path('sftpretty-{0}.log'.format(uuid().hex)
-                                        ).as_posix()
+                logcation = Path('/tmp/sftpretty-{0}.log'.format(uuid().hex))
+                logcation.touch()
+                self._cnopts.log = logcation.as_posix()
             util.log_to_file(self._cnopts.log)
 
     def _set_username(self):
@@ -206,7 +207,6 @@ class Connection(object):
             if self._tconnect['username'] is None:
                 raise CredentialException('No username specified.')
 
-    @property
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         self._sftp = SFTPClient.from_transport(self._transport)
@@ -226,11 +226,6 @@ class Connection(object):
             if self._cwd is not None:
                 log.info('Default Channel Path: [{0}]'.format(self._cwd))
                 self._sftp.chdir(self._cwd)
-            else:
-                log.info('Default Channel Path: [/]')
-                self._sftp.chdir('/')
-
-        self._sftp_live = True
 
         return channel
 
@@ -304,7 +299,7 @@ class Connection(object):
         def _get(self, remotepath, localpath=None, callback=None,
                  preserve_mtime=False):
 
-            channel = self._sftp_channel
+            channel = self._sftp_channel()
 
             if not localpath:
                 localpath = Path(remotepath).name
@@ -356,18 +351,16 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        channel = self._sftp_channel
+        channel = self._sftp_channel()
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
 
-        cwd = self.pwd
-
-        if not remotedir.startswith(cwd):
-            remotedir = Path(cwd).joinpath(remotedir).as_posix()
-
+        remotedir = self._sftp.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
+
+        channel.close()
 
         if not pattern:
             paths = [
@@ -388,14 +381,14 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as queue:
+            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
                 threads = {
-                           queue.submit(self.get, remote, local,
-                                        callback=callback,
-                                        preserve_mtime=preserve_mtime,
-                                        exceptions=exceptions, tries=tries,
-                                        backoff=backoff, delay=delay,
-                                        logger=logger, silent=silent): remote
+                           pool.submit(self.get, remote, local,
+                                       callback=callback,
+                                       preserve_mtime=preserve_mtime,
+                                       exceptions=exceptions, tries=tries,
+                                       backoff=backoff, delay=delay,
+                                       logger=logger, silent=silent): remote
                            for remote, local, callback, preserve_mtime,
                            exceptions, tries, backoff, delay, logger, silent in
                            paths
@@ -403,19 +396,15 @@ class Connection(object):
                 for future in as_completed(threads):
                     name = threads[future]
                     try:
-                        future.result()
+                        data = future.result()
                     except Exception as err:
-                        log.error('Get Thread [{0}]: [{1}] [FAILED]'
-                                  .format(channel.get_name(), name))
-                        channel.close()
+                        log.error('Get Thread: [{0}] [FAILED]'.format(name))
                         raise err
                     else:
-                        log.info('Get Thread [{0}]: [{1}] [COMPLETE]'
-                                 .format(channel.get_name(), name))
-                        channel.close()
+                        log.info('Get Thread: [{0}] [COMPLETE]'.format(name))
+                        return data
         else:
             log.info('No files found in directory [{0}]'.format(remotedir))
-            channel.close()
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -449,13 +438,18 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
+        channel = self._sftp_channel()
+
         directories = {}
 
-        paths = self.remotetree(directories, remotedir, localdir, recurse=True)
-        paths['root'] = [(remotedir, localdir)]
+        remotedir = self._sftp.normalize(remotedir)
+        channel.close()
 
-        for tld in paths.keys():
-            for remote, local in paths[tld]:
+        directories['root'] = [(remotedir, localdir)]
+        self.remotetree(directories, remotedir, localdir, recurse=True)
+
+        for tld in directories.keys():
+            for remote, local in directories[tld]:
                 self.get_d(remote, local, callback=callback,
                            pattern=pattern, preserve_mtime=preserve_mtime,
                            exceptions=exceptions, tries=tries, backoff=backoff,
@@ -492,12 +486,13 @@ class Connection(object):
                logger=logger, silent=silent)
         def _getfo(self, remotepath, flo, callback=None):
 
-            channel = self._sftp_channel
+            channel = self._sftp_channel()
 
             if not callback:
                 callback = partial(_callback, remotepath, logger=logger)
 
             flo_size = self._sftp.getfo(remotepath, flo, callback=callback)
+
             channel.close()
 
             return flo_size
@@ -547,7 +542,7 @@ class Connection(object):
         def _put(self, localpath, remotepath=None, callback=None,
                  confirm=True, preserve_mtime=False):
 
-            channel = self._sftp_channel
+            channel = self._sftp_channel()
 
             if not remotepath:
                 remotepath = Path(localpath).name
@@ -610,8 +605,6 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        channel = self._sftp_channel
-
         if localdir == '.':
             localdir = Path.cwd().as_posix()
 
@@ -629,14 +622,14 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as queue:
+            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
                 threads = {
-                           queue.submit(self.put, local, remote,
-                                        callback=callback, confirm=confirm,
-                                        preserve_mtime=preserve_mtime,
-                                        exceptions=exceptions, tries=tries,
-                                        backoff=backoff, delay=delay,
-                                        logger=logger, silent=silent): local
+                           pool.submit(self.put, local, remote,
+                                       callback=callback, confirm=confirm,
+                                       preserve_mtime=preserve_mtime,
+                                       exceptions=exceptions, tries=tries,
+                                       backoff=backoff, delay=delay,
+                                       logger=logger, silent=silent): local
                            for local, remote, callback, confirm,
                            preserve_mtime, exceptions, tries, backoff, delay,
                            logger, silent in paths
@@ -644,19 +637,15 @@ class Connection(object):
                 for future in as_completed(threads):
                     name = threads[future]
                     try:
-                        future.result()
+                        data = future.result()
                     except Exception as err:
-                        log.error('Put Thread [{0}]: [{1}] [FAILED]'
-                                  .format(channel.get_name(), name))
-                        channel.close()
+                        log.error('Put Thread: [{0}] [FAILED]'.format(name))
                         raise err
                     else:
-                        log.info('Put Thread [{0}]: [{1}] [COMPLETE]'
-                                 .format(channel.get_name(), name))
-                        channel.close()
+                        log.info('Put Thread: [{0}] [COMPLETE]'.format(name))
+                        return data
         else:
             log.info('No files found in directory [{0}]'.format(localdir))
-            channel.close()
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -699,11 +688,11 @@ class Connection(object):
         if localdir == '.':
             localdir = Path.cwd().as_posix()
 
-        paths = self.localtree(directories, localdir, remotedir, recurse=True)
-        paths['root'] = [(localdir, remotedir)]
+        directories['root'] = [(localdir, remotedir)]
+        self.localtree(directories, localdir, remotedir, recurse=True)
 
-        for tld in paths.keys():
-            for local, remote in paths[tld]:
+        for tld in directories.keys():
+            for local, remote in directories[tld]:
                 self.put_d(local, remote, callback=callback, confirm=confirm,
                            preserve_mtime=preserve_mtime,
                            exceptions=exceptions, tries=tries, backoff=backoff,
@@ -749,7 +738,7 @@ class Connection(object):
         def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
                    confirm=True):
 
-            channel = self._sftp_channel
+            channel = self._sftp_channel()
 
             if not remotepath:
                 remotepath = Path(flo.name).name
@@ -924,7 +913,10 @@ class Connection(object):
         try:
             self._sftp.stat(remotepath)
         except IOError as err:
-            return False
+            if err.errno == 2:
+                return False
+            else:
+                raise err
 
         return True
 
@@ -1060,8 +1052,6 @@ class Connection(object):
         except Exception as err:
             raise err
 
-        return(container)
-
     def lstat(self, remotepath):
         '''return information about file/directory for the given remote path,
         without following symbolic links. Otherwise, the same as .stat()
@@ -1194,6 +1184,7 @@ class Connection(object):
 
         try:
             for attribute in self._sftp.listdir_attr(remotedir):
+                channel.close()
                 if S_ISDIR(attribute.st_mode):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
@@ -1205,14 +1196,10 @@ class Connection(object):
                     else:
                         container[remotedir] = [(remote, local)]
                     if recurse:
-                        channel.close()
                         self.remotetree(container, remote, localdir,
                                         recurse=recurse)
         except Exception as err:
-            channel.close()
             raise err
-
-        return(container)
 
     def remove(self, remotefile):
         '''Remove the file @ remotefile, remotefile may include a path, if no
