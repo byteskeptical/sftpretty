@@ -1,5 +1,7 @@
 sftpretty
 ======
+.. image:: https://travis-ci.org/bornwitbugs/sftpretty.svg?branch=master
+    :target: https://travis-ci.org/bornwitbugs/sftpretty
 
 A pretty quick and simple interface to SFTP. The module offers high level abstractions and
 multi-threaded routines to handle your SFTP needs. Provides asynchronous file transfer with
@@ -26,9 +28,8 @@ Example
 
 Supports
 --------
-[![Build Status](https://travis-ci.org/bornwitbugs/sftpretty.svg?branch=master)](https://travis-ci.org/bornwitbugs/sftpretty)
 
-Tested on Python 3.3, 3.4, 3.5, 3.6, 3.7
+Tested on Python 3.5, 3.6, 3.7
 
 
 Additional Information
