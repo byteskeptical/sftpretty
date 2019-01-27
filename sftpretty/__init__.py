@@ -843,9 +843,9 @@ class Connection(object):
         '''
         self._sftp_connect()
 
-        self._cwd = self.pwd
-
         self._sftp.chdir(remotepath)
+
+        self._cwd = self.pwd
 
     def chmod(self, remotepath, mode=777):
         '''Set the mode of a remotepath to mode, where mode is an integer
