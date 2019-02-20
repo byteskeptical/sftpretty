@@ -242,6 +242,7 @@ class Connection(object):
         '''Start the transport and set the ciphers if specified.'''
         try:
             self._transport = Transport((host, port))
+            self._transport.setName(hash(host))
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
             # Set security ciphers if set
@@ -351,16 +352,14 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
+        remotedir = self.normalize(remotedir)
+        filelist = self.listdir_attr(remotedir)
+
         channel = self._sftp_channel()
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
             Path(localdir).mkdir(parents=True)
-
-        remotedir = self._sftp.normalize(remotedir)
-        filelist = self._sftp.listdir_attr(remotedir)
-
-        channel.close()
 
         if not pattern:
             paths = [
@@ -381,7 +380,7 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            with ThreadPoolExecutor() as pool:
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
@@ -398,13 +397,15 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        log.error('Get Thread: [{0}] [FAILED]'.format(name))
+                        logger.error('Get Thread: [{0}] [FAILED]'.format(name))
                         raise err
                     else:
-                        log.info('Get Thread: [{0}] [COMPLETE]'.format(name))
+                        logger.info('Get Thread: [{0}] [COMPLETE]'.format(name))
                         return data
         else:
-            log.info('No files found in directory [{0}]'.format(remotedir))
+            logger.info('No files found in directory [{0}]'.format(remotedir))
+
+        channel.close()
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -438,12 +439,9 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
-        channel = self._sftp_channel()
-
         directories = {}
 
-        remotedir = self._sftp.normalize(remotedir)
-        channel.close()
+        remotedir = self.normalize(remotedir)
 
         directories['root'] = [(remotedir, localdir)]
         self.remotetree(directories, remotedir, localdir, recurse=True)
@@ -622,7 +620,7 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            with ThreadPoolExecutor() as pool:
                 threads = {
                            pool.submit(self.put, local, remote,
                                        callback=callback, confirm=confirm,
@@ -639,13 +637,13 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        log.error('Put Thread: [{0}] [FAILED]'.format(name))
+                        logger.error('Put Thread: [{0}] [FAILED]'.format(name))
                         raise err
                     else:
-                        log.info('Put Thread: [{0}] [COMPLETE]'.format(name))
+                        logger.info('Put Thread: [{0}] [COMPLETE]'.format(name))
                         return data
         else:
-            log.info('No files found in directory [{0}]'.format(localdir))
+            logger.info('No files found in directory [{0}]'.format(localdir))
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -938,13 +936,16 @@ class Connection(object):
         :returns: (bool)
 
         '''
-        self._sftp_connect()
+        # self._sftp_connect()
+        channel = self._sftp_channel()
 
         try:
             result = S_ISDIR(self._sftp.stat(remotepath).st_mode)
         except IOError:
             # No such directory
             result = False
+        finally:
+            channel.close()
 
         return result
 
@@ -956,13 +957,16 @@ class Connection(object):
         :returns: (bool)
 
         '''
-        self._sftp_connect()
+        # self._sftp_connect()
+        channel = self._sftp_channel()
 
         try:
             result = S_ISREG(self._sftp.stat(remotepath).st_mode)
         except IOError:
             # No such file
             result = False
+        finally:
+            channel.close()
 
         return result
 
@@ -1097,8 +1101,6 @@ class Connection(object):
         :raises: OSError
 
         '''
-        self._sftp_connect()
-
         try:
             if self.isdir(remotedir):
                 pass
