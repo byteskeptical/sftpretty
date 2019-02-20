@@ -67,7 +67,7 @@ VFS = {
                     'foo1.txt': 'content of foo1.txt',
                     'image01.jpg': 'data for image01.jpg'
                 },
-                'make.txt': 'content of make.txt'
+                'make.txt': 'content of make.txt',
                 'foo2': {
                     'bar1': {
                         'bar1.txt': 'contents bar1.txt'
