@@ -401,10 +401,10 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        logger.error('Get Thread: [{0}] [FAILED]'.format(name))
+                        logger.error('Thread [{0}]: [FAILED]'.format(name))
                         raise err
                     else:
-                        logger.info('Get Thread: [{0}] [COMPLETE]'.format(name))
+                        logger.info('Thread [{0}]: [COMPLETE]'.format(name))
                         return data
         else:
             logger.info('No files found in directory [{0}]'.format(remotedir))
@@ -448,8 +448,8 @@ class Connection(object):
         channel.close()
 
         directories = {}
-
         directories['root'] = [(remotedir, localdir)]
+
         self.remotetree(directories, remotedir, localdir, recurse=True)
 
         for tld in directories.keys():
@@ -643,10 +643,10 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        logger.error('Put Thread: [{0}] [FAILED]'.format(name))
+                        logger.error('Thread [{0}]: [FAILED]'.format(name))
                         raise err
                     else:
-                        logger.info('Put Thread: [{0}] [COMPLETE]'.format(name))
+                        logger.info('Thread [{0}]: [COMPLETE]'.format(name))
                         return data
         else:
             logger.info('No files found in directory [{0}]'.format(localdir))
