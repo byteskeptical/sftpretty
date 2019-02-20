@@ -352,10 +352,10 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
+        channel = self._sftp_channel()
+
         remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
-
-        channel = self._sftp_channel()
 
         if not Path(localdir).is_dir():
             log.info('Creating Folder [{0}]'.format(localdir))
@@ -1016,10 +1016,15 @@ class Connection(object):
         :returns: (list of SFTPAttributes), sorted
 
         '''
-        self._sftp_connect()
+        #self._sftp_connect()
+        channel = self._sftp_channel()
 
-        return sorted(self._sftp.listdir_attr(remotepath),
-                      key=lambda attribute: attribute.filename)
+        directory_attributes = sorted(self._sftp.listdir_attr(remotepath),
+                                      key=lambda attribute: attribute.filename)
+
+        channel.close()
+
+        return directory_attributes
 
     def localtree(self, container, localdir, remotedir, recurse=True):
         '''recursively descend, depth first, the directory tree rooted at
@@ -1128,9 +1133,14 @@ class Connection(object):
 
         :raises: IOError, if remotepath can't be resolved
         '''
-        self._sftp_connect()
+        #self._sftp_connect()
+        channel = self._sftp_channel()
 
-        return self._sftp.normalize(remotepath)
+        normalized = self._sftp.normalize(remotepath)
+
+        channel.close()
+
+        return normalized
 
     def open(self, remote_file, mode='r', bufsize=-1):
         '''Open a file on the remote server.
@@ -1182,11 +1192,8 @@ class Connection(object):
         :raises: Exception
 
         '''
-        channel = self._sftp_channel()
-
         try:
-            for attribute in self._sftp.listdir_attr(remotedir):
-                channel.close()
+            for attribute in self.listdir_attr(remotedir):
                 if S_ISDIR(attribute.st_mode):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()

@@ -41,7 +41,7 @@ def rmdir(dir):
     dir.rmdir()
 
 
-#@contextmanager
+@contextmanager
 def tempfile_containing(contents='', suffix=''):
     '''create a temporary file, with optional suffix and return the filename,
     cleanup when finished'''
