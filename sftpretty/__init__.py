@@ -212,7 +212,9 @@ class Connection(object):
         self._sftp = SFTPClient.from_transport(self._transport)
 
         channel = self._sftp.get_channel()
+
         channel.set_name(uuid().hex)
+        channel.settimeout(15)
 
         if self._default_path is not None:
             if self._cwd is not None:
@@ -356,6 +358,7 @@ class Connection(object):
 
         remotedir = self._sftp.normalize(remotedir)
         filelist = self._sftp.listdir_attr(remotedir)
+
         channel.close()
 
         if not Path(localdir).is_dir():
@@ -406,8 +409,6 @@ class Connection(object):
         else:
             logger.info('No files found in directory [{0}]'.format(remotedir))
 
-        #channel.close()
-
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
               delay=1, logger=log, silent=False):
@@ -440,9 +441,13 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
-        directories = {}
+        channel = self._sftp_channel()
 
-        remotedir = self.normalize(remotedir)
+        remotedir = self._sftp.normalize(remotedir)
+
+        channel.close()
+
+        directories = {}
 
         directories['root'] = [(remotedir, localdir)]
         self.remotetree(directories, remotedir, localdir, recurse=True)
@@ -888,9 +893,9 @@ class Connection(object):
             self._sftp.close()
             self._sftp_live = False
         # Close the SSH Transport.
-        #if self._transport:
-        #    self._transport.close()
-        #    self._transport = None
+        if self._transport:
+            self._transport.close()
+            self._transport = None
         # Clean up any loggers
         if self._cnopts.log:
             # if handlers are active they hang around until the app Exits
@@ -937,16 +942,14 @@ class Connection(object):
         :returns: (bool)
 
         '''
-        # self._sftp_connect()
         channel = self._sftp_channel()
 
         try:
             result = S_ISDIR(self._sftp.stat(remotepath).st_mode)
+            channel.close()
         except IOError:
             # No such directory
             result = False
-        finally:
-            channel.close()
 
         return result
 
@@ -958,16 +961,14 @@ class Connection(object):
         :returns: (bool)
 
         '''
-        # self._sftp_connect()
         channel = self._sftp_channel()
 
         try:
             result = S_ISREG(self._sftp.stat(remotepath).st_mode)
+            channel.close()
         except IOError:
             # No such file
             result = False
-        finally:
-            channel.close()
 
         return result
 
@@ -1183,8 +1184,11 @@ class Connection(object):
         :raises: Exception
 
         '''
+        channel = self._sftp_channel()
+
         try:
-            for attribute in self.listdir_attr(remotedir):
+            for attribute in self._sftp.listdir_attr(remotedir):
+                channel.close()
                 if S_ISDIR(attribute.st_mode):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
