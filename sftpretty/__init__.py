@@ -887,9 +887,9 @@ class Connection(object):
             self._sftp.close()
             self._sftp_live = False
         # Close the SSH Transport.
-        if self._transport:
-            self._transport.close()
-            self._transport = None
+        #if self._transport:
+        #    self._transport.close()
+        #    self._transport = None
         # Clean up any loggers
         if self._cnopts.log:
             # if handlers are active they hang around until the app Exits
@@ -1016,15 +1016,10 @@ class Connection(object):
         :returns: (list of SFTPAttributes), sorted
 
         '''
-        #self._sftp_connect()
-        channel = self._sftp_channel()
+        self._sftp_connect()
 
-        directory_attributes = sorted(self._sftp.listdir_attr(remotepath),
-                                      key=lambda attribute: attribute.filename)
-
-        channel.close()
-
-        return directory_attributes
+        return sorted(self._sftp.listdir_attr(remotepath),
+                      key=lambda attribute: attribute.filename)
 
     def localtree(self, container, localdir, remotedir, recurse=True):
         '''recursively descend, depth first, the directory tree rooted at
@@ -1133,14 +1128,9 @@ class Connection(object):
 
         :raises: IOError, if remotepath can't be resolved
         '''
-        #self._sftp_connect()
-        channel = self._sftp_channel()
+        self._sftp_connect()
 
-        normalized = self._sftp.normalize(remotepath)
-
-        channel.close()
-
-        return normalized
+        return self._sftp.normalize(remotepath)
 
     def open(self, remote_file, mode='r', bufsize=-1):
         '''Open a file on the remote server.
