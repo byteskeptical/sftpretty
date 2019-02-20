@@ -352,7 +352,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        channel = self._sftp_channel()
+        #channel = self._sftp_channel()
 
         remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
@@ -405,7 +405,7 @@ class Connection(object):
         else:
             logger.info('No files found in directory [{0}]'.format(remotedir))
 
-        channel.close()
+        #channel.close()
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
