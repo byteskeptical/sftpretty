@@ -63,16 +63,16 @@ VFS = {
     'home': {
         'test': {
             'pub': {
-                'make.txt': "content of make.txt",
                 'foo1': {
                     'foo1.txt': 'content of foo1.txt',
                     'image01.jpg': 'data for image01.jpg'
                 },
+                'make.txt': 'content of make.txt'
                 'foo2': {
-                    'foo2.txt': 'content of foo2.txt',
                     'bar1': {
                         'bar1.txt': 'contents bar1.txt'
-                    }
+                    },
+                    'foo2.txt': 'content of foo2.txt'
                 }
             },
             'read.me': 'contents of read.me'
