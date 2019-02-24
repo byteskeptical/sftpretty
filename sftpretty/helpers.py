@@ -43,7 +43,6 @@ def hash(filename, algorithm=None, blocksize=65536):
 
     return algorithm.hexdigest()
 
-
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     try:
         len(exceptions)
