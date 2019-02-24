@@ -23,7 +23,8 @@ def test_get_r(sftpserver):
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                                                sftp.getcwd(), *pth).iterdir()
+                              ]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -45,7 +46,8 @@ def test_get_r_pwd(sftpserver):
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                                                sftp.getcwd(), *pth).iterdir()
+                              ]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -66,7 +68,8 @@ def test_get_r_pathed(sftpserver):
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                                                sftp.getcwd(), *pth).iterdir()
+                              ]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -87,7 +90,8 @@ def test_get_r_cdd(sftpserver):
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                                                sftp.getcwd(), *pth).iterdir()
+                              ]) == fls
 
             # cleanup local
             rmdir(localpath)
