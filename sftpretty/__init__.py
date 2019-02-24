@@ -206,7 +206,7 @@ class Connection(object):
                 raise CredentialException('No username specified.')
 
     @contextmanager
-    def _sftp_channel(self):
+    def _sftp_channel(self, keepalive=False):
         '''Establish new SFTP channel.'''
         try:
             id = uuid().hex
@@ -225,7 +225,8 @@ class Connection(object):
         except Exception as err:
             raise err
         finally:
-            channel.close()
+            if not keepalive:
+                channel.close()
 
     def _start_transport(self, host, port):
         '''Start the transport and set the ciphers if specified.'''
@@ -424,7 +425,7 @@ class Connection(object):
 
         '''
         with self._sftp_channel() as channel:
-             remotedir = channel.normalize(remotedir)
+            remotedir = channel.normalize(remotedir)
 
         directories = {}
         directories['root'] = [(remotedir, localdir)]
@@ -903,7 +904,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             try:
-                result = S_ISDIR(self._sftp.stat(remotepath).st_mode)
+                result = S_ISDIR(channel.stat(remotepath).st_mode)
             except IOError:
                 # No such directory
                 result = False
@@ -920,7 +921,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             try:
-                result = S_ISREG(self._sftp.stat(remotepath).st_mode)
+                result = S_ISREG(channel.stat(remotepath).st_mode)
             except IOError:
                 # No such file
                 result = False
@@ -954,7 +955,7 @@ class Connection(object):
 
         '''
         with self._sftp_channel() as channel:
-             directory = sorted(channel.listdir(remotepath))
+            directory = sorted(channel.listdir(remotepath))
 
         return directory
 
@@ -1107,9 +1108,10 @@ class Connection(object):
         :raises: IOError, if the file could not be opened.
 
         '''
-        with self._sftp_channel() as channel:
+        with self._sftp_channel(keepalive=True) as channel:
             flo = channel.open(remote_file, mode=mode, bufsize=bufsize)
-            return flo
+
+        return flo
 
     def readlink(self, remotelink):
         '''Return the target of a symlink (shortcut).  The result will be
@@ -1321,7 +1323,7 @@ class Connection(object):
         :returns: (obj) the active SFTPClient object
 
         '''
-        with self._sftp_channel() as channel:
+        with self._sftp_channel(keepalive=True) as channel:
             return channel
 
     @property
@@ -1335,8 +1337,8 @@ class Connection(object):
             before raising socket.timeout, or None for no timeout
         '''
         with self._sftp_channel() as channel:
-            _sock = channel.get_channel()
-            timeout = _sock.gettimeout()
+            _channel = channel.get_channel()
+            timeout = _channel.gettimeout()
 
         return timeout
 
