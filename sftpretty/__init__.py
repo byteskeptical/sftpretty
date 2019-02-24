@@ -235,6 +235,9 @@ class Connection(object):
             self._transport.setName(hash(host))
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
+            banner = self._transport.get_banner()
+            if banner is not None:
+                log.info(banner)
             # Set security ciphers if set
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
