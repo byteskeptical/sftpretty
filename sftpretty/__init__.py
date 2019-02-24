@@ -234,12 +234,12 @@ class Connection(object):
         '''Start the transport and set the ciphers if specified.'''
         try:
             self._transport = Transport((host, port))
-            self._transport.setkeepalive(60)
+            self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
-            banner = self._transport.get_banner()
-            if banner is not None:
-                log.info(banner)
+            #banner = self._transport.get_banner()
+            #if banner is not None:
+            #    log.info(banner)
             # Set security ciphers if set
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
