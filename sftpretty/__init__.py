@@ -13,6 +13,7 @@ from sftpretty.exceptions import (CredentialException, ConnectionException,
 from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
+from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
 __version__ = '0.0.2'
@@ -187,15 +188,16 @@ class Connection(object):
                                                'revise and provide a path to '
                                                'a valid private key'))
 
-    def _set_logging(self, id=None):
+    def _set_logging(self):
         '''Set logging for connection'''
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
-                logcation = Path('/tmp/sftpretty-{0}.log'.format(uuid().hex))
-                logcation.touch()
-                self._cnopts.log = logcation.as_posix()
-            util.log_to_file(self._cnopts.log)
+                flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
+                util.log_to_file(flo)
+            else:
+                util.log_to_file(self._cnopts.log)
+            log.info('Logging to file: [{0}]'.format(self._cnopts.log))
 
     def _set_username(self):
         '''Set the username for the connection. If not passed, then look to
@@ -232,7 +234,7 @@ class Connection(object):
         '''Start the transport and set the ciphers if specified.'''
         try:
             self._transport = Transport((host, port))
-            self._transport.setName(hash(host))
+            self._transport.setkeepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
             banner = self._transport.get_banner()
@@ -344,7 +346,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        remotedir = self.normalize(remotedir)
+        #remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -427,8 +429,8 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
-        with self._sftp_channel() as channel:
-            remotedir = channel.normalize(remotedir)
+        #with self._sftp_channel() as channel:
+        #    remotedir = channel.normalize(remotedir)
 
         directories = {}
         directories['root'] = [(remotedir, localdir)]
@@ -856,7 +858,7 @@ class Connection(object):
     def close(self):
         '''Closes the connection and cleans up.'''
         # Close the SSH Transport.
-        if self._transport:
+        if self._transport and self._transport.is_active():
             self._transport.close()
             self._transport = None
         # Clean up any loggers
@@ -1095,8 +1097,9 @@ class Connection(object):
 
         return expanded_path
 
-    def open(self, remote_file, mode='rb', bufsize=-1):
-        '''Open a file on the remote server.
+    def open(self, remote_file, mode='r', bufsize=-1):
+        '''Open a file on the remote server. If not closed explicitly
+        connection will be closed with underlying transport.
 
         See http://paramiko-docs.readthedocs.org/en/latest/api/sftp.html for
         details.
@@ -1317,9 +1320,11 @@ class Connection(object):
 
     @property
     def sftp_client(self):
-        '''Give access to the underlying, connected paramiko SFTPClient object
+        '''Give access to the underlying, connected paramiko SFTPClient object.
+        Client is not handled by context manager. If not closed explicitly
+        connection will be closed with underlying transport.
 
-        see http://paramiko-docs.readthedocs.org/en/latest/api/sftp.html
+        see https://paramiko-docs.readthedocs.org/en/latest/api/sftp.html
 
         :params: None
 

@@ -21,10 +21,9 @@ def test_get_r(sftpserver):
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                cwd = Path(localpath).joinpath(sftp.getcwd()).as_posix()
                 assert sorted([path.name
-                               for path in Path(cwd).joinpath(*pth).iterdir()]
-                             ) == fls
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -44,10 +43,9 @@ def test_get_r_pwd(sftpserver):
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                cwd = Path(localpath).joinpath(sftp.getcwd()).as_posix()
                 assert sorted([path.name
-                               for path in Path(cwd).joinpath(*pth).iterdir()]
-                             ) == fls
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -66,10 +64,9 @@ def test_get_r_pathed(sftpserver):
                       (['', 'bar1'], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
-                cwd = Path(localpath).joinpath(sftp.getcwd()).as_posix()
                 assert sorted([path.name
-                               for path in Path(cwd).joinpath(*pth).iterdir()]
-                             ) == fls
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -88,10 +85,9 @@ def test_get_r_cdd(sftpserver):
                       (['bar1', ], ['bar1.txt', ])
                      ]
             for pth, fls in checks:
-                cwd = Path(localpath).joinpath(sftp.getcwd()).as_posix()
                 assert sorted([path.name
-                               for path in Path(cwd).joinpath(*pth).iterdir()]
-                             ) == fls
+                               for path in Path(localpath).joinpath(
+                                                *pth).iterdir()]) == fls
 
             # cleanup local
             rmdir(localpath)
