@@ -237,9 +237,6 @@ class Connection(object):
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
-            #banner = self._transport.get_banner()
-            #if banner is not None:
-            #    log.info(banner)
             # Set security ciphers if set
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
@@ -346,7 +343,6 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        #remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -429,9 +425,6 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
 
         '''
-        #with self._sftp_channel() as channel:
-        #    remotedir = channel.normalize(remotedir)
-
         directories = {}
         directories['root'] = [(remotedir, localdir)]
 
