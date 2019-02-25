@@ -426,7 +426,7 @@ class Connection(object):
 
         '''
         directories = {}
-        directories['root'] = [(remotedir, localdir)]
+        # directories['root'] = [(remotedir, localdir)]
 
         self.remotetree(directories, remotedir, localdir, recurse=True)
 
