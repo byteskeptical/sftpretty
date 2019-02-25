@@ -4,6 +4,7 @@ try:
 except ImportError as err:
     from hashlib import sha512 as hashbrown
 from io import BytesIO, IOBase
+from pathlib import Path
 from stat import S_IMODE
 from time import sleep
 
@@ -42,6 +43,42 @@ def hash(filename, algorithm=None, blocksize=65536):
             buffer = filename.read(blocksize)
 
     return algorithm.hexdigest()
+
+
+def localtree(container, localdir, remotedir, recurse=True):
+    '''recursively descend, depth first, the directory tree rooted at
+    local directory.
+
+    :param dict container: dictionary object to save directory tree
+    :param str localdir:
+        root of local directory to descend, use '.' to start at
+        :attr:`.pwd`
+    :param str remotedir:
+        root of remote directory to append localdir to create new
+        path
+    :param bool recurse: *Default: True* - should it recurse
+
+    :returns: (dict) local directory tree
+
+    :raises: Exception
+
+    '''
+    try:
+        for localpath in Path(localdir).iterdir():
+            if localpath.is_dir():
+                local = localpath.as_posix()
+                remote = Path(remotedir).joinpath(
+                    localpath.relative_to(
+                        Path(localdir).root).as_posix()).as_posix()
+                if localdir in container.keys():
+                    container[localdir].append((local, remote))
+                else:
+                    container[localdir] = [(local, remote)]
+                if recurse:
+                    localtree(container, local, remotedir,
+                              recurse=recurse)
+    except Exception as err:
+        raise err
 
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):

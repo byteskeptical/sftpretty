@@ -10,7 +10,7 @@ from paramiko import (hostkeys, SFTPClient, Transport, util,
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
-from sftpretty.helpers import _callback, hash, retry, st_mode_to_int
+from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
@@ -663,7 +663,7 @@ class Connection(object):
         directories['root'] = [(localdir,
                                 Path(remotedir).joinpath(localdir).as_posix())]
 
-        self.localtree(directories, localdir, remotedir, recurse=True)
+        localtree(directories, localdir, remotedir, recurse=True)
 
         for tld in directories.keys():
             for local, remote in directories[tld]:
@@ -978,41 +978,6 @@ class Connection(object):
                                key=lambda attribute: attribute.filename)
 
         return directory
-
-    def localtree(self, container, localdir, remotedir, recurse=True):
-        '''recursively descend, depth first, the directory tree rooted at
-        local directory.
-
-        :param dict container: dictionary object to save directory tree
-        :param str localdir:
-            root of local directory to descend, use '.' to start at
-            :attr:`.pwd`
-        :param str remotedir:
-            root of remote directory to append localdir to create new
-            path
-        :param bool recurse: *Default: True* - should it recurse
-
-        :returns: (dict) local directory tree
-
-        :raises: Exception
-
-        '''
-        try:
-            for localpath in Path(localdir).iterdir():
-                if localpath.is_dir():
-                    local = localpath.as_posix()
-                    remote = Path(remotedir).joinpath(
-                        localpath.relative_to(
-                            Path(localdir).root).as_posix()).as_posix()
-                    if localdir in container.keys():
-                        container[localdir].append((local, remote))
-                    else:
-                        container[localdir] = [(local, remote)]
-                    if recurse:
-                        self.localtree(container, local, remotedir,
-                                       recurse=recurse)
-        except Exception as err:
-            raise err
 
     def lstat(self, remotepath):
         '''return information about file/directory for the given remote path,

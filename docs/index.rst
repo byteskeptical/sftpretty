@@ -1,5 +1,5 @@
-sftpretty
-=========
+Welcome to sftpretty's documentation!
+=====================================
 
 A pretty quick and simple interface to SFTP. The module offers high level abstractions and
 multi-threaded routines to handle your SFTP needs. Provides asynchronous file transfer with
@@ -18,7 +18,7 @@ Example
             sftp.get('remote_file')         # get a remote file
 
     with Connection('hostname', private_key='~/.ssh/id_rsa', private_key_pass='secret') as sftp:
-        sftp.put_r('/my/local/filename', '/private')  # upload directory recursively 
+        sftp.put_r('/my/local/filename', '/private')  # upload directory recursively
                                                       # to private/ on remote
         sftp.get_d('remote_directory', '~/downloads') # get a remote directory
 
@@ -29,6 +29,7 @@ Tested on Python 3.5, 3.6, 3.7
 
 .. image:: https://travis-ci.org/bornwitbugs/sftpretty.svg?branch=master
     :target: https://travis-ci.org/bornwitbugs/sftpretty
+
 
 Additional Information
 ----------------------
@@ -41,3 +42,22 @@ Additional Information
 Requirements
 ------------
   paramiko >= 1.17.0
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   cookbook
+   sftpretty
+   changes
+   contributing
+   authors
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
