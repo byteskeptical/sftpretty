@@ -82,7 +82,7 @@ def test_get_r_cdd(sftpserver):
 
             checks = [
                       (['', ], ['bar1', 'foo2.txt']),
-                      (['bar1', ], ['bar1.txt', ])
+                      (['bar1', ], ['bar1.txt', ]),
                      ]
             for pth, fls in checks:
                 assert sorted([path.name

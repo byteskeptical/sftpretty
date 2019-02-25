@@ -426,7 +426,8 @@ class Connection(object):
 
         '''
         directories = {}
-        # directories['root'] = [(remotedir, localdir)]
+        directories['root'] = [(remotedir,
+                                Path(localdir).joinpath(remotedir).as_posix())]
 
         self.remotetree(directories, remotedir, localdir, recurse=True)
 
@@ -659,7 +660,8 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         directories = {}
-        directories['root'] = [(localdir, remotedir)]
+        directories['root'] = [(localdir,
+                                Path(remotedir).joinpath(localdir).as_posix())]
 
         self.localtree(directories, localdir, remotedir, recurse=True)
 
@@ -802,7 +804,6 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             channel.chdir(remotepath)
-
             self._default_path = channel.normalize('.')
 
     def chmod(self, remotepath, mode=777):
