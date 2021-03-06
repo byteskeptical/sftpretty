@@ -13,12 +13,12 @@
 # serve to show the default.
 
 import sys
-import os
+from os import environ, path
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -104,7 +104,7 @@ pygments_style = 'sphinx'
 html_theme = 'default'
 # on_rtd is whether we are on readthedocs.org, this line of code grabbed from
 #   docs.readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
@@ -210,7 +210,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'sftpretty.tex', u'sftpretty Documentation',
+  ('index', 'sftpretty.tex', u'SFTPretty Documentation',
    u'bornwitbugs', 'manual'),
 ]
 
@@ -240,7 +240,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sftpretty', u'sftpretty Documentation',
+    ('index', 'sftpretty', u'SFTPretty Documentation',
      [u'bornwitbugs'], 1)
 ]
 
@@ -254,8 +254,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'sftpretty', u'sftpretty Documentation',
-   u'bornwitbugs', 'sftpretty', 'One line description of project.',
+  ('index', 'sftpretty', u'SFTPretty Documentation',
+   u'bornwitbugs', 'sftpretty', 'Secure file transfer made easy.',
    'Miscellaneous'),
 ]
 

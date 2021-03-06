@@ -2,21 +2,20 @@ class ConnectionException(Exception):
     '''Exception raised for connection problems
 
     Attributes:
-        message  -- explanation of the error
+        message -- explanation of the error
     '''
 
     def __init__(self, host, port):
         # Call the base class constructor with the parameters it needs
         Exception.__init__(self, host, port)
-        self.message = 'Could not connect to host:port. {0}:{1}'.format(host,
-                                                                        port)
+        self.message = f'Could not connect to host:port [{host}:{port}]!'
 
 
 class CredentialException(Exception):
     '''Exception raised for credential problems
 
     Attributes:
-        message  -- explanation of the error
+        message -- explanation of the error
     '''
 
     def __init__(self, message):

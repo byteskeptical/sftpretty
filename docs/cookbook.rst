@@ -136,6 +136,7 @@ the modification times on the local copy match those on the server.
     # ...
     sftp.get('myfile', preserve_mtime=True)
 
+
 :meth:`sftpretty.Connection.get_d`
 -------------------------------
 This sftpretty method is an abstraction above :meth:`.get` that allows you to copy
@@ -145,6 +146,7 @@ all the files in a remote directory to a local path.
 
     # copy all files under public to a local path, preserving modification time
     sftp.get_d('public', 'local-backup', preserve_mtime=True)
+
 
 :meth:`sftpretty.Connection.get_r`
 -------------------------------
@@ -156,6 +158,7 @@ directories from the remote to a local path.
     # copy all files AND directories under public to a local path
     sftp.get_r('public', 'local-backup', preserve_mtime=True)
 
+
 :meth:`sftpretty.Connection.put`
 -----------------------------
 In addition to the normal paramiko call, you can optionally set the
@@ -166,6 +169,7 @@ the modification times on the server copy match those on the local.
 
     # copy myfile, to the current working directory on the server, preserving modification time
     sftp.put('myfile', preserve_mtime=True)
+
 
 :meth:`sftpretty.Connection.put_d`
 -------------------------------
@@ -213,6 +217,7 @@ want to return to later.
         sftp.chdir('here')      # now in ./static/here
     # now back to the original current working directory
 
+
 :meth:`sftpretty.Connection.chmod`
 -------------------------------
 :meth:`.chmod` is a wrapper around paramiko's except for the fact it will
@@ -251,6 +256,7 @@ extra bits and hands you the file mode bits in a way you'll recognize.
     >>> sftpretty.st_mode_to_int(attr.st_mode)
     644
 
+
 :meth:`sftpretty.Connection.chown`
 -------------------------------
 sftpretty's method allows you to specify just, gid or the uid or both.  If either
@@ -262,6 +268,7 @@ method requires that you explicitly set both.
 are uid 102 on your local system, a uid of 102 on the remote system most likely
 won't be your login.  You will need to do some homework to make sure that you
 are setting these values as you intended.
+
 
 :attr:`sftpretty.Connection.pwd`
 -----------------------------
@@ -279,6 +286,7 @@ not been called prior.
     >>> sftp.pwd
     u'/home/test'
 
+
 :meth:`sftpretty.Connection.listdir`
 ---------------------------------
 The difference here, is that sftpretty's version returns a sorted list instead of
@@ -289,6 +297,7 @@ paramiko's arbitrary order. Sorted by filename.
     ...
     >>> sftp.listdir()
     [u'pub', u'readme.sym', u'readme.txt']
+
 
 :meth:`sftpretty.Connection.listdir_attr`
 --------------------------------------
@@ -301,9 +310,10 @@ paramiko's arbitrary order. Sorted by SFTPAttribute.filename.
     >>> for attr in sftp.listdir_attr():
     ...     print attr.filename, attr
     ...
-    pub dr-xrwxr-x   1 501      502             5 19 May 23:22 pub
+    pub        dr-xrwxr-x   1 501      502             5 19 May 23:22 pub
     readme.sym lrwxr-xr-x   1 501      502            10 21 May 23:29 readme.sym
     readme.txt -r--r--r--   1 501      502          8192 26 May 23:32 readme.txt
+
 
 :meth:`sftpretty.Connection.makedirs`
 ----------------------------------
@@ -316,6 +326,7 @@ needed, setting their mode, if created. Takes a mode argument, just like
     ...
     sftp.makedirs('pub/show/off')  # will happily make all non-existing directories
 
+
 :meth:`sftpretty.Connection.mkdir`
 -------------------------------
 Just like :meth:`.chmod`, the mode is an integer representation of the octal
@@ -325,6 +336,7 @@ number to use.  Just like the unix cmd, `chmod` you use 744 not 0744 or 0o744.
 
     ...
     sftp.mkdir('show', mode=644)  # user r/w, group and other read-only
+
 
 :meth:`sftpretty.Connection.isdir`
 -------------------------------
@@ -336,6 +348,7 @@ a simple True/False.
     ...
     >>> sftp.isdir('pub')
     True
+
 
 :meth:`sftpretty.Connection.isfile`
 --------------------------------
@@ -379,7 +392,7 @@ Like :meth:`.exists`, but returns True for a broken symbolic link
 
 :meth:`sftpretty.Connection.truncate`
 ----------------------------------
-Like the underlying .truncate method, by sftpretty returns the file's new size
+Like the underlying `.truncate` method, by sftpretty returns the file's new size
 after the operation.
 
 .. code-block:: python
@@ -394,7 +407,7 @@ Is a powerful method that can recursively (*default*) walk a **remote**
 directory structure and calls a user-supplied container (dictionary) where
 entries are stored in ``{directory: tuple(sub-directories, localdir)}`` form.
 It is used in the get_r method of sftpretty and can be used with great effect
-and can be used with great effect to do your own bidding.
+to grab whole directories in parallel.
 
 .. code-block:: python
 

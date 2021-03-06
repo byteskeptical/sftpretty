@@ -17,8 +17,8 @@ LONG_DESCRIPTION += BUF
 DESCRIPTION = "Making SFTP great AGAIN!"
 
 setup(
-    name="sftpretty",
-    version="0.0.2",
+    name='sftpretty',
+    version='0.0.3',
 
     packages=['sftpretty', ],
 
@@ -41,6 +41,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
 

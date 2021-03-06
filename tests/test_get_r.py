@@ -14,12 +14,13 @@ def test_get_r(sftpserver):
             sftp.get_r('.', localpath)
 
             checks = [
-                      ([''], ['pub', 'read.me']),
-                      (['', 'pub'], ['foo1', 'foo2', 'make.txt']),
-                      (['', 'pub', 'foo1'], ['foo1.txt', 'image01.jpg']),
-                      (['', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
-                      (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
+                      ([''], ['home', 'read.me']),
+                      (['home', 'pub'], ['foo1', 'foo2', 'make.txt']),
+                      (['home', 'pub', 'foo1'], ['foo1.txt', 'image01.jpg']),
+                      (['home', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
+                      (['home', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
+
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
@@ -37,11 +38,12 @@ def test_get_r_pwd(sftpserver):
             sftp.get_r('pub/foo2', localpath)
 
             checks = [
-                      (['', ], ['pub', ]),
+                      (['', ], ['home', 'pub']),
                       (['', 'pub', ], ['foo2', ]),
                       (['', 'pub', 'foo2'], ['bar1', 'foo2.txt']),
                       (['', 'pub', 'foo2', 'bar1'], ['bar1.txt', ]),
                      ]
+
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
@@ -63,6 +65,7 @@ def test_get_r_pathed(sftpserver):
                       (['', ], ['bar1', ]),
                       (['', 'bar1'], ['bar1.txt', ]),
                      ]
+
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(
@@ -81,9 +84,10 @@ def test_get_r_cdd(sftpserver):
             sftp.get_r('.', localpath)
 
             checks = [
-                      (['', ], ['bar1', 'foo2.txt']),
+                      (['', ], ['foo2.txt', 'home']),
                       (['bar1', ], ['bar1.txt', ]),
                      ]
+
             for pth, fls in checks:
                 assert sorted([path.name
                                for path in Path(localpath).joinpath(

@@ -16,7 +16,7 @@ from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 # pylint: disable = R0913,C0302
 
 basicConfig(level=INFO)
@@ -59,12 +59,11 @@ class CnOpts(object):
         try:
             self.hostkeys.load(knownhosts)
         except IOError:
-            # Can't find known_hosts in the standard place
-            raise UserWarning(('Failed to load HostKeys from [{0}]. You will '
-                               'need to explicitly load host keys '
-                               '(cnopts.hostkeys.load(filename)) or '
-                               'disable HostKey checking '
-                               '(cnopts.hostkeys = None).').format(knownhosts))
+            # Can't find known_hosts in the standard location
+            raise UserWarning((f'No file or host key found in [{knownhosts}]. '
+                               'You will need to explicitly load host keys '
+                               '(cnopts.hostkeys.load(filename)) or disable '
+                               'host key checking (cnopts.hostkeys = None).'))
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
@@ -75,8 +74,7 @@ class CnOpts(object):
         kval = self.hostkeys.lookup(host)
         # None | {key_type: private_key}
         if kval is None:
-            raise SSHException('No hostkey for host [{0}] found.'
-                               .format(str(host)))
+            raise SSHException(f'No hostkey for host [{host}] found.')
 
         # Return the private key from the dictionary
         return list(kval.values())[0]
@@ -165,9 +163,8 @@ class Connection(object):
                         else:
                             raise CredentialException(('Unable to identify '
                                                        'key type from file '
-                                                       'provided, [{0}]!')
-                                                      .format(
-                                                          private_key_file))
+                                                       'provided: '
+                                                      f'[{private_key_file}]'))
                     except PermissionError as err:
                         raise err
                     finally:
@@ -186,7 +183,7 @@ class Connection(object):
                     raise CredentialException(('Path provided is not a file '
                                                'or does not exist, please '
                                                'revise and provide a path to '
-                                               'a valid private key'))
+                                               'a valid private key.'))
 
     def _set_logging(self):
         '''Set logging for connection'''
@@ -197,7 +194,7 @@ class Connection(object):
                 util.log_to_file(flo)
             else:
                 util.log_to_file(self._cnopts.log)
-            log.info('Logging to file: [{0}]'.format(self._cnopts.log))
+            log.info(f'Logging to file: [{self._cnopts.log}]')
 
     def _set_username(self):
         '''Set the username for the connection. If not passed, then look to
@@ -220,7 +217,7 @@ class Connection(object):
             channel.settimeout(self._timeout)
 
             if self._default_path is not None:
-                log.info('Default Path: [{0}]'.format(self._default_path))
+                log.info(f'Default Path: [{self._default_path}]')
                 _channel.chdir(self._default_path)
 
             yield _channel
@@ -346,7 +343,7 @@ class Connection(object):
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
-            log.info('Creating Folder [{0}]'.format(localdir))
+            log.info(f'Creating Folder [{localdir}]!')
             Path(localdir).mkdir(parents=True)
 
         if not pattern:
@@ -364,7 +361,7 @@ class Connection(object):
                       callback, preserve_mtime, exceptions, tries, backoff,
                       delay, logger, silent)
                      for attribute in filelist if S_ISREG(attribute.st_mode)
-                     if '{0}'.format(pattern) in attribute.filename
+                     if f'{pattern}' in attribute.filename
                     ]
 
         if paths != []:
@@ -385,13 +382,13 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        logger.error('Thread [{0}]: [FAILED]'.format(name))
+                        logger.error(f'Thread [{name}]: [FAILED]')
                         raise err
                     else:
-                        logger.info('Thread [{0}]: [COMPLETE]'.format(name))
+                        logger.info(f'Thread [{name}]: [COMPLETE]')
                         return data
         else:
-            logger.info('No files found in directory [{0}]'.format(remotedir))
+            logger.info(f'No files found in directory [{remotedir}]')
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -426,7 +423,7 @@ class Connection(object):
 
         '''
         directories = {}
-        directories['root'] = [(remotedir,
+        directories['root'] = [(self.normalize(remotedir),
                                 Path(localdir).joinpath(remotedir).as_posix())]
 
         self.remotetree(directories, remotedir, localdir, recurse=True)
@@ -615,13 +612,13 @@ class Connection(object):
                     try:
                         data = future.result()
                     except Exception as err:
-                        logger.error('Thread [{0}]: [FAILED]'.format(name))
+                        logger.error(f'Thread [{name}]: [FAILED]')
                         raise err
                     else:
-                        logger.info('Thread [{0}]: [COMPLETE]'.format(name))
+                        logger.info(f'Thread [{name}]: [COMPLETE]')
                         return data
         else:
-            logger.info('No files found in directory [{0}]'.format(localdir))
+            logger.info(f'No files found in directory [{localdir}]')
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -1029,7 +1026,7 @@ class Connection(object):
                 pass
             elif self.isfile(remotedir):
                 raise OSError(('A file with the same name as the remotedir, '
-                               '[{0}], already exists.').format(remotedir))
+                              f'[{remotedir}], already exists.'))
             else:
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
@@ -1093,23 +1090,29 @@ class Connection(object):
         return link_destination
 
     def remotetree(self, container, remotedir, localdir, recurse=True):
-        '''recursively descend, depth first, the directory tree rooted at
-        remote directory.
+        '''recursively descend remote directory mapping the tree to a
+        dictionary container.
 
         :param dict container: dictionary object to save directory tree
+            {remotedir:
+                 [(remotedir/sub-directory,
+                   localdir/remotedir/sub-directory)],}
         :param str remotedir:
             root of remote directory to descend, use '.' to start at
             :attr:`.pwd`
         :param str localdir:
-            root of local directory to append remotedir to create new path
-        :param bool recurse: *Default: True*. should it recurse
+            root of local directory to append remotedir too
+        :param bool recurse: *Default: True*. To recurse or not to recurse
+            that is the question
 
-        :returns: (dict) remote directory tree
+        :returns: None
 
         :raises: Exception
 
         '''
         try:
+            localdir = Path(localdir).expanduser().as_posix()
+            remotedir = self.normalize(remotedir)
             for attribute in self.listdir_attr(remotedir):
                 if S_ISDIR(attribute.st_mode):
                     remote = Path(remotedir).joinpath(

@@ -6,6 +6,6 @@ Authors
 Acknowledgment
 ---------------
     * ftpretty by codebynumbers
-    * paramiko - https://paramiko-docs.readthedocs.org/
+    * paramiko by Robey Pointer
     * pysftp by dundeemt
     * ssh.py by Zeth
