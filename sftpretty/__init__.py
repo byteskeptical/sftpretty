@@ -2,7 +2,7 @@ from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
 from logging import (basicConfig, getLogger,
-                     DEBUG, debug, ERROR, error, INFO, info)
+                     DEBUG, debug, ERROR, error, INFO, info, WARNING, warning)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport, util,
                       AuthenticationException, SSHException,
