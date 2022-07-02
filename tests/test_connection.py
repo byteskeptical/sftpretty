@@ -23,7 +23,6 @@ def test_connection_bad_host():
                               username='demo',
                               password='password',
                               cnopts=cnopts)
-            sftp.close()
 
 
 @SKIP_IF_CI
