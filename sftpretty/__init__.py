@@ -16,7 +16,6 @@ from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
-# pylint: disable = R0913,C0302
 
 basicConfig(level=INFO)
 log = getLogger(__name__)
@@ -54,6 +53,8 @@ class CnOpts(object):
         self.kex = None
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
+            if not Path(knownhosts).exists():
+                 Path(knownhosts).touch()
         self.hostkeys = hostkeys.HostKeys()
         try:
             self.hostkeys.load(knownhosts)
