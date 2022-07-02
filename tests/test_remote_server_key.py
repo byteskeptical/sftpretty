@@ -31,7 +31,8 @@ def test_cnopts_no_knownhosts():
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
     with pytest.raises(HostKeysException):
-        CnOpts(knownhosts='pytest.ini')
+        with pytest.raises(UserWarning):
+            CnOpts(knownhosts='pytest.ini')
 
 
 def test_hostkey_not_found():

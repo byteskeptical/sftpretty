@@ -56,7 +56,7 @@ class CnOpts(object):
         self.hostkeys = hostkeys.HostKeys()
         try:
             self.hostkeys.load(knownhosts)
-        except FileNotFoundError or IOError:
+        except IOError:
             # Can't find known_hosts in the standard location
             raise UserWarning((f'No file or host key found in [{knownhosts}]. '
                                'You will need to explicitly load host keys '
