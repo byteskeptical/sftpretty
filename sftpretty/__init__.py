@@ -53,12 +53,10 @@ class CnOpts(object):
         self.kex = None
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
-            if not Path(knownhosts).exists():
-                 Path(knownhosts).touch()
         self.hostkeys = hostkeys.HostKeys()
         try:
             self.hostkeys.load(knownhosts)
-        except IOError:
+        except FileNotFoundError or IOError:
             # Can't find known_hosts in the standard location
             raise UserWarning((f'No file or host key found in [{knownhosts}]. '
                                'You will need to explicitly load host keys '
