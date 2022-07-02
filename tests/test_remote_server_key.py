@@ -34,7 +34,7 @@ def test_cnopts_bad_knownhosts():
     with pytest.raises(HostKeysException):
         with pytest.raises(UserWarning):
             knownhosts = Path('~/knownhosts').expanduser().as_posix()
-            Path(knownhosts).touch
+            Path(knownhosts).touch(mode=0600)
             CnOpts(knownhosts=knownhosts)
             Path(knownhosts).unlink()
 
