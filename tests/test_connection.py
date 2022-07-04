@@ -4,7 +4,7 @@ import pytest
 
 from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
 from sftpretty import (CnOpts, Connection, AuthenticationException,
-                       ConnectionException, SSHException)
+                       CredentialException, SSHException)
 
 
 def test_connection_with(sftpserver):
