@@ -40,6 +40,7 @@ def test_no_username_raises_err(sftpserver):
         params = conn(sftpserver)
         del params['username']
         with pytest.raises(CredentialException):
-            Connection(**params)
+            sftp = Connection(**params)
+            sftp.close()
     if hold_logname is not None:
         environ['LOGNAME'] = hold_logname
