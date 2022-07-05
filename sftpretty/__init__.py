@@ -243,7 +243,7 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.connect(**authentication)
+            self._transport.connect(authentication)
         except (AttributeError, gaierror):
             raise ConnectionException(host, port)
 
@@ -1320,10 +1320,10 @@ class Connection(object):
 
     def __del__(self):
         '''Attempt to clean up if not explicitly closed.'''
-        self.close()
+        self._transport.close()
 
     def __enter__(self):
         return self
 
     def __exit__(self, etype, value, traceback):
-        self.close()
+        self._transport.close()
