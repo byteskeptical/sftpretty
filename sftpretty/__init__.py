@@ -111,14 +111,12 @@ class Connection(object):
     :raises HostKeysException:
 
     '''
-    def __init__(self, host, username=None, private_key=None, password=None,
-                 port=22, private_key_pass=None, cnopts=None,
-                 default_path=None):
-        # Starting point for transport.connect options
-        self._tconnect = {
-                          'username': username, 'password': password,
-                          'hostkey': None, 'pkey': None
-                         }
+    def __init__(self, host, cnopts=None, default_path=None, password=None,
+                 port=22, private_key=None, private_key_pass=None,
+                 username=None):
+        # construct object for transport.connect options
+        self._tconnect = {'hostkey': None, 'password': password, 'pkey': None,
+                          'username': username}
         self._cnopts = cnopts or CnOpts()
         # Check that we have a hostkey to verify
         if self._cnopts.hostkeys is not None:
@@ -127,7 +125,7 @@ class Connection(object):
         self._set_logging()
         self._set_username()
         self._timeout = None
-        # Begin the SSH transport.
+        # Begin SSH transport
         self._transport = None
         self._set_authentication(password, private_key, private_key_pass)
         self._start_transport(self._tconnect, host, port)
@@ -849,17 +847,20 @@ class Connection(object):
 
     def close(self):
         '''Closes the connection and cleans up.'''
-        # Close the SSH Transport.
-        if self._transport and self._transport.is_active():
-            self._transport.close()
-            self._transport = None
-        # Clean up any loggers
-        if self._cnopts.log:
-            # if handlers are active they hang around until the app Exits
-            # this closes and removes the handlers if in use at close
-            lgr = getLogger(__name__)
-            if lgr:
-                lgr.handlers = []
+        try:
+            # Close the SSH Transport.
+            if self._transport and self._transport.is_active():
+                self._transport.close()
+                self._transport = None
+            # Clean up any loggers
+            if self._cnopts.log:
+                # if handlers are active they hang around until the app Exits
+                # this closes and removes the handlers if in use at close
+                lgr = getLogger(__name__)
+                if lgr:
+                    lgr.handlers = []
+        except AttributeError:
+            pass
 
     def exists(self, remotepath):
         '''Test whether a remotepath exists.
@@ -1320,10 +1321,10 @@ class Connection(object):
 
     def __del__(self):
         '''Attempt to clean up if not explicitly closed.'''
-        self._transport.close()
+        self.close()
 
     def __enter__(self):
         return self
 
-    def __exit__(self, etype, value, traceback):
-        self._transport.close()
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
