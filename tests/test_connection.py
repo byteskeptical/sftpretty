@@ -3,8 +3,8 @@
 import pytest
 
 from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
-from sftpretty import (CnOpts, Connection, AuthenticationException,
-                       CredentialException, SSHException)
+from sftpretty import (CnOpts, Connection,
+                       ConnectionException, SSHException)
 
 
 def test_connection_with(sftpserver):
@@ -16,7 +16,7 @@ def test_connection_with(sftpserver):
 
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
-    with pytest.raises(CredentialException):
+    with pytest.raises(ConnectionException):
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None

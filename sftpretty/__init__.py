@@ -126,12 +126,11 @@ class Connection(object):
         self._default_path = default_path
         self._set_logging()
         self._set_username()
-        # Begin the SSH transport.
         self._timeout = None
+        # Begin the SSH transport.
         self._transport = None
         self._set_authentication(password, private_key, private_key_pass)
-        self._start_transport(host, port)
-        self._transport.connect(**self._tconnect)
+        self._start_transport(self._tconnect, host, port)
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate the transport. prefer password if given'''
@@ -223,13 +222,14 @@ class Connection(object):
             if not keepalive:
                 _channel.close()
 
-    def _start_transport(self, host, port):
+    def _start_transport(self, authentication, host, port):
         '''Start the transport and set the ciphers if specified.'''
         try:
             self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
+
             # Set security ciphers if set
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
@@ -242,8 +242,9 @@ class Connection(object):
             if self._cnopts.kex is not None:
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
+
+            self._transport.connect(**authentication)
         except (AttributeError, gaierror):
-            # Couldn't connect
             raise ConnectionException(host, port)
 
     def get(self, remotepath, localpath=None, callback=None,
