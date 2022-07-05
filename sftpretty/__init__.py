@@ -243,7 +243,7 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.connect(authentication**)
+            self._transport.connect(**authentication)
         except (AttributeError, gaierror):
             raise ConnectionException(host, port)
 
