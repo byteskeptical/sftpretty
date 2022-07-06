@@ -114,7 +114,7 @@ class Connection(object):
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
                  username=None):
-        # construct object for transport.connect options
+        # construct object for transport.connect authentication
         self._tconnect = {'hostkey': None, 'password': password, 'pkey': None,
                           'username': username}
         self._cnopts = cnopts or CnOpts()
@@ -134,7 +134,7 @@ class Connection(object):
         '''Authenticate the transport. prefer password if given'''
         if password is None:
             # Use private key.
-            if not private_key:
+            if private_key is None:
                 raise CredentialException('No password or key specified.')
             # Use the paramiko agent or provided key object
             elif isinstance(private_key,
