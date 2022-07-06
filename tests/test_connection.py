@@ -25,6 +25,7 @@ def test_connection_bad_host():
                               password='password',
                               cnopts=cnopts)
             sftp.close()
+    assert e.type is ConnectionException
 
 
 @SKIP_IF_CI
