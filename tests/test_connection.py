@@ -4,7 +4,7 @@ import pytest
 
 from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
 from sftpretty import (CnOpts, Connection,
-                       ConnectionException, SSHException)
+                       AuthenticationException, SSHException)
 
 
 def test_connection_with(sftpserver):
@@ -16,14 +16,12 @@ def test_connection_with(sftpserver):
 
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
-    with pytest.raises(ConnectionException):
+    with pytest.raises(AuthenticationException):
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            with Connection(host='',
-                              username='demo',
-                              password='password',
-                              cnopts=cnopts) as sftp:
+            with Connection(cnopts=cnopts, host='', password='password',
+                            username='badhost') as sftp:
                 sftp.listdir()
 
 

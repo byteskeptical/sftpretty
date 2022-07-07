@@ -147,9 +147,9 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                                 if type(x) == type(e) and
                                 x.args == e.args)):
                         raise
-                    msg = (f'Retrying in {mdelay} second(s)...\n'
-                           f'{str(e) if str(e) != "" else repr(e)}\n '
-                           f'Retry {mtries:d}/{tries:d}')
+                    msg = (f'Retry ({mtries:d}/{tries:d}):\n'
+                           f'{str(e) if str(e) != "" else repr(e)}\n'
+                           f'Retrying in {mdelay} second(s)...')
                     if not silent:
                         if logger:
                             logger.warning(msg)

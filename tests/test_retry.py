@@ -17,7 +17,7 @@ class UnexpectedError(Exception):
 
 
 def test_no_retry_required():
-    counter=0
+    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
     def succeeds():
@@ -30,8 +30,9 @@ def test_no_retry_required():
     assert r == 'success'
     assert counter == 1
 
+
 def test_retries_once():
-    counter=0
+    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
     def fails_once():
@@ -47,8 +48,9 @@ def test_retries_once():
     assert r == 'success'
     assert counter == 2
 
+
 def test_limit_is_reached():
-    counter=0
+    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
     def always_fails():
@@ -61,8 +63,9 @@ def test_limit_is_reached():
 
     assert counter == 4
 
+
 def test_multiple_exception_types():
-    counter=0
+    counter = 0
 
     @retry((RetryableError, AnotherRetryableError), tries=4, delay=0.1)
     def raise_multiple_exceptions():
@@ -80,6 +83,7 @@ def test_multiple_exception_types():
     assert r == 'success'
     assert counter == 3
 
+
 def test_unexpected_exception_does_not_retry():
 
     @retry(RetryableError, tries=4, delay=0.1)
@@ -88,6 +92,7 @@ def test_unexpected_exception_does_not_retry():
 
     with pytest.raises(UnexpectedError, match='unexpected error'):
         raise_unexpected_error()
+
 
 @pytest.fixture(autouse=True)
 def test_using_a_logger(caplog):
