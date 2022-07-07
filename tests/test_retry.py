@@ -1,6 +1,7 @@
-from logging import getLogger, StreamHandler
-from sftpretty.helpers import retry
-from unittest import main, TestCase
+import pytest
+
+from logging import DEBUG, getLogger, StreamHandler
+from retry import retry
 
 
 class RetryableError(Exception):
@@ -15,90 +16,104 @@ class UnexpectedError(Exception):
     pass
 
 
-class RetryTestCase(TestCase):
+def test_no_retry_required():
+    counter = 0
 
-    def test_no_retry_required(self):
-        self.counter = 0
+    @retry(RetryableError, tries=4, delay=0.1)
+    def succeeds():
+        counter += 1
+        return 'success'
 
-        @retry(RetryableError, tries=4, delay=0.1)
-        def succeeds():
-            self.counter += 1
+    r = succeeds()
+
+    assert r == 'success'
+    assert counter == 1
+
+def test_retries_once():
+    counter = 0
+
+    @retry(RetryableError, tries=4, delay=0.1)
+    def fails_once():
+        counter += 1
+        if counter < 2:
+            raise RetryableError('failed')
+        else:
             return 'success'
 
-        r = succeeds()
+    r = fails_once()
 
-        self.assertEqual(r, 'success')
-        self.assertEqual(self.counter, 1)
+    assert r == 'success'
+    assert counter == 2
 
-    def test_retries_once(self):
-        self.counter = 0
+def test_limit_is_reached():
+    counter = 0
 
-        @retry(RetryableError, tries=4, delay=0.1)
-        def fails_once():
-            self.counter += 1
-            if self.counter < 2:
-                raise RetryableError('failed')
-            else:
-                return 'success'
+    @retry(RetryableError, tries=4, delay=0.1)
+    def always_fails():
+        counter += 1
+        raise RetryableError('failed')
 
-        r = fails_once()
-        self.assertEqual(r, 'success')
-        self.assertEqual(self.counter, 2)
+    with pytest.raises(RetryableError, match='failed'):
+        always_fails()
 
-    def test_limit_is_reached(self):
-        self.counter = 0
+    assert counter == 4
 
-        @retry(RetryableError, tries=4, delay=0.1)
-        def always_fails():
-            self.counter += 1
+def test_multiple_exception_types():
+    counter = 0
+
+    @retry((RetryableError, AnotherRetryableError), tries=4, delay=0.1)
+    def raise_multiple_exceptions():
+        counter += 1
+        if counter == 1:
+            raise RetryableError('a retryable error')
+        elif counter == 2:
+            raise AnotherRetryableError('another retryable error')
+        else:
+            return 'success'
+
+    r = raise_multiple_exceptions()
+
+    assert r == 'success'
+    assert counter == 3
+
+def test_unexpected_exception_does_not_retry():
+
+    @retry(RetryableError, tries=4, delay=0.1)
+    def raise_unexpected_error():
+        raise UnexpectedError('unexpected error')
+
+    with pytest.raises(UnexpectedError, match='unexpected error'):
+        raise_unexpected_error()
+
+@pytest.fixture(autouse=True)
+def test_using_a_logger(caplog):
+    _caplog = caplog
+    expected = {'DEBUG': 'success',
+                'ERROR': 'failed',
+                'WARNING': ('Retry (4/4):\nfailed\nRetrying in 0.1 '
+                            'second(s)...')}
+    records = {}
+    counter = 0
+
+    sh = StreamHandler()
+    log = getLogger(__name__)
+    log.addHandler(sh)
+
+    @retry(RetryableError, tries=4, delay=0.1, logger=log)
+    def fails_once():
+        counter += 1
+        if counter < 2:
+            log.error('failed')
             raise RetryableError('failed')
+        else:
+            log.debug('success')
+            for record in _caplog.records:
+                records[record.levelname] = record.message
+            return 'success'
 
-        with self.assertRaises(RetryableError):
-            always_fails()
-        self.assertEqual(self.counter, 4)
+    with _caplog.at_level(DEBUG):
+        r = fails_once()
 
-    def test_multiple_exception_types(self):
-        self.counter = 0
-
-        @retry((RetryableError, AnotherRetryableError), tries=4, delay=0.1)
-        def raise_multiple_exceptions():
-            self.counter += 1
-            if self.counter == 1:
-                raise RetryableError('a retryable error')
-            elif self.counter == 2:
-                raise AnotherRetryableError('another retryable error')
-            else:
-                return 'success'
-
-        r = raise_multiple_exceptions()
-        self.assertEqual(r, 'success')
-        self.assertEqual(self.counter, 3)
-
-    def test_unexpected_exception_does_not_retry(self):
-
-        @retry(RetryableError, tries=4, delay=0.1)
-        def raise_unexpected_error():
-            raise UnexpectedError('unexpected error')
-
-        with self.assertRaises(UnexpectedError):
-            raise_unexpected_error()
-
-    def test_using_a_logger(self):
-        self.counter = 0
-
-        sh = StreamHandler()
-        logger = getLogger(__name__)
-        logger.addHandler(sh)
-
-        @retry(RetryableError, tries=4, delay=0.1, logger=logger)
-        def fails_once():
-            self.counter += 1
-            if self.counter < 2:
-                raise RetryableError('failed')
-            else:
-                return 'success'
-
-        fails_once()
-
-if __name__ == '__main__':
-    main()
+    assert r == 'success'
+    assert counter == 2
+    assert expected == records
