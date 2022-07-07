@@ -17,10 +17,9 @@ class UnexpectedError(Exception):
 
 
 def test_no_retry_required():
-    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
-    def succeeds():
+    def succeeds(counter=0):
         counter += 1
         return 'success'
 
@@ -30,10 +29,9 @@ def test_no_retry_required():
     assert counter == 1
 
 def test_retries_once():
-    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
-    def fails_once():
+    def fails_once(counter=0):
         counter += 1
         if counter < 2:
             raise RetryableError('failed')
@@ -46,10 +44,9 @@ def test_retries_once():
     assert counter == 2
 
 def test_limit_is_reached():
-    counter = 0
 
     @retry(RetryableError, tries=4, delay=0.1)
-    def always_fails():
+    def always_fails(counter=0):
         counter += 1
         raise RetryableError('failed')
 
@@ -59,10 +56,9 @@ def test_limit_is_reached():
     assert counter == 4
 
 def test_multiple_exception_types():
-    counter = 0
 
     @retry((RetryableError, AnotherRetryableError), tries=4, delay=0.1)
-    def raise_multiple_exceptions():
+    def raise_multiple_exceptions(counter=0):
         counter += 1
         if counter == 1:
             raise RetryableError('a retryable error')
@@ -93,14 +89,13 @@ def test_using_a_logger(caplog):
                 'WARNING': ('Retry (4/4):\nfailed\nRetrying in 0.1 '
                             'second(s)...')}
     records = {}
-    counter = 0
 
     sh = StreamHandler()
     log = getLogger(__name__)
     log.addHandler(sh)
 
     @retry(RetryableError, tries=4, delay=0.1, logger=log)
-    def fails_once():
+    def fails_once(counter=0):
         counter += 1
         if counter < 2:
             log.error('failed')

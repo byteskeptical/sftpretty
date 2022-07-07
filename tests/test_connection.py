@@ -24,6 +24,7 @@ def test_connection_bad_host():
                               username='demo',
                               password='password',
                               cnopts=cnopts) as sftp:
+                sftp.listdir()
 
 
 @SKIP_IF_CI
