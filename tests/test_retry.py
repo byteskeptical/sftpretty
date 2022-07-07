@@ -1,7 +1,7 @@
 import pytest
 
 from logging import DEBUG, getLogger, StreamHandler
-from retry import retry
+from sftpretty.helpers import retry
 
 
 class RetryableError(Exception):
