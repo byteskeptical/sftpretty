@@ -21,7 +21,8 @@ def test_no_retry_required():
 
     @retry(RetryableError, tries=4, delay=0.1)
     def succeeds():
-        nonlocal counter += 1
+        nonlocal counter
+        counter += 1
         return 'success'
 
     r = succeeds()
@@ -34,7 +35,8 @@ def test_retries_once():
 
     @retry(RetryableError, tries=4, delay=0.1)
     def fails_once():
-        nonlocal counter += 1
+        nonlocal counter
+        counter += 1
         if counter < 2:
             raise RetryableError('failed')
         else:
@@ -50,7 +52,8 @@ def test_limit_is_reached():
 
     @retry(RetryableError, tries=4, delay=0.1)
     def always_fails():
-        nonlocal counter += 1
+        nonlocal counter
+        counter += 1
         raise RetryableError('failed')
 
     with pytest.raises(RetryableError, match='failed'):
@@ -63,7 +66,8 @@ def test_multiple_exception_types():
 
     @retry((RetryableError, AnotherRetryableError), tries=4, delay=0.1)
     def raise_multiple_exceptions():
-        nonlocal counter += 1
+        nonlocal counter
+        counter += 1
         if counter == 1:
             raise RetryableError('a retryable error')
         elif counter == 2:
@@ -101,7 +105,8 @@ def test_using_a_logger(caplog):
 
     @retry(RetryableError, tries=4, delay=0.1, logger=log)
     def fails_once():
-        nonlocal counter += 1
+        nonlocal counter
+        counter += 1
         if counter < 2:
             log.error('failed')
             raise RetryableError('failed')
