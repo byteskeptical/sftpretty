@@ -3,7 +3,6 @@ location'''
 
 from common import conn, VFS
 from sftpretty import Connection
-from sys import platform
 
 
 def test_issue_65(sftpserver):
@@ -17,7 +16,4 @@ def test_issue_65(sftpserver):
             with sftp.cd('/home/test/pub'):
                 pass
 
-            if platform.startswith('linux'):
-                assert sftp.getcwd() == '/'
-            elif platform.startswith('win32'):
-                assert sftp.getcwd() is None
+            assert sftp.getcwd() == '/'

@@ -19,8 +19,8 @@ def test_log_cnopt_user_file(sftpserver):
             assert sftp.logfile == cnopts.log
             assert Path(sftp.logfile).exists()
             logfile = sftp.logfile
-        # cleanup
-        Path(logfile).unlink()
+    # cleanup
+    Path(logfile).unlink()
 
 
 def test_log_cnopts_explicit_false(sftpserver):
@@ -45,5 +45,5 @@ def test_log_cnopts_true(sftpserver):
             # and we are not writing to a file named 'True'
             assert sftp.logfile == cnopts.log
             logfile = sftp.logfile
-        # cleanup
-        Path(logfile).unlink()
+    # cleanup
+    Path(logfile).unlink()

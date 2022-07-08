@@ -5,6 +5,7 @@ import pytest
 from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
 from sftpretty import (CnOpts, Connection,
                        AuthenticationException, SSHException)
+from sys import platform
 
 
 def test_connection_with(sftpserver):
@@ -16,13 +17,18 @@ def test_connection_with(sftpserver):
 
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
-    with pytest.raises(AuthenticationException):
-        with pytest.raises(UserWarning):
-            cnopts = CnOpts()
-            cnopts.hostkeys = None
-            with Connection(cnopts=cnopts, host='', password='password',
-                            username='badhost') as sftp:
-                sftp.listdir()
+    if platform.startswith('darwin'):
+        err = AuthenticationException
+    else:
+        err = AttributeError
+        with pytest.raises(err):
+            with pytest.raises(UserWarning):
+                with sftpserver.serve_content(VFS):
+                    cnopts = CnOpts()
+                    cnopts.hostkeys = None
+                    sftp = Connection(cnopts=cnopts, host='',
+                                      password='password', username='badhost')
+                    sftp.close()
 
 
 @SKIP_IF_CI

@@ -13,7 +13,7 @@ def test_remotetree(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             directories = {}
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
 
             sftp.remotetree(directories, cwd, localpath)
 
@@ -39,7 +39,7 @@ def test_remotetree_no_recurse(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             directories = {}
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
 
             sftp.remotetree(directories, cwd, localpath, recurse=False)
 
