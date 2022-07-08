@@ -3,6 +3,7 @@
 import pytest
 
 from common import conn, VFS
+from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
 

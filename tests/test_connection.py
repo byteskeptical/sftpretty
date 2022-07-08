@@ -3,7 +3,7 @@
 import pytest
 
 from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
-from sftpretty import (CnOpts, Connection,
+from sftpretty import (CnOpts, Connection, ConnectionException,
                        AuthenticationException, SSHException)
 from sys import platform
 
@@ -21,14 +21,13 @@ def test_connection_bad_host():
         err = AuthenticationException
     else:
         err = AttributeError
-        with pytest.raises(err):
-            with pytest.raises(UserWarning):
-                with sftpserver.serve_content(VFS):
-                    cnopts = CnOpts()
-                    cnopts.hostkeys = None
-                    sftp = Connection(cnopts=cnopts, host='',
-                                      password='password', username='badhost')
-                    sftp.close()
+    with pytest.raises(err):
+        with pytest.raises(UserWarning):
+            cnopts = CnOpts()
+            cnopts.hostkeys = None
+            sftp = Connection(cnopts=cnopts, host='',
+                              password='password', username='badhost')
+            sftp.close()
 
 
 @SKIP_IF_CI
