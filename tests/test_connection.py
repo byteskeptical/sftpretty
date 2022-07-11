@@ -22,12 +22,12 @@ def test_connection_bad_host():
 #    else:
 #        err = AttributeError
 #    with pytest.raises(err):
-#    with pytest.raises(UserWarning):
-    cnopts = CnOpts()
-    cnopts.hostkeys = None
-    sftp = Connection(cnopts=cnopts, host='',
-                      password='password', username='badhost')
-    sftp.close()
+    with pytest.raises(UserWarning):
+        cnopts = CnOpts()
+        cnopts.hostkeys = None
+        sftp = Connection(cnopts=cnopts, host='',
+                          password='password', username='badhost')
+        sftp.close()
 
 
 @SKIP_IF_CI
