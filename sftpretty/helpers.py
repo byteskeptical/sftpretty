@@ -74,7 +74,6 @@ def localtree(container, localdir, remotedir, recurse=True):
     '''
     try:
         localdir = Path(localdir).absolute().expanduser()
-        if 
         for localpath in localdir.iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()
