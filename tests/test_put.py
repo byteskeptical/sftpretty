@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, SKIP_IF_CI, STARS8192, tempfile_containing, VFS
+from common import conn, SKIP_IF_CI, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep
@@ -13,7 +13,7 @@ from unittest.mock import Mock
 def test_put_callback(lsftp):
     '''test the callback feature of put'''
     cback = Mock(return_value=None)
-    with tempfile_containing(contents=4096*'*') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.chdir('/home/test')
         lsftp.put(fname, callback=cback)
@@ -26,7 +26,7 @@ def test_put_callback(lsftp):
 @SKIP_IF_CI
 def test_put_confirm(lsftp):
     '''test the confirm feature of put'''
-    with tempfile_containing(contents=8192*'*') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.chdir('/home/test')
         result = lsftp.put(fname)
@@ -51,7 +51,7 @@ def test_put(lsftp):
         assert base_fname not in lsftp.listdir()
         lsftp.put(fname)
         assert base_fname in lsftp.listdir()
-        with tempfile_containing('') as tfile:
+        with tempfile_containing(contents='') as tfile:
             lsftp.get(base_fname, tfile)
             assert open(tfile).read() == contents
         # clean up
@@ -62,7 +62,7 @@ def test_put_bad_local(sftpserver):
     '''try to put a non-existing file to a read-only server'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            with tempfile_containing('should fail') as fname:
+            with tempfile_containing() as fname:
                 pass
             # tempfile has been removed
             with pytest.raises(OSError):
@@ -72,7 +72,7 @@ def test_put_bad_local(sftpserver):
 # TODO
 # def test_put_not_allowed(psftp):
 #     '''try to put a file to a read-only server'''
-#     with tempfile_containing('should fail') as fname:
+#     with tempfile_containing() as fname:
 #         with pytest.raises(IOError):
 #             psftp.put(fname)
 
@@ -80,7 +80,7 @@ def test_put_bad_local(sftpserver):
 @SKIP_IF_CI
 def test_put_preserve_mtime(lsftp):
     '''test that m_time is preserved from local to remote, when put'''
-    with tempfile_containing(contents=STARS8192) as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         base = Path(fname).stat()
         # with Connection(**SFTP_LOCAL) as sftp:

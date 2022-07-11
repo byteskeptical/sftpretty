@@ -3,7 +3,6 @@
 from common import STARS8192
 from pathlib import Path
 
-# pylint: disable = W0142
 
 DIR_LIST = [('pub', ),
             ('pub', 'foo1'),

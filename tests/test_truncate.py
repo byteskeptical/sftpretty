@@ -4,19 +4,10 @@ from common import SKIP_IF_CI, STARS8192
 from io import BytesIO
 
 
-def makeflo():
-    '''return a proper bytesIO object based on version of py'''
-    try:
-        flo = BytesIO(STARS8192)
-    except TypeError:
-        flo = BytesIO(bytes(STARS8192, 'UTF-8'))
-    return flo
-
-
 @SKIP_IF_CI
 def test_truncate_smaller(lsftp):
     '''test truncate, make file smaller'''
-    flo = makeflo()
+    flo = BytesIO(bytes(STARS8192, 'UTF-8'))
     rname = 'truncate.txt'
     try:
         lsftp.remove(rname)
@@ -31,7 +22,7 @@ def test_truncate_smaller(lsftp):
 @SKIP_IF_CI
 def test_truncate_larger(lsftp):
     '''test truncate, make file larger'''
-    flo = makeflo()
+    flo = BytesIO(bytes(STARS8192, 'UTF-8'))
     rname = 'truncate.txt'
     try:
         lsftp.remove(rname)
@@ -46,7 +37,7 @@ def test_truncate_larger(lsftp):
 @SKIP_IF_CI
 def test_truncate_same(lsftp):
     '''test truncate, make file same size'''
-    flo = makeflo()
+    flo = BytesIO(bytes(STARS8192, 'UTF-8'))
     rname = 'truncate.txt'
     try:
         lsftp.remove(rname)

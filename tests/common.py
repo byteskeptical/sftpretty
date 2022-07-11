@@ -38,7 +38,7 @@ def rmdir(dir):
 
 
 @contextmanager
-def tempfile_containing(contents='', suffix=''):
+def tempfile_containing(contents=STARS8192, suffix=''):
     '''create a temporary file, with optional suffix and return the filename,
     cleanup when finished'''
 
@@ -49,7 +49,7 @@ def tempfile_containing(contents='', suffix=''):
         fh.write(contents.encode('utf-8'))
 
     try:
-        yield temp_path
+        yield Path(temp_path).as_posix()
     finally:
         Path(temp_path).unlink()
 

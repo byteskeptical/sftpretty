@@ -9,7 +9,7 @@ from pathlib import Path
 @SKIP_IF_CI
 def test_remove(lsftp):
     '''test the remove method'''
-    with tempfile_containing('*' * 8192) as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.chdir('/home/test')
         lsftp.put(fname)
@@ -24,7 +24,7 @@ def test_remove(lsftp):
 @SKIP_IF_CI
 def test_unlink(lsftp):
     '''test the unlink function'''
-    with tempfile_containing('*' * 8192) as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.chdir('/home/test')
         lsftp.put(fname)
