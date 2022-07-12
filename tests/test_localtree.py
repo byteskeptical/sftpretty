@@ -16,7 +16,7 @@ def test_localtree(sftpserver):
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, Path(localpath).drive)
+            localtree(directories, localpath + cwd, Path(localpath).anchor)
 
             dkeys = [f'{localpath}/home/test',
                      f'{localpath}/home/test/pub',
@@ -49,7 +49,7 @@ def test_localtree_no_recurse(sftpserver):
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, Path(localpath).drive,
+            localtree(directories, localpath + cwd, Path(localpath).anchor,
                       recurse=False)
 
             dkeys = [f'{localpath}/home/test/pub/foo2']
