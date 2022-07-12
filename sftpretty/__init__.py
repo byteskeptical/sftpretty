@@ -242,7 +242,7 @@ class Connection(object):
                 self._transport.get_security_options().kex = kex
 
             self._transport.connect(**authentication)
-        except (AttributeError, gaierror):
+        except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
 
     def get(self, remotepath, localpath=None, callback=None,

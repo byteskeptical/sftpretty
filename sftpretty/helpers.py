@@ -79,7 +79,7 @@ def localtree(container, localdir, remotedir, recurse=True):
                 local = localpath.as_posix()
                 remote = Path(remotedir).joinpath(
                     localpath.relative_to(
-                        localdir.root or localdir.drive).as_posix()).as_posix()
+                        localdir.anchor).as_posix()).as_posix()
                 if localdir.as_posix() in container.keys():
                     container[localdir.as_posix()].append((local, remote))
                 else:
