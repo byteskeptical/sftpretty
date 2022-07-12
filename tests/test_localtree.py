@@ -16,7 +16,7 @@ def test_localtree(sftpserver):
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, '/')
+            localtree(directories, localpath + cwd, Path(localpath).drive)
 
             dkeys = [f'{localpath}/home/test',
                      f'{localpath}/home/test/pub',
@@ -34,8 +34,8 @@ def test_localtree(sftpserver):
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
 
-            # cleanup local
-            rmdir(localpath)
+    # cleanup local
+    rmdir(localpath)
 
 
 def test_localtree_no_recurse(sftpserver):
@@ -49,7 +49,8 @@ def test_localtree_no_recurse(sftpserver):
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, '/', recurse=False)
+            localtree(directories, localpath + cwd, Path(localpath).drive,
+                      recurse=False)
 
             dkeys = [f'{localpath}/home/test/pub/foo2']
 
@@ -59,5 +60,5 @@ def test_localtree_no_recurse(sftpserver):
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
 
-            # cleanup local
-            rmdir(localpath)
+    # cleanup local
+    rmdir(localpath)
