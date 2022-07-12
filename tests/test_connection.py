@@ -25,9 +25,8 @@ def test_connection_bad_host():
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            sftp = Connection(cnopts=cnopts, host='localhost',
+            sftp = Connection(cnopts=cnopts, host='badhost.home.arpa',
                               password='password', username='badhost')
-            sftp.close()
 
 
 @SKIP_IF_CI
