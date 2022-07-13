@@ -156,7 +156,8 @@ class Connection(object):
                                 private_key_file, password=private_key_pass)
                         except PasswordRequiredException as err:
                             raise CredentialException(('Key is encrypted and '
-                                                       'no password was provided.'))
+                                                       'no password was '
+                                                       'provided.'))
                         except SSHException as err:
                             raise err
                 else:
@@ -243,11 +244,13 @@ class Connection(object):
                 raise err
 
             remote_key = self._transport.get_remote_server_key()
-            log.info(f'{host} Host Key: {remote_key.get_fingerprint()}')
+            log.info((f'{host} Host Key:\n\t'
+                      f'Name: {remote_key.get_name()}\n\t'
+                      f'Fingerprint: {remote_key.get_base64()}\n\t'
+                      f'Size: {remote_key.get_bits():d}'))
 
-            #if self._cnopts.hostkeys is not None:
-            #    if remote_key.__cmp__(self._cnopts.get_hostkey(host)) != 0:
-            #        raise HostKeysException('Host key verification failed!')
+            if self._cnopts.hostkeys is not None:
+                self._cnopts.get_hostkey(host)
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
 
