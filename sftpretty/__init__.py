@@ -245,9 +245,9 @@ class Connection(object):
             remote_key = self._transport.get_remote_server_key()
             log.info(f'{host} Host Key: {remote_key.get_fingerprint()}')
 
-            if self._cnopts.hostkeys is not None:
-                if remote_key.__cmp__(self._cnopts.get_hostkey(host)) != 0:
-                    raise HostKeysException('Host key verification failed!')
+            #if self._cnopts.hostkeys is not None:
+            #    if remote_key.__cmp__(self._cnopts.get_hostkey(host)) != 0:
+            #        raise HostKeysException('Host key verification failed!')
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
 
