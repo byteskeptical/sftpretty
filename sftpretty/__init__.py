@@ -235,7 +235,13 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.start_client()
+            self._transport.start_client(timeout=30.0)
+            err = self._transport.get_exception()
+
+            if err:
+                self._transport.close()
+                raise err
+
             remote_key = self._transport.get_remote_server_key()
             log.info(f'{host} Host Key: {remote_key.get_fingerprint()}')
 
