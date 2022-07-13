@@ -16,13 +16,13 @@ def test_connection_with(sftpserver):
 
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
-#    with pytest.raises(AuthenticationException):
-    with pytest.raises(UserWarning):
-        cnopts = CnOpts()
-        cnopts.hostkeys = None
-        sftp = Connection('', cnopts=cnopts, password='password',
-                          port=222, username='badhost')
-        sftp.close()
+    with pytest.raises(SSHException):
+        with pytest.raises(UserWarning):
+            cnopts = CnOpts()
+            cnopts.hostkeys = None
+            sftp = Connection('172.16.0.11', cnopts=cnopts, password='password',
+                              port=222, username='badhost')
+            sftp.close()
 
 
 @SKIP_IF_CI
