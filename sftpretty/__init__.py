@@ -214,7 +214,7 @@ class Connection(object):
             if not keepalive:
                 _channel.close()
 
-    def _start_transport(self, authentication, host, port):
+    def _start_transport(self, host, port):
         '''Start the transport and set the ciphers if specified.'''
         try:
             self._transport = Transport((host, port))
