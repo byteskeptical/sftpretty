@@ -114,34 +114,21 @@ class Connection(object):
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
                  username=None):
-        # construct object for transport.connect authentication
-        self._tconnect = {'hostkey': None, 'password': password, 'pkey': None,
-                          'username': username}
         self._cnopts = cnopts or CnOpts()
-        # Check that we have a hostkey to verify
-        if self._cnopts.hostkeys is not None:
-            self._tconnect['hostkey'] = self._cnopts.get_hostkey(host)
         self._default_path = default_path
         self._set_logging()
-        self._set_username()
+        self._set_username(username)
         self._timeout = None
         # Begin SSH transport
         self._transport = None
+        self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
-        self._start_transport(self._tconnect, host, port)
 
     def _set_authentication(self, password, private_key, private_key_pass):
-        '''Authenticate the transport. prefer password if given'''
-        if password is None:
-            # Use private key.
-            if private_key is None:
-                raise CredentialException('No password or key specified.')
-            # Use the paramiko agent or provided key object
-            elif isinstance(private_key,
-                            (AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey)):
-                self._tconnect['pkey'] = private_key
-            # Use path provided
-            elif isinstance(private_key, str):
+        '''Authenticate to transport. Prefer private key if given'''
+        if private_key is not None:
+            # Use path or provided key object
+            if isinstance(private_key, str):
                 private_key_file = Path(private_key).expanduser().as_posix()
                 if Path(private_key_file).is_file():
                     try:
@@ -164,14 +151,11 @@ class Connection(object):
                         raise err
                     finally:
                         try:
-                            if not private_key_pass:
-                                self._tconnect['pkey'] = (
-                                    key_type.from_private_key_file(
-                                        private_key_file))
-                            else:
-                                self._tconnect['pkey'] = (
-                                    key_type.from_private_key_file(
-                                        private_key_file, private_key_pass))
+                            private_key = key_type.from_private_key_file(
+                                private_key_file, password=private_key_pass)
+                        except PasswordRequiredException as err:
+                            raise CredentialException(('Key is encrypted and '
+                                                       'no password was provided.'))
                         except SSHException as err:
                             raise err
                 else:
@@ -179,6 +163,11 @@ class Connection(object):
                                                'or does not exist, please '
                                                'revise and provide a path to '
                                                'a valid private key.'))
+            self._transport.auth_publickey(self._username, private_key)
+        elif password is not None:
+            self._transport.auth_password(self._username, password)
+        else:
+            raise CredentialException('No password or key specified.')
 
     def _set_logging(self):
         '''Set logging for connection'''
@@ -191,13 +180,17 @@ class Connection(object):
                 util.log_to_file(self._cnopts.log)
             log.info(f'Logging to file: [{self._cnopts.log}]')
 
-    def _set_username(self):
+    def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
         the environment. Still nothing? Throw exception.'''
-        if self._tconnect['username'] is None:
-            self._tconnect['username'] = environ.get('LOGNAME', None)
-            if self._tconnect['username'] is None:
-                raise CredentialException('No username specified.')
+        local_username = environ.get('LOGNAME', None)
+
+        if username is not None:
+            self._username = username
+        elif local_username is not None:
+            self._username = local_username
+        else:
+            raise CredentialException('No username specified.')
 
     @contextmanager
     def _sftp_channel(self, keepalive=False):
@@ -241,7 +234,13 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.connect(**authentication)
+            self._transport.start_client()
+            remote_key = self._transport.get_remote_server_key()
+            log.info(f'{host} Host Key: {remote_key.get_fingerprint()}')
+
+            if self._cnopts.hostkeys is not None:
+                if remote_key.__cmp__(self._cnopts.get_hostkey(host)) != 0:
+                    raise HostKeysException('Host key verification failed!')
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
 
