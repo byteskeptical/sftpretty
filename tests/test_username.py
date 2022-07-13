@@ -15,7 +15,7 @@ def test_username_specified(sftpserver):
         params = conn(sftpserver)
         params['username'] = 'bob'
         with Connection(**params) as sftp:
-            assert sftp._tconnect['username'] == params['username']
+            assert sftp._username == params['username']
 
 
 def test_username_from_environ(sftpserver):
@@ -29,7 +29,7 @@ def test_username_from_environ(sftpserver):
         with Connection(**params) as sftp:
             if hold_logname is not None:
                 environ['LOGNAME'] = hold_logname
-            assert sftp._tconnect['username'] == username
+            assert sftp._username == username
 
 
 def test_no_username_raises_err(sftpserver):
