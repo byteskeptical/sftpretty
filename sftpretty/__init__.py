@@ -5,8 +5,9 @@ from logging import (basicConfig, getLogger,
                      DEBUG, debug, ERROR, error, INFO, info, WARNING, warning)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport, util,
-                      AuthenticationException, SSHException,
-                      AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+                      AuthenticationException, PasswordRequiredException,
+                      SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
+                      RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
