@@ -237,20 +237,21 @@ class Connection(object):
                 self._transport.get_security_options().kex = kex
 
             self._transport.start_client(timeout=30.0)
-            err = self._transport.get_exception()
 
-            if err:
-                self._transport.close()
-                raise err
+            if self._transport.is_active():
+                remote_key = self._transport.get_remote_server_key()
+                log.info((f'{host} Host Key:\n\t'
+                          f'Name: {remote_key.get_name()}\n\t'
+                          f'Fingerprint: {remote_key.get_base64()}\n\t'
+                          f'Size: {remote_key.get_bits():d}'))
 
-            remote_key = self._transport.get_remote_server_key()
-            log.info((f'{host} Host Key:\n\t'
-                      f'Name: {remote_key.get_name()}\n\t'
-                      f'Fingerprint: {remote_key.get_base64()}\n\t'
-                      f'Size: {remote_key.get_bits():d}'))
-
-            if self._cnopts.hostkeys is not None:
-                self._cnopts.get_hostkey(host)
+                if self._cnopts.hostkeys is not None:
+                    self._cnopts.get_hostkey(host)
+            else:
+                err = self._transport.get_exception()
+                if err:
+                    self._transport.close()
+                    raise err
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
 
