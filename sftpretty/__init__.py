@@ -864,21 +864,18 @@ class Connection(object):
             channel.chown(remotepath, uid=uid, gid=gid)
 
     def close(self):
-        '''Closes the connection and cleans up.'''
+        '''Closes the connection and cleans up the mess.'''
         try:
             # Close the transport.
             if self._transport and self._transport.is_active():
                 self._transport.close()
-                self._transport = None
+            self._transport = None
             # Clean up any loggers
             if self._cnopts.log:
                 # remove lingering handlers if any
                 lgr = getLogger(__name__)
                 if lgr:
                     lgr.handlers = []
-        # Usually happens when a Connection object fails to __init__
-        except AttributeError:
-            self.close()
         except Exception as err:
             raise err
 

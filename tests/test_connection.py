@@ -20,9 +20,10 @@ def test_connection_bad_host():
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            sftp = Connection(**conn(''))
+            sftp = Connection(**conn('127.0.0.2'))
             print(str(e.value))
             print(str(e.type))
+            sftp.close()
 
 
 @SKIP_IF_CI
