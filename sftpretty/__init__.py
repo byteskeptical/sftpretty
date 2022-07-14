@@ -48,15 +48,15 @@ class CnOpts(object):
     :raises HostKeysException:
     '''
     def __init__(self, knownhosts=None):
-        self.log = False
-        self.compression = False
         self.ciphers = None
+        self.compression = False
         self.digests = None
+        self.hostkeys = hostkeys.HostKeys()
         self.key_types = None
         self.kex = None
+        self.log = False
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
-        self.hostkeys = hostkeys.HostKeys()
         try:
             self.hostkeys.load(knownhosts)
         except IOError:
@@ -120,13 +120,13 @@ class Connection(object):
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
                  username=None):
+        self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
         self._set_username(username)
         self._timeout = None
-        # Begin SSH transport
-        self._transport = None
+        # Begin transport
         self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
 
@@ -866,7 +866,7 @@ class Connection(object):
     def close(self):
         '''Closes the connection and cleans up.'''
         try:
-            # Close the SSH Transport.
+            # Close the transport.
             if self._transport and self._transport.is_active():
                 self._transport.close()
                 self._transport = None
@@ -876,6 +876,9 @@ class Connection(object):
                 lgr = getLogger(__name__)
                 if lgr:
                     lgr.handlers = []
+        # Usually happens when a Connection object fails to __init__
+        except AttributeError:
+            self.close()
         except Exception as err:
             raise err
 
