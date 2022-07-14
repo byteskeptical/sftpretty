@@ -1,3 +1,4 @@
+from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
@@ -51,6 +52,7 @@ class CnOpts(object):
         self.compression = False
         self.ciphers = None
         self.digests = None
+        self.key_types = None
         self.kex = None
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
@@ -223,15 +225,19 @@ class Connection(object):
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
 
-            # Set security ciphers if set
+            # Set allowed ciphers
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
                 self._transport.get_security_options().ciphers = ciphers
-            # Set security digests if set
+            # Set connection digests
             if self._cnopts.digests is not None:
                 digests = self._cnopts.digests
                 self._transport.get_security_options().digests = digests
-            # Set security kex if set
+            # Set allowed key types
+            if self._cnopts.key_types is not None:
+                keys = self._cnopts.key_types
+                self._transport.get_security_options().key_types = keys
+            # Set connection kex
             if self._cnopts.kex is not None:
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
@@ -239,14 +245,21 @@ class Connection(object):
             self._transport.start_client(timeout=30.0)
 
             if self._transport.is_active():
-                remote_key = self._transport.get_remote_server_key()
-                log.info((f'{host} Host Key:\n\t'
-                          f'Name: {remote_key.get_name()}\n\t'
-                          f'Fingerprint: {remote_key.get_base64()}\n\t'
-                          f'Size: {remote_key.get_bits():d}'))
+                remote_hostkey = self._transport.get_remote_server_key()
+                remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
+                log.info((f'[{host}] Host Key:\n\t'
+                          f'Name: {remote_hostkey.get_name()}\n\t'
+                          f'Fingerprint: {remote_fingerprint}\n\t'
+                          f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
-                    self._cnopts.get_hostkey(host)
+                    known_hostkey = self._cnopts.get_hostkey(host)
+                    known_fingerprint = hexlify(known_hostkey.get_fingerprint())
+                    log.info(f'Known: {known_fingerprint}')
+                    if known_fingerprint == remote_fingerprint:
+                        log.info(f'{host} key verification: [SUCCESS]')
+                    else:
+                        log.error(f'{host} key verification: [FAILED]')
             else:
                 err = self._transport.get_exception()
                 if err:
@@ -254,6 +267,8 @@ class Connection(object):
                     raise err
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
+        except Exception as err:
+            raise err
 
     def get(self, remotepath, localpath=None, callback=None,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,

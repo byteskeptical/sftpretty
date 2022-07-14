@@ -20,8 +20,9 @@ def test_connection_bad_host():
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            sftp = Connection(' :222', cnopts=cnopts, password='password',
+            sftp = Connection(' ::1:222', cnopts=cnopts, password='password',
                               username='badhost')
+            assert pytest.raises()
             print(str(e.value))
             sftp.close()
 

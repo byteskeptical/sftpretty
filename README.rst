@@ -12,7 +12,7 @@ is a Python3 optimized fork of pysftp with additional features & improvements.
 * More tests
 * Multi-threaded directory transfers
 * Progress notifications
-* Support for digests & kex connection options
+* Support for ciphers, digests, key types & kex connection options
 * Support for ED25519 & ECDSA keys
 * Support for private key passwords
 * Thread-safe connection manager
