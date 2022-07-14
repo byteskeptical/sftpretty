@@ -14,17 +14,14 @@ def test_connection_with(sftpserver):
             assert sftp.listdir() == ['pub', 'read.me']
 
 
-def test_connection_bad_host():
+def test_connection_bad_host(sftpserver):
     '''attempt connection to a non-existing server'''
     with pytest.raises(Exception) as e:
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            sftp = Connection(' ::1:222', cnopts=cnopts, password='password',
-                              username='badhost')
-            assert pytest.raises()
+            sftp = Connection(**conn(sftpserver))
             print(str(e.value))
-            sftp.close()
 
 
 @SKIP_IF_CI

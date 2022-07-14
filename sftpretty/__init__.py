@@ -70,8 +70,12 @@ class CnOpts(object):
                 raise HostKeysException('No host keys found!')
 
     def get_hostkey(self, host):
-        '''Return the matching hostkey to use for verification for the host
-        indicated or raise an SSHException'''
+        '''Return the matching known hostkey to be used for verification or
+        raise an SSHException
+        :param str host:
+            The Hostname or IP of the remote machine.
+        :raises SSHException:
+        '''
         kval = self.hostkeys.lookup(host)
         # None | {key_type: private_key}
         if kval is None:
@@ -82,8 +86,8 @@ class CnOpts(object):
 
 
 class Connection(object):
-    '''Connects and logs into the specified hostname.
-    Arguments that are not given are guessed from the environment.
+    '''Connects and logs into the specified hostname. Arguments that are not
+    given are guessed from the environment.
 
     :param str host:
         The Hostname or IP of the remote machine.
@@ -112,7 +116,6 @@ class Connection(object):
     :raises AuthenticationException:
     :raises PasswordRequiredException:
     :raises HostKeysException:
-
     '''
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
@@ -253,13 +256,12 @@ class Connection(object):
                           f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
-                    known_hostkey = self._cnopts.get_hostkey(host)
-                    known_fingerprint = hexlify(known_hostkey.get_fingerprint())
-                    log.info(f'Known: {known_fingerprint}')
-                    if known_fingerprint == remote_fingerprint:
-                        log.info(f'{host} key verification: [SUCCESS]')
-                    else:
-                        log.error(f'{host} key verification: [FAILED]')
+                    user_hostkey = self._cnopts.get_hostkey(host)
+                    user_fingerprint = hexlify(user_hostkey.get_fingerprint())
+                    log.info(f'Known: {user_fingerprint}')
+                    if user_fingerprint != remote_fingerprint:
+                        raise HostKeysException((f'{host} key verification: '
+                                                 '[FAILED]'))
             else:
                 err = self._transport.get_exception()
                 if err:
@@ -302,7 +304,6 @@ class Connection(object):
         :returns: None
 
         :raises: IOError
-
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
@@ -440,7 +441,6 @@ class Connection(object):
         :returns: None
 
         :raises: Any exception raised by operations will be passed through.
-
         '''
         self.chdir(remotedir)
 
@@ -484,7 +484,6 @@ class Connection(object):
         :returns: (int) the number of bytes written to the opened file object
 
         :raises: Any exception raised by operations will be passed through.
-
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
@@ -726,7 +725,6 @@ class Connection(object):
             (obj) SFTPAttributes containing attributes about the given file
 
         :raises: TypeError, if remotepath not specified, any underlying error
-
         '''
         @retry(exceptions, tires=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
@@ -773,7 +771,6 @@ class Connection(object):
         :returns: (list of str) representing the results of the command
 
         :raises: Any exception raised by command will be passed through.
-
         '''
         @retry(exceptions, backoff=backoff, delay=delay, logger=logger,
                silent=silent, tries=tries)
@@ -821,7 +818,6 @@ class Connection(object):
         :returns: None
 
         :raises: IOError, if path does not exist
-
         '''
         with self._sftp_channel() as channel:
             channel.chdir(remotepath)
@@ -838,7 +834,6 @@ class Connection(object):
         :returns: None
 
         :raises: IOError, if the file doesn't exist
-
         '''
         with self._sftp_channel() as channel:
             channel.chmod(remotepath, mode=int(str(mode), 8))
@@ -854,9 +849,7 @@ class Connection(object):
 
         :returns: None
 
-        :raises:
-            IOError, if you don't have permission or the file doesn't exist
-
+        :raises: IOError, if user lacks permission or if the file doesn't exist
         '''
         with self._sftp_channel() as channel:
             if uid is None or gid is None:
@@ -884,8 +877,8 @@ class Connection(object):
                 lgr = getLogger(__name__)
                 if lgr:
                     lgr.handlers = []
-        except AttributeError:
-            pass
+        except Exception as err:
+            raise err 
 
     def exists(self, remotepath):
         '''Test whether a remotepath exists.
@@ -893,7 +886,6 @@ class Connection(object):
         :param str remotepath: the remote path to verify
 
         :returns: (bool) True, if remotepath exists, else False
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -910,7 +902,6 @@ class Connection(object):
         '''Return the current working directory on the remote.
 
         :returns: (str) the current remote path. None, if not set.
-
         '''
         with self._sftp_channel() as channel:
             cwd = channel.getcwd()
@@ -923,7 +914,6 @@ class Connection(object):
         :param str remotepath: the path to test
 
         :returns: (bool)
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -940,7 +930,6 @@ class Connection(object):
         :param str remotepath: the path to test
 
         :returns: (bool)
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -958,7 +947,6 @@ class Connection(object):
         :param str remotepath: the remote path to verify
 
         :returns: (bool), True, if lexists, else False
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -995,7 +983,6 @@ class Connection(object):
         :param str remotepath: path to list on the server
 
         :returns: (list of SFTPAttributes), sorted
-
         '''
         with self._sftp_channel() as channel:
             directory = sorted(channel.listdir_attr(remotepath),
@@ -1010,7 +997,6 @@ class Connection(object):
         :param str remotepath: path to stat
 
         :returns: (obj) SFTPAttributes object
-
         '''
         with self._sftp_channel() as channel:
             lstat = channel.lstat(remotepath)
@@ -1027,7 +1013,6 @@ class Connection(object):
             int representation of octal mode for directory
 
         :returns: None
-
         '''
         with self._sftp_channel() as channel:
             channel.mkdir(remotepath, mode=int(str(mode), 8))
@@ -1046,7 +1031,6 @@ class Connection(object):
         :returns: None
 
         :raises: OSError
-
         '''
         try:
             if self.isdir(remotedir):
@@ -1095,7 +1079,6 @@ class Connection(object):
         :returns: (obj) SFTPFile, a handle the remote open file
 
         :raises: IOError, if the file could not be opened.
-
         '''
         with self._sftp_channel(keepalive=True) as channel:
             flo = channel.open(remote_file, mode=mode, bufsize=bufsize)
@@ -1109,7 +1092,6 @@ class Connection(object):
         :param str remotelink: remote path of the symlink
 
         :return: (str) absolute path to target
-
         '''
         with self._sftp_channel() as channel:
             link_destination = channel.normalize(channel.readlink(remotelink))
@@ -1135,7 +1117,6 @@ class Connection(object):
         :returns: None
 
         :raises: Exception
-
         '''
         try:
             localdir = Path(localdir).expanduser().as_posix()
@@ -1180,7 +1161,6 @@ class Connection(object):
         :returns: None
 
         :raises: IOError
-
         '''
         with self._sftp_channel() as channel:
             channel.posix_rename(remote_src, remote_dest)
@@ -1191,7 +1171,6 @@ class Connection(object):
         :param str remotepath: the remote directory to remove
 
         :returns: None
-
         '''
         with self._sftp_channel() as channel:
             channel.rmdir(remotepath)
@@ -1202,7 +1181,6 @@ class Connection(object):
         :param str remotepath: path to stat
 
         :returns: (obj) SFTPAttributes
-
         '''
         with self._sftp_channel() as channel:
             stat = channel.stat(remotepath)
@@ -1217,10 +1195,7 @@ class Connection(object):
 
         :returns: None
 
-        :raises:
-            any underlying error, IOError if something already exists at
-            remote_dest
-
+        :raises: any underlying error, IOError if remote_dest already exists
         '''
         with self._sftp_channel() as channel:
             channel.symlink(remote_src, remote_dest)
@@ -1236,7 +1211,6 @@ class Connection(object):
         :returns: (int) new size of file
 
         :raises: IOError, if file does not exist
-
         '''
         with self._sftp_channel() as channel:
             channel.truncate(remotepath, size)
@@ -1251,7 +1225,6 @@ class Connection(object):
         :returns:
             (tuple of  str) currently used ciphers (local_cipher,
             remote_cipher)
-
         '''
         return self._transport.local_cipher, self._transport.remote_cipher
 
@@ -1262,7 +1235,6 @@ class Connection(object):
         :returns:
             (tuple of  str) currently used compression (local_compression,
             remote_compression)
-
         '''
         local_compression = self._transport.local_compression
         remote_compression = self._transport.remote_compression
@@ -1274,7 +1246,6 @@ class Connection(object):
         '''return the name of the file used for logging or False it not logging
 
         :returns: (str)logfile or (bool) False
-
         '''
         return self._cnopts.log
 
@@ -1283,7 +1254,6 @@ class Connection(object):
         '''return the current working directory
 
         :returns: (str) current working directory
-
         '''
         with self._sftp_channel() as channel:
             pwd = channel.normalize('.')
@@ -1303,7 +1273,6 @@ class Connection(object):
             (obj) security preferences of the ssh transport. These are tuples
             of acceptable `.ciphers`, `.digests`, `.key_types`, and key
             exchange algorithms `.kex`, listed in order of preference.
-
         '''
         return self._transport.get_security_options()
 
@@ -1318,19 +1287,15 @@ class Connection(object):
         :params: None
 
         :returns: (obj) the active SFTPClient object
-
         '''
         with self._sftp_channel(keepalive=True) as channel:
             return channel
 
     @property
     def timeout(self):
-        ''' (float|None) *Default: None* -
-            get or set the underlying socket timeout for pending read/write
-            ops.
+        '''Get or set the underlying socket timeout for pending read/write ops.
 
-        :returns:
-            (float|None) seconds to wait for a pending read/write operation
+        :returns: (float|None) seconds to wait for pending read/write operation
             before raising socket.timeout, or None for no timeout
         '''
         with self._sftp_channel() as channel:
