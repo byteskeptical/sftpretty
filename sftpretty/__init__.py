@@ -872,13 +872,12 @@ class Connection(object):
                 self._transport = None
             # Clean up any loggers
             if self._cnopts.log:
-                # if handlers are active they hang around until the app Exits
-                # this closes and removes the handlers if in use at close
+                # remove lingering handlers if any
                 lgr = getLogger(__name__)
                 if lgr:
                     lgr.handlers = []
         except Exception as err:
-            raise err 
+            raise err
 
     def exists(self, remotepath):
         '''Test whether a remotepath exists.
