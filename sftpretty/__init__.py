@@ -177,7 +177,7 @@ class Connection(object):
             raise CredentialException('No password or key specified.')
 
     def _set_logging(self):
-        '''Set logging for connection'''
+        '''Set logging for connection'
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.

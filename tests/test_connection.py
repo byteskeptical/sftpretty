@@ -20,7 +20,8 @@ def test_connection_bad_host():
         with pytest.raises(UserWarning):
             cnopts = CnOpts()
             cnopts.hostkeys = None
-            sftp = Connection('fe80::1112:bcde:789a:1234%eth0')
+            sftp = Connection('1234%eth0')
+            sftp.listdir()
             sftp.close()
 
 
