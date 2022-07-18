@@ -177,7 +177,7 @@ class Connection(object):
             raise CredentialException('No password or key specified.')
 
     def _set_logging(self):
-        '''Set logging for connection'
+        '''Set logging for connection'''
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
@@ -333,7 +333,7 @@ class Connection(object):
     def get_d(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
               delay=1, logger=log, silent=False):
-        '''get the contents of remotedir and write to locadir. (non-recursive)
+        '''Get the contents of remotedir and write to locadir. (non-recursive)
 
         :param str remotedir: the remote directory to copy from (source)
         :param str localdir: the local directory to copy to (target)
@@ -414,7 +414,7 @@ class Connection(object):
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
               delay=1, logger=log, silent=False):
-        '''recursively copy remotedir structure to localdir
+        '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: the remote directory to recursively copy from
         :param str localdir: the local directory to recursively copy to
@@ -535,7 +535,6 @@ class Connection(object):
 
         :raises IOError: if remotepath doesn't exist
         :raises OSError: if localpath doesn't exist
-
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
@@ -970,7 +969,7 @@ class Connection(object):
         return directory
 
     def listdir_attr(self, remotepath='.'):
-        '''return a list of SFTPAttribute objects of the files/directories for
+        '''Return a list of SFTPAttribute objects of the files/directories for
         the given remote path. The list is in arbitrary order. It does not
         include the special entries '.' and '..'.
 
@@ -990,7 +989,7 @@ class Connection(object):
         return directory
 
     def lstat(self, remotepath):
-        '''return information about file/directory for the given remote path,
+        '''Return information about file/directory for the given remote path,
         without following symbolic links. Otherwise, the same as .stat()
 
         :param str remotepath: path to stat
@@ -1187,7 +1186,7 @@ class Connection(object):
         return stat
 
     def symlink(self, remote_src, remote_dest):
-        '''create a symlink for a remote file on the server
+        '''Create a symlink for a remote file on the server
 
         :param str remote_src: path of original file
         :param str remote_dest: path of the created symlink
@@ -1231,9 +1230,8 @@ class Connection(object):
     def active_compression(self):
         '''Get tuple of currently used local and remote compression.
 
-        :returns:
-            (tuple of  str) currently used compression (local_compression,
-            remote_compression)
+        :returns: (tuple of str) currently used compression
+            (local_compression, remote_compression)
         '''
         local_compression = self._transport.local_compression
         remote_compression = self._transport.remote_compression
@@ -1242,15 +1240,15 @@ class Connection(object):
 
     @property
     def logfile(self):
-        '''return the name of the file used for logging or False it not logging
+        '''Return the name of the file used for logging or False it not logging
 
-        :returns: (str)logfile or (bool) False
+        :returns: (str) logfile or (bool) False
         '''
         return self._cnopts.log
 
     @property
     def pwd(self):
-        '''return the current working directory
+        '''Return the current working directory
 
         :returns: (str) current working directory
         '''
@@ -1261,12 +1259,12 @@ class Connection(object):
 
     @property
     def remote_server_key(self):
-        '''return the remote server's key'''
+        '''Return the remote server's key'''
         return self._transport.get_remote_server_key()
 
     @property
     def security_options(self):
-        '''return the available security options recognized by paramiko.
+        '''Return the available security options recognized by paramiko.
 
         :returns:
             (obj) security preferences of the ssh transport. These are tuples
@@ -1305,7 +1303,7 @@ class Connection(object):
 
     @timeout.setter
     def timeout(self, val):
-        '''setter for timeout'''
+        '''Setter for timeout'''
         self._timeout = val
 
     def __del__(self):
@@ -1316,4 +1314,5 @@ class Connection(object):
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
+        '''GTFO'''
         self.close()
