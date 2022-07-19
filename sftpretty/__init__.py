@@ -1,4 +1,3 @@
-from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
@@ -13,7 +12,7 @@ from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
-from socket import gaierror, socket, AF_INET, SOCK_STREAM
+from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
@@ -221,12 +220,9 @@ class Connection(object):
                 _channel.close()
 
     def _start_transport(self, host, port):
-        '''Start the transport and set the ciphers if specified.'''
-        sock = socket(AF_INET, SOCK_STREAM)
-        sock.settimeout(10)
+        '''Start the transport and set connection options if specified.'''
         try:
-            sock.connect((host, port))
-            self._transport = Transport(sock)
+            self._transport = Transport(f'{host}:{port}')
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
@@ -252,7 +248,8 @@ class Connection(object):
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
-                remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
+                remote_fingerprint = remote_hostkey.get_fingerprint().decode(
+                                         'utf8')
                 log.info((f'[{host}] Host Key:\n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
@@ -260,8 +257,9 @@ class Connection(object):
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)
-                    user_fingerprint = hexlify(user_hostkey.get_fingerprint())
-                    log.info(f'Known: {user_fingerprint}')
+                    user_fingerprint = user_hostkey.get_fingerprint().decode(
+                                           'utf8')
+                    log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
                                                  '[FAILED]'))
