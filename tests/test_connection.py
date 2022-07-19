@@ -18,9 +18,7 @@ def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
     with pytest.raises(Exception):
         with pytest.raises(UserWarning):
-#            cnopts = CnOpts()
-#            cnopts.hostkeys = None
-            sftp = Connection('1234%eth0')
+            sftp = Connection(('fe80::1234','%eth0'), cnopts=CnOpts())
             sftp.listdir()
             sftp.close()
 
