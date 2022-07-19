@@ -13,7 +13,7 @@ from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
-from socket import gaierror
+from socket import gaierror, socket, AF_INET, SOCK_STREAM
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
@@ -222,8 +222,11 @@ class Connection(object):
 
     def _start_transport(self, host, port):
         '''Start the transport and set the ciphers if specified.'''
+        sock = socket(AF_INET, SOCK_STREAM)
+        sock.settimeout(10)
         try:
-            self._transport = Transport((host, port))
+            sock.connect((host, port))
+            self._transport = Transport(sock)
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
@@ -245,7 +248,7 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.start_client(timeout=30.0)
+            self._transport.start_client(timeout=10.0)
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
