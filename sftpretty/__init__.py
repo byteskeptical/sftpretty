@@ -58,8 +58,8 @@ class CnOpts(object):
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
         try:
             self.hostkeys.load(knownhosts)
-        except IOError:
-            # Can't find known_hosts in the standard location
+        except FileNotFoundError:
+            # Can't find known_hosts in the default unix location, windows has none
             raise UserWarning((f'No file or host key found in [{knownhosts}]. '
                                'You will need to explicitly load host keys '
                                '(cnopts.hostkeys.load(filename)) or disable '
@@ -88,26 +88,19 @@ class Connection(object):
     '''Connects and logs into the specified hostname. Arguments that are not
     given are guessed from the environment.
 
-    :param str host:
-        The Hostname or IP of the remote machine.
-    :param str|None username: *Default: None* -
-        Your username at the remote machine.
-    :param str|obj|None private_key: *Default: None* -
-        path to private key file(str) or paramiko.AgentKey
-    :param str|None password: *Default: None* -
-        Your password at the remote machine.
-    :param int port: *Default: 22* -
-        The SSH port of the remote machine.
-    :param str|None private_key_pass: *Default: None* -
-        password to use, if private_key is encrypted.
-    :param list|None ciphers: *Deprecated* -
-        see ``sftpretty.CnOpts`` and ``cnopts`` parameter
-    :param bool|str log: *Deprecated* -
-        see ``sftpretty.CnOpts`` and ``cnopts`` parameter
-    :param None|CnOpts cnopts: *Default: None* - extra connection options
+    :param str host: *Required* - Hostname or address of the remote machine.
+    :param None|CnOpts cnopts: *Default: None* - Extended connection options
         set in a CnOpts object.
-    :param str|None default_path: *Default: None* -
-        set a default path upon connection.
+    :param str|None default_path: *Default: None* - Set a default working
+        directory upon connection.
+    :param str|None password: *Default: None* - Credential for remote machine.
+    :param int port: *Default: 22* - SFTP server port of the remote machine.
+    :param str|obj|None private_key: *Default: None* - Path to private key
+        file(str) or paramiko.AgentKey object
+    :param str|None private_key_pass: *Default: None* - Password to use on
+        encrypted private_key.
+    :param int|None timeout: *Default: None* - Set channel timeout.
+    :param str|None username: *Default: None* - User for remote machine.
     :returns: (obj) connection to the requested host
     :raises ConnectionException:
     :raises CredentialException:
@@ -118,13 +111,13 @@ class Connection(object):
     '''
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
-                 username=None):
+                 timeout=None, username=None):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
         self._set_username(username)
-        self._timeout = None
+        self._timeout = timeout
         # Begin transport
         self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
@@ -278,12 +271,12 @@ class Connection(object):
             delay=1, logger=log, silent=False):
         '''Copies a file between the remote host and the local host.
 
-        :param str remotepath: the remote path and filename, source
+        :param str remotepath: The remote path and filename, source
         :param str localpath:
-            the local path and filename to copy, destination. If not specified,
+            The local path and filename to copy, destination. If not specified,
             file is copied to local current working directory
         :param callable callback:
-            optional callback function (form: ``func(int, int)``) that accepts
+            Optional callback function (form: ``func(int, int)``) that accepts
             the bytes transferred so far and the total bytes to be transferred.
         :param bool preserve_mtime: *Default: False*
             make the modification time(st_mtime) on the
@@ -336,15 +329,15 @@ class Connection(object):
               delay=1, logger=log, silent=False):
         '''Get the contents of remotedir and write to locadir. (non-recursive)
 
-        :param str remotedir: the remote directory to copy from (source)
-        :param str localdir: the local directory to copy to (target)
+        :param str remotedir: The remote directory to copy from (source)
+        :param str localdir: The local directory to copy to (target)
         :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
+            Optional callback function (form: ``func(int, int``)) that accepts
             the bytes transferred so far and the total bytes to be transferred.
-        :param str pattern: filter applied to filenames to transfer only subset
+        :param str pattern: Filter applied to filenames to transfer only subset
             of files in a directory.
         :param bool preserve_mtime: *Default: False*
-            preserve modification time on files
+            Preserve modification time on files
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -417,12 +410,12 @@ class Connection(object):
               delay=1, logger=log, silent=False):
         '''Recursively copy remotedir structure to localdir
 
-        :param str remotedir: the remote directory to recursively copy from
-        :param str localdir: the local directory to recursively copy to
+        :param str remotedir: The remote directory to recursively copy from
+        :param str localdir: The local directory to recursively copy to
         :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
+            Optional callback function (form: ``func(int, int``)) that accepts
             the bytes transferred so far and the total bytes to be transferred.
-        :param str pattern: filter applied to filenames to transfer only subset
+        :param str pattern: Filter applied to filenames to transfer only subset
             of files in a directory.
         :param bool preserve_mtime: *Default: False*
             preserve modification time on files
@@ -505,14 +498,14 @@ class Connection(object):
             delay=1, logger=log, silent=False):
         '''Copies a file between the local host and the remote host.
 
-        :param str localpath: the local path and filename
+        :param str localpath: The local path and filename
         :param str remotepath:
-            the remote path, else the remote :attr:`.pwd` and filename is used.
+            The remote path, else the remote :attr:`.pwd` and filename is used.
         :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
+            Optional callback function (form: ``func(int, int``)) that accepts
             the bytes transferred so far and the total bytes to be transferred.
         :param bool confirm:
-            whether to do a stat() on the file afterwards to confirm the file
+            Whether to do a stat() on the file afterwards to confirm the file
             size
         :param bool preserve_mtime: *Default: False*
             make the modification time(st_mtime) on the
