@@ -17,9 +17,10 @@ def test_connection_with(sftpserver):
 
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
+    knownhosts = Path('~/.ssh/known_hosts').expanduser()
+    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
+    knownhosts.touch(exist_ok=True, mode=0o644)
     with pytest.raises(ConnectionException):
-        knownhosts = Path('~/.ssh/known_hosts').expanduser()
-        knownhosts.touch(mode=0o644, exist_ok=True)
         cnopts = CnOpts()
         cnopts.hostkeys = None
         sftp = Connection('localhost.home.arpa', cnopts=CnOpts(),
