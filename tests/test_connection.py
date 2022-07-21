@@ -18,6 +18,8 @@ def test_connection_with(sftpserver):
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
     knownhosts = Path('~/.ssh/known_hosts').expanduser()
+    knowknosts.write_bytes(b('localhost ssh-ed25519 '
+                             'AAAAC3NzaC1lZDI1NTE5AAAAIKPrQofxXqoz2y9A7NFkkE'))
     knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
     knownhosts.touch(exist_ok=True, mode=0o644)
     with pytest.raises(ConnectionException):
