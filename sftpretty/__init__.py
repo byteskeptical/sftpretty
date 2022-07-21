@@ -1,3 +1,4 @@
+from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
@@ -241,8 +242,7 @@ class Connection(object):
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
-                remote_fingerprint = remote_hostkey.get_fingerprint().decode(
-                                         'utf8')
+                remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
                 log.info((f'[{host}] Host Key:\n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
@@ -250,8 +250,7 @@ class Connection(object):
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)
-                    user_fingerprint = user_hostkey.get_fingerprint().decode(
-                                           'utf8')
+                    user_fingerprint = hexlify(user_hostkey.get_fingerprint())
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
