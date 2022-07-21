@@ -99,7 +99,7 @@ class Connection(object):
         file(str) or paramiko.AgentKey object
     :param str|None private_key_pass: *Default: None* - Password to use on
         encrypted private_key.
-    :param int|None timeout: *Default: None* - Set channel timeout.
+    :param float|None timeout: *Default: None* - Set channel timeout.
     :param str|None username: *Default: None* - User for remote machine.
     :returns: (obj) connection to the requested host
     :raises ConnectionException:
@@ -215,7 +215,7 @@ class Connection(object):
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
         try:
-            self._transport = Transport(f'{host}:{port}')
+            self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
@@ -237,7 +237,7 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
-            self._transport.start_client(timeout=10.0)
+            self._transport.start_client(timeout=self._timeout)
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
