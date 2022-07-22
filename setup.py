@@ -32,7 +32,7 @@ setup(
     keywords='scp sftp ssh ftp',
     url='https://github.com/byteskeptical/sftpretty',
     long_description=LONG_DESCRIPTION,
-    long_description_content_type='text/rst',
+    long_description_content_type='text/x-rst',
     platforms=['any'],
     download_url='https://pypi.python.org/pypi/sftpretty',
     classifiers=[
