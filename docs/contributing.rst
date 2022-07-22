@@ -6,7 +6,7 @@ Bug reports or feature enhancements that include a test are given preferential t
 
 Code
 -----
-    1. Fork the repository `sftpretty <https://github.com/bornwitbugs/sftpretty>`_
+    1. Fork the repository `sftpretty <https://github.com/byteskeptical/sftpretty>`_
     2. Install supporting software packages and sftpretty in --editable mode
       a. Make a virtualenv, clone the repos, install the deps from pip install -r requirements-dev.txt
       b. Install sftpretty in editable mode, pip install -e .
@@ -23,7 +23,7 @@ Using sphinx to build the docs. Make html is your friend, see docstrings for det
 
 Bug Reports
 -----------
-If you encounter a bug or some surprising behavior, please file an issue on our `tracker <https://github.com/bornwitbugs/sftpretty/issues>`_
+If you encounter a bug or some surprising behavior, please file an issue on our `tracker <https://github.com/byteskeptical/sftpretty/issues>`_
 
 Issue Priorities
 ----------------

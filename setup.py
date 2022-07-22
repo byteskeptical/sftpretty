@@ -14,7 +14,7 @@ with open('docs/changes.rst') as h_rst:
     BUF = BUF.replace('$', '``')        # restore existing code markers
 LONG_DESCRIPTION += BUF
 
-DESCRIPTION = "Making SFTP great AGAIN!"
+DESCRIPTION = "Pretty secure file transfer made easy."
 
 setup(
     name='sftpretty',
@@ -32,6 +32,7 @@ setup(
     keywords='scp sftp ssh ftp',
     url='https://github.com/byteskeptical/sftpretty',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/rst',
     platforms=['any'],
     download_url='https://pypi.python.org/pypi/sftpretty',
     classifiers=[

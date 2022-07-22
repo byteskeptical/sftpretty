@@ -3,13 +3,13 @@ Cook Book
 
 While in many ways, sftpretty is just a thin wrapper over paramiko's SFTPClient,
 there are a number of ways that we make it more productive and easier to
-accomplish common, higher-level tasks.  The following snippets show where we
-add value to this great module.  See the :doc:`sftpretty` docs for a complete
+accomplish common, higher-level tasks. The following snippets show where we
+add value to this great module. See the :doc:`sftpretty` docs for a complete
 listing.
 
 :meth:`sftpretty.Connection`
 -------------------------
-The Connection object is the base of sftpretty.  It supports connections via
+The Connection object is the base of sftpretty. It supports connections via
 username and password.
 
 .. code-block:: python
@@ -45,6 +45,15 @@ Want to use a DSA, ECDSA, ED25519, or RSA key pair, that is simple too.
 
 If you key is password protected, just add ``private_key_pass`` to the argument list.
 
+.. code-block:: python
+
+    import sftpretty
+    with sftpretty.Connection('hostname', username='me', private_key='/path/to/keyfile',
+                               private_key_pass='keyfile pass') as sftp:
+        #
+        # ... do sftp operations
+        #
+
 How about a ``paramiko.AgentKey`` ? no problem, just set the private_key equal to it.
 
 .. code-block:: python
@@ -65,8 +74,8 @@ object. These options are advanced and not applicable to most uses, because of
 this they have been segmented from the Connection parameter list and made
 available via CnOpts obj/parameter.
 
-Host Key checking is enabled by default.  It will use ``~/.ssh/known_hosts`` by
-default.  If you wish to disable host key checking (NOT ADVISED) you will need
+Host Key checking is enabled by default. It will use ``~/.ssh/known_hosts`` by
+default. If you wish to disable host key checking (NOT ADVISED) you will need
 to modify the default CnOpts and set the .hostkeys to None.
 
 .. code-block:: python
@@ -105,15 +114,16 @@ you can use tilde notation in your pathing.
 
 OTHER AVAILABLE CONNECTION OPTIONS via CnOpts:
 
-  * .log - replaces the log parameter in the Connection method
   * .compression - False (Default) no compression, True - enable compression 
   * .ciphers - replaces the ciphers parameter in the Connection method.
   * .digests - replaces the digests parameter in the Connection method.
   * .kex - replaces the kex parameter in the Connection method.
+  * .key_types - replaces the key types parameter in the Connection method.
+  * .log - replaces the log parameter in the Connection method
 
 Here is a common scenario, you have your connection information stored in a
 persistence mechanism, like `yamjam <http://yamjam.rtfd.org/>`_ and when you access
-it, it is returned in dictionary form.  ``{'host':'myhost', username:'me', ...}``
+it, it is returned in dictionary form. ``{'host':'myhost', username:'me', ...}``
 Just send the dict into the connection object like so:
 
 .. code-block:: python
@@ -431,7 +441,7 @@ to grab whole directories in parallel.
 :attr:`sftpretty.localtree`
 -----------------------
 Is similar to :meth:`pysftp.Connection.remotetree` except that it walks a **local**
-directory structure.  It has the same output and likewise needs a user-supplied
+directory structure. It has the same output and likewise needs a user-supplied
 container (dictionary) to store results.
 
 .. code-block:: python
@@ -448,7 +458,7 @@ container (dictionary) to store results.
 :attr:`sftpretty.Connection.sftp_client`
 -------------------------------------
 Don't like how we have over-ridden or modified a paramiko method? Use this
-attribute to get at paramiko's original version.  Remember, our goal is to
+attribute to get at paramiko's original version. Remember, our goal is to
 augment not supplant paramiko.
 
 
@@ -457,13 +467,13 @@ Remarks
 We think paramiko is a great python library and it is the backbone of sftpretty.
 The methods sftpretty has created are abstractions that serve a programmer's
 productivity by encapsulating many of the higher function use cases of
-interacting with SFTP.  Instead of writing your own code to walk directories
+interacting with SFTP. Instead of writing your own code to walk directories
 and call get and put, dealing with not only paramiko but Python's own ``os``
 and ``stat`` modules and writing tests *(many code snippets on the net are
 incomplete and don't account for edge cases)* sftpretty supplies a complete
-library for dealing with all three.  Leaving you to focus on your primary task.
+library for dealing with all three. Leaving you to focus on your primary task.
 
 Paramiko also tries very hard to stay true to Python's ``os`` module, which
-means sometimes, things are weird or a bit too low level.  We think paramiko's
+means sometimes, things are weird or a bit too low level. We think paramiko's
 goals are good and don't believe they should change. Those changes are for an
 abstraction library like sftpretty.

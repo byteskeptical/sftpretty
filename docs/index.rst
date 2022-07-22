@@ -12,7 +12,7 @@ is a Python3 optimized fork of pysftp with additional features & improvements.
 * More tests
 * Multi-threaded directory transfers
 * Progress notifications
-* Support for digests & kex connection options
+* Support for ciphers, digests, key types & kex connection options
 * Support for ED25519 & ECDSA keys
 * Support for private key passwords
 * Thread-safe connection manager
@@ -76,6 +76,14 @@ Additional Information
 * Documentation: https://sftpretty.rtfd.org
 * License: BSD
 
+Requirements
+------------
+paramiko >= 1.17.0
+
+Supports
+--------
+Tested on Python 3.6, 3.7, 3.8, 3.9
+
 Contents
 --------
 
@@ -87,18 +95,6 @@ Contents
    changes
    contributing
    authors
-
-Requirements
-------------
-paramiko >= 1.17.0
-
-Supports
---------
-Tested on Python 3.6, 3.7, 3.8, 3.9
-
-.. image:: https://travis-ci.org/byteskeptical/sftpretty.svg?branch=master
-    :target: https://travis-ci.org/byteskeptical/sftpretty
-
 
 Indices & Tables
 ================
