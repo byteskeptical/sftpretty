@@ -568,7 +568,7 @@ class Connection(object):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
-        :param str remotedir: The remote location to save directory. 
+        :param str remotedir: The remote location to save directory.
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
