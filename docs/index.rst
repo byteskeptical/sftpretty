@@ -84,6 +84,18 @@ Supports
 --------
 Tested on Python 3.6, 3.7, 3.8, 3.9
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 2
+
+   cookbook
+   sftpretty
+   changes
+   contributing
+   authors
+
 Indices & Tables
 ================
 
