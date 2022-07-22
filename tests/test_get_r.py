@@ -10,7 +10,7 @@ def test_get_r(sftpserver):
     '''test the get_r for remotepath is pwd '.' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
 
             local_tree = {}
@@ -37,7 +37,7 @@ def test_get_r_pwd(sftpserver):
     '''test the get_r for remotepath is pwd '/pub/foo2' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('pub/foo2', localpath)
 
             local_tree = {}
@@ -47,8 +47,8 @@ def test_get_r_pwd(sftpserver):
             local_cwd = Path(localpath).joinpath(
                              remote_cwd.lstrip('/')).as_posix()
 
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
             localtree(local_tree, local_cwd, localpath)
+            sftp.remotetree(remote_tree, remote_cwd, localpath)
 
             localdirs = sorted([localdir.replace(localpath, '')
                                 for localdir in local_tree.keys()])
@@ -65,7 +65,7 @@ def test_get_r_pathed(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo2')
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('./bar1', localpath)
 
             local_tree = {}
@@ -75,8 +75,8 @@ def test_get_r_pathed(sftpserver):
             local_cwd = Path(localpath).joinpath(
                              remote_cwd.lstrip('/')).as_posix()
 
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
             localtree(local_tree, local_cwd, localpath)
+            sftp.remotetree(remote_tree, remote_cwd, localpath)
 
             actual = hash(Path(local_cwd).joinpath('bar1/bar1.txt').as_posix())
             expected = ('a69f73cca23a9ac5c8b567dc185a756e97c982164fe258'
@@ -94,7 +94,7 @@ def test_get_r_cdd(sftpserver):
     '''test the get_r for chdir('pub/foo2')'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 
@@ -105,8 +105,8 @@ def test_get_r_cdd(sftpserver):
             local_cwd = Path(localpath).joinpath(
                              remote_cwd.lstrip('/')).as_posix()
 
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
             localtree(local_tree, local_cwd, localpath)
+            sftp.remotetree(remote_tree, remote_cwd, localpath)
 
             localdirs = sorted([localdir.replace(localpath, '')
                                 for localdir in local_tree.keys()])

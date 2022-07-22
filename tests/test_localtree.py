@@ -1,6 +1,7 @@
 '''test sftpretty.localtree'''
 
 from common import conn, rmdir, VFS
+from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
@@ -9,13 +10,13 @@ def test_localtree(sftpserver):
     '''test the localtree function, with recurse'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, '/')
+            localtree(directories, localpath + cwd, Path(localpath).anchor)
 
             dkeys = [f'{localpath}/home/test',
                      f'{localpath}/home/test/pub',
@@ -33,22 +34,23 @@ def test_localtree(sftpserver):
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
 
-            # cleanup local
-            rmdir(localpath)
+    # cleanup local
+    rmdir(localpath)
 
 
 def test_localtree_no_recurse(sftpserver):
     '''test the localtree function, without recursing'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
             directories = {}
 
-            localtree(directories, localpath + cwd, '/', recurse=False)
+            localtree(directories, localpath + cwd, Path(localpath).anchor,
+                      recurse=False)
 
             dkeys = [f'{localpath}/home/test/pub/foo2']
 
@@ -58,5 +60,5 @@ def test_localtree_no_recurse(sftpserver):
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
 
-            # cleanup local
-            rmdir(localpath)
+    # cleanup local
+    rmdir(localpath)

@@ -18,7 +18,7 @@ DESCRIPTION = "Making SFTP great AGAIN!"
 
 setup(
     name='sftpretty',
-    version='1.0.0',
+    version='1.0.1',
 
     packages=['sftpretty', ],
 
@@ -29,7 +29,7 @@ setup(
     author_email='40208858+byteskeptical@users.noreply.github.com',
     description=DESCRIPTION,
     license='BSD',
-    keywords='sftp ssh ftp internet',
+    keywords='scp sftp ssh ftp',
     url='https://github.com/byteskeptical/sftpretty',
     long_description=LONG_DESCRIPTION,
     platforms=['any'],
@@ -44,5 +44,4 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
-
 )

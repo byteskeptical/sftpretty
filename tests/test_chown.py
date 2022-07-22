@@ -9,7 +9,7 @@ from pathlib import Path
 @SKIP_IF_CI
 def test_chown_uid(lsftp):
     '''test changing just the uid'''
-    with tempfile_containing('contents') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
         uid = org_attrs.st_uid  # - 1
@@ -23,7 +23,7 @@ def test_chown_uid(lsftp):
 @SKIP_IF_CI
 def test_chown_gid(lsftp):
     '''test changing just the gid'''
-    with tempfile_containing('contents') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
         gid = org_attrs.st_gid  # - 1
@@ -37,7 +37,7 @@ def test_chown_gid(lsftp):
 @SKIP_IF_CI
 def test_chown_none(lsftp):
     '''call .chown with no gid or uid specified'''
-    with tempfile_containing('contents') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
         lsftp.chown(base_fname)

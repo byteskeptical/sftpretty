@@ -5,6 +5,7 @@ import pytest
 from common import conn, VFS
 from paramiko.hostkeys import HostKeys
 from paramiko.rsakey import RSAKey
+from pathlib import Path
 from sftpretty import CnOpts, Connection, HostKeysException, SSHException
 
 
@@ -24,14 +25,18 @@ def test_remote_server_key(sftpserver):
 
 def test_cnopts_no_knownhosts():
     '''test setting knownhosts to a non-existant file'''
-    with pytest.raises(UserWarning):     # pylint:disable=e1101
+    with pytest.raises(UserWarning):
         CnOpts(knownhosts='i-m-not-there')
 
 
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
     with pytest.raises(HostKeysException):
-        CnOpts(knownhosts='pytest.ini')
+        with pytest.raises(UserWarning):
+            knownhosts = Path('~/knownhosts').expanduser().as_posix()
+            Path(knownhosts).touch(mode=0o600)
+            CnOpts(knownhosts=knownhosts)
+            Path(knownhosts).unlink()
 
 
 def test_hostkey_not_found():

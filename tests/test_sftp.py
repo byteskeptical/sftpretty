@@ -47,7 +47,7 @@ def test_mkdir_p(lsftp):
 def test_symlink(lsftp):
     '''test symlink creation'''
     rdest = '/home/test/honey-boo-boo'
-    with tempfile_containing(contents=8192*'*') as fname:
+    with tempfile_containing() as fname:
         lsftp.put(fname)
         lsftp.symlink(fname, rdest)
         rslt = lsftp.lstat(rdest)
@@ -71,7 +71,7 @@ def test_exists(sftpserver):
 @SKIP_IF_CI
 def test_lexists(lsftp):
     '''test .lexists() functionality'''
-    with tempfile_containing(contents='yup') as fname:
+    with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.put(fname)
         # rfile = '/home/test/readme.txt'

@@ -19,7 +19,7 @@ def test_chmod_not_exist(sftpserver):
 def test_chmod_simple(lsftp):
     '''test basic chmod with octal mode represented by an int'''
     new_mode = 744      # user=rwx g=r o=r
-    with tempfile_containing('') as fname:
+    with tempfile_containing(contents='') as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
         lsftp.chmod(base_fname, new_mode)

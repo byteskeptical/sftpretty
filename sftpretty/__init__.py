@@ -1,12 +1,14 @@
+from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
 from logging import (basicConfig, getLogger,
-                     DEBUG, debug, ERROR, error, INFO, info)
+                     DEBUG, debug, ERROR, error, INFO, info, WARNING, warning)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport, util,
-                      AuthenticationException, SSHException,
-                      AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+                      AuthenticationException, PasswordRequiredException,
+                      SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
+                      RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
@@ -16,7 +18,6 @@ from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
-# pylint: disable = R0913,C0302
 
 basicConfig(level=INFO)
 log = getLogger(__name__)
@@ -25,40 +26,42 @@ log = getLogger(__name__)
 class CnOpts(object):
     '''additional connection options beyond authentication
 
-    :ivar bool|str log: initial value: False -
-        log connection/handshake details? If set to True,
-        sftpretty creates a temporary file and logs to that.  If set to a valid
-        path and filename, sftpretty logs to that.  The name of the logfile can
-        be found at  ``.logfile``
+    :ivar bool|str log: initial value: False - Log connection details. If set
+        to True, creates a temporary file used to capture logs. If set to an
+        existing filepath, logs will be appended.
     :ivar bool compression: initial value: False - Enables compression on the
         transport, if set to True.
-    :ivar list|None ciphers: initial value: None -
-        List of ciphers to use in order.
-    :ivar list|None digests: initial value: None -
+    :ivar list|None ciphers: initial value: None - Ordered list of allowed
+        ciphers to use for connection.
+    :ivar list|None digests: initial value: None - Ordered list of preferred
+        digests to use for connection.
         List of digests to use in order.
-    :ivar list|None kex: initial value: None -
-        List of key exchange algorithms to use in order.
-    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object to use for
-        host key checking.
-    :param filepath|None knownhosts: initial value: None - file to load
-        hostkeys. If not specified, uses ~/.ssh/known_hosts
-    :returns: (obj) CnOpts - A connection options object, used for passing
-        extended options to the Connection
+    :ivar list|None key_types: initial value: None - Ordered list of allowed
+        key types to use for connection.
+    :ivar list|None kex: initial value: None - Ordered list of preferred
+        key exchange algorithms to use for connection.
+    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
+        host key verifcation.
+    :param filepath|None knownhosts: initial value: None - Location to load
+        hostkeys. If None, tries default unix location  ~/.ssh/known_hosts.
+    :returns: (obj) CnOpts - Connection options object, used for passing
+        extended options to a Connection object.
     :raises HostKeysException:
     '''
     def __init__(self, knownhosts=None):
-        self.log = False
-        self.compression = False
         self.ciphers = None
+        self.compression = False
         self.digests = None
+        self.hostkeys = hostkeys.HostKeys()
+        self.key_types = None
         self.kex = None
+        self.log = False
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
-        self.hostkeys = hostkeys.HostKeys()
         try:
             self.hostkeys.load(knownhosts)
-        except IOError:
-            # Can't find known_hosts in the standard location
+        except FileNotFoundError:
+            # no known_hosts in the default unix location, windows has none
             raise UserWarning((f'No file or host key found in [{knownhosts}]. '
                                'You will need to explicitly load host keys '
                                '(cnopts.hostkeys.load(filename)) or disable '
@@ -68,8 +71,12 @@ class CnOpts(object):
                 raise HostKeysException('No host keys found!')
 
     def get_hostkey(self, host):
-        '''Return the matching hostkey to use for verification for the host
-        indicated or raise an SSHException'''
+        '''Return the matching known hostkey to be used for verification or
+        raise an SSHException
+        :param str host:
+            The Hostname or IP of the remote machine.
+        :raises SSHException:
+        '''
         kval = self.hostkeys.lookup(host)
         # None | {key_type: private_key}
         if kval is None:
@@ -80,72 +87,48 @@ class CnOpts(object):
 
 
 class Connection(object):
-    '''Connects and logs into the specified hostname.
-    Arguments that are not given are guessed from the environment.
+    '''Connects and logs into the specified hostname. Arguments that are not
+    given are guessed from the environment.
 
-    :param str host:
-        The Hostname or IP of the remote machine.
-    :param str|None username: *Default: None* -
-        Your username at the remote machine.
-    :param str|obj|None private_key: *Default: None* -
-        path to private key file(str) or paramiko.AgentKey
-    :param str|None password: *Default: None* -
-        Your password at the remote machine.
-    :param int port: *Default: 22* -
-        The SSH port of the remote machine.
-    :param str|None private_key_pass: *Default: None* -
-        password to use, if private_key is encrypted.
-    :param list|None ciphers: *Deprecated* -
-        see ``sftpretty.CnOpts`` and ``cnopts`` parameter
-    :param bool|str log: *Deprecated* -
-        see ``sftpretty.CnOpts`` and ``cnopts`` parameter
-    :param None|CnOpts cnopts: *Default: None* - extra connection options
-        set in a CnOpts object.
-    :param str|None default_path: *Default: None* -
-        set a default path upon connection.
-    :returns: (obj) connection to the requested host
+    :param str host: *Required* - Hostname or address of the remote machine.
+    :param None|CnOpts cnopts: *Default: None* - Extended connection options
+        set as a CnOpts object.
+    :param str|None default_path: *Default: None* - Set the default working
+        directory upon connection.
+    :param str|None password: *Default: None* - Credential for remote machine.
+    :param int port: *Default: 22* - SFTP server port of the remote machine.
+    :param str|obj|None private_key: *Default: None* - Path to private key
+        file(str) or paramiko.AgentKey object
+    :param str|None private_key_pass: *Default: None* - Password to use on
+        encrypted private_key.
+    :param float|None timeout: *Default: None* - Set channel timeout.
+    :param str|None username: *Default: None* - User for remote machine.
+    :returns: (obj) Connection to the requested host.
     :raises ConnectionException:
     :raises CredentialException:
     :raises SSHException:
     :raises AuthenticationException:
     :raises PasswordRequiredException:
     :raises HostKeysException:
-
     '''
-    def __init__(self, host, username=None, private_key=None, password=None,
-                 port=22, private_key_pass=None, cnopts=None,
-                 default_path=None):
-        # Starting point for transport.connect options
-        self._tconnect = {
-                          'username': username, 'password': password,
-                          'hostkey': None, 'pkey': None
-                         }
+    def __init__(self, host, cnopts=None, default_path=None, password=None,
+                 port=22, private_key=None, private_key_pass=None,
+                 timeout=None, username=None):
+        self._transport = None
         self._cnopts = cnopts or CnOpts()
-        # Check that we have a hostkey to verify
-        if self._cnopts.hostkeys is not None:
-            self._tconnect['hostkey'] = self._cnopts.get_hostkey(host)
         self._default_path = default_path
         self._set_logging()
-        self._set_username()
-        # Begin the SSH transport.
-        self._timeout = None
-        self._transport = None
-        self._set_authentication(password, private_key, private_key_pass)
+        self._set_username(username)
+        self._timeout = timeout
+        # Begin transport
         self._start_transport(host, port)
-        self._transport.connect(**self._tconnect)
+        self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
-        '''Authenticate the transport. prefer password if given'''
-        if password is None:
-            # Use private key.
-            if not private_key:
-                raise CredentialException('No password or key specified.')
-            # Use the paramiko agent or provided key object
-            elif isinstance(private_key,
-                            (AgentKey, DSSKey, ECDSAKey, Ed25519Key, RSAKey)):
-                self._tconnect['pkey'] = private_key
-            # Use path provided
-            elif isinstance(private_key, str):
+        '''Authenticate to transport. Prefer private key if given'''
+        if private_key is not None:
+            # Use path or provided key object
+            if isinstance(private_key, str):
                 private_key_file = Path(private_key).expanduser().as_posix()
                 if Path(private_key_file).is_file():
                     try:
@@ -168,14 +151,12 @@ class Connection(object):
                         raise err
                     finally:
                         try:
-                            if not private_key_pass:
-                                self._tconnect['pkey'] = (
-                                    key_type.from_private_key_file(
-                                        private_key_file))
-                            else:
-                                self._tconnect['pkey'] = (
-                                    key_type.from_private_key_file(
-                                        private_key_file, private_key_pass))
+                            private_key = key_type.from_private_key_file(
+                                private_key_file, password=private_key_pass)
+                        except PasswordRequiredException as err:
+                            raise CredentialException(('Key is encrypted and '
+                                                       'no password was '
+                                                       'provided.'))
                         except SSHException as err:
                             raise err
                 else:
@@ -183,6 +164,11 @@ class Connection(object):
                                                'or does not exist, please '
                                                'revise and provide a path to '
                                                'a valid private key.'))
+            self._transport.auth_publickey(self._username, private_key)
+        elif password is not None:
+            self._transport.auth_password(self._username, password)
+        else:
+            raise CredentialException('No password or key specified.')
 
     def _set_logging(self):
         '''Set logging for connection'''
@@ -195,13 +181,17 @@ class Connection(object):
                 util.log_to_file(self._cnopts.log)
             log.info(f'Logging to file: [{self._cnopts.log}]')
 
-    def _set_username(self):
+    def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
         the environment. Still nothing? Throw exception.'''
-        if self._tconnect['username'] is None:
-            self._tconnect['username'] = environ.get('LOGNAME', None)
-            if self._tconnect['username'] is None:
-                raise CredentialException('No username specified.')
+        local_username = environ.get('LOGNAME', None)
+
+        if username is not None:
+            self._username = username
+        elif local_username is not None:
+            self._username = local_username
+        else:
+            raise CredentialException('No username specified.')
 
     @contextmanager
     def _sftp_channel(self, keepalive=False):
@@ -225,44 +215,72 @@ class Connection(object):
                 _channel.close()
 
     def _start_transport(self, host, port):
-        '''Start the transport and set the ciphers if specified.'''
+        '''Start the transport and set connection options if specified.'''
         try:
             self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
             self._transport.use_compression(self._cnopts.compression)
-            # Set security ciphers if set
+
+            # Set allowed ciphers
             if self._cnopts.ciphers is not None:
                 ciphers = self._cnopts.ciphers
                 self._transport.get_security_options().ciphers = ciphers
-            # Set security digests if set
+            # Set connection digests
             if self._cnopts.digests is not None:
                 digests = self._cnopts.digests
                 self._transport.get_security_options().digests = digests
-            # Set security kex if set
+            # Set allowed key types
+            if self._cnopts.key_types is not None:
+                key_types = self._cnopts.key_types
+                self._transport.get_security_options().key_types = key_types
+            # Set connection kex
             if self._cnopts.kex is not None:
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
-        except (AttributeError, gaierror):
-            # Couldn't connect
-            raise ConnectionException(host, port)
 
-    def get(self, remotepath, localpath=None, callback=None,
+            self._transport.start_client(timeout=self._timeout)
+
+            if self._transport.is_active():
+                remote_hostkey = self._transport.get_remote_server_key()
+                remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
+                log.info((f'[{host}] Host Key:\n\t'
+                          f'Name: {remote_hostkey.get_name()}\n\t'
+                          f'Fingerprint: {remote_fingerprint}\n\t'
+                          f'Size: {remote_hostkey.get_bits():d}'))
+
+                if self._cnopts.hostkeys is not None:
+                    user_hostkey = self._cnopts.get_hostkey(host)
+                    user_fingerprint = hexlify(user_hostkey.get_fingerprint())
+                    log.info(f'Known Fingerprint: {user_fingerprint}')
+                    if user_fingerprint != remote_fingerprint:
+                        raise HostKeysException((f'{host} key verification: '
+                                                 '[FAILED]'))
+            else:
+                err = self._transport.get_exception()
+                if err:
+                    self._transport.close()
+                    raise err
+        except (AttributeError, gaierror, UnicodeError):
+            raise ConnectionException(host, port)
+        except Exception as err:
+            raise err
+
+    def get(self, remotefile, localpath=None, callback=None,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
             delay=1, logger=log, silent=False):
         '''Copies a file between the remote host and the local host.
 
-        :param str remotepath: the remote path and filename, source
-        :param str localpath:
-            the local path and filename to copy, destination. If not specified,
-            file is copied to local current working directory
-        :param callable callback:
-            optional callback function (form: ``func(int, int)``) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param bool preserve_mtime: *Default: False*
-            make the modification time(st_mtime) on the
-            local file match the time on the remote. (st_atime can differ
-            because stat'ing the localfile can/does update it's st_atime)
+        :param str remotefile: The remote path and filename to retrieve.
+        :param str localpath: The local path to save download.
+            If None, file is copied to local current working directory.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int)``) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param bool preserve_mtime: *Default: False* Sync the modification
+            time(st_mtime) on the local file to match the time on the remote.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -279,47 +297,48 @@ class Connection(object):
         :returns: None
 
         :raises: IOError
-
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _get(self, remotepath, localpath=None, callback=None,
+        def _get(self, remotefile, localpath=None, callback=None,
                  preserve_mtime=False):
 
             if not localpath:
-                localpath = Path(remotepath).name
+                localpath = Path(remotefile).name
 
             if not callback:
-                callback = partial(_callback, remotepath, logger=logger)
+                callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
                 if preserve_mtime:
-                    remote_attributes = channel.stat(remotepath)
+                    remote_attributes = channel.stat(remotefile)
 
-                channel.get(remotepath, localpath=localpath,
+                channel.get(remotefile, localpath=localpath,
                             callback=callback)
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
                                   remote_attributes.st_mtime))
 
-        _get(self, remotepath, localpath=localpath, callback=callback,
+        _get(self, remotefile, localpath=localpath, callback=callback,
              preserve_mtime=preserve_mtime)
 
     def get_d(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
               delay=1, logger=log, silent=False):
-        '''get the contents of remotedir and write to locadir. (non-recursive)
+        '''Get the contents of remotedir and write to locadir. Non-recursive.
 
-        :param str remotedir: the remote directory to copy from (source)
-        :param str localdir: the local directory to copy to (target)
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param str pattern: filter applied to filenames to transfer only subset
+        :param str remotedir: The remote directory to copy locally.
+        :param str localdir: The local path to save download.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param str pattern: Filter applied to filenames to transfer only subset
             of files in a directory.
-        :param bool preserve_mtime: *Default: False*
-            preserve modification time on files
+        :param bool preserve_mtime: *Default: False* Sync the modification
+            time(st_mtime) on the local file to match the time on the remote.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -390,17 +409,19 @@ class Connection(object):
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
               delay=1, logger=log, silent=False):
-        '''recursively copy remotedir structure to localdir
+        '''Recursively copy remotedir structure to localdir
 
-        :param str remotedir: the remote directory to recursively copy from
-        :param str localdir: the local directory to recursively copy to
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param str pattern: filter applied to filenames to transfer only subset
+        :param str remotedir: The remote directory to recursively copy.
+        :param str localdir: The local path to save recursive download.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param str pattern: Filter applied to filenames to transfer only subset
             of files in a directory.
-        :param bool preserve_mtime: *Default: False*
-            preserve modification time on files
+        :param bool preserve_mtime: *Default: False* Sync the modification
+            time(st_mtime) on the local file to match the time on the remote.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -417,7 +438,6 @@ class Connection(object):
         :returns: None
 
         :raises: Any exception raised by operations will be passed through.
-
         '''
         self.chdir(remotedir)
 
@@ -436,15 +456,15 @@ class Connection(object):
                            exceptions=exceptions, tries=tries, backoff=backoff,
                            delay=delay, logger=logger, silent=silent)
 
-    def getfo(self, remotepath, flo, callback=None, exceptions=None,
+    def getfo(self, remotefile, flo, callback=None, exceptions=None,
               tries=None, backoff=2, delay=1, logger=log, silent=False):
         '''Copy a remote file (remotepath) to a file-like object, flo.
 
-        :param str remotepath: the remote path and filename, source
-        :param flo: open file like object to write, destination.
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
+        :param str remotefile: The remote path and filename to retrieve.
+        :param flo: Open file like object ready to write.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -458,43 +478,41 @@ class Connection(object):
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
-        :returns: (int) the number of bytes written to the opened file object
+        :returns: (int) The number of bytes written to the opened file object
 
         :raises: Any exception raised by operations will be passed through.
-
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _getfo(self, remotepath, flo, callback=None):
+        def _getfo(self, remotefile, flo, callback=None):
 
             if not callback:
-                callback = partial(_callback, remotepath, logger=logger)
+                callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
-                flo_size = channel.getfo(remotepath, flo, callback=callback)
+                flo_size = channel.getfo(remotefile, flo, callback=callback)
 
             return flo_size
 
-        return _getfo(self, remotepath, flo, callback=callback)
+        return _getfo(self, remotefile, flo, callback=callback)
 
-    def put(self, localpath, remotepath=None, callback=None, confirm=True,
+    def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
             delay=1, logger=log, silent=False):
         '''Copies a file between the local host and the remote host.
 
-        :param str localpath: the local path and filename
-        :param str remotepath:
-            the remote path, else the remote :attr:`.pwd` and filename is used.
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param bool confirm:
-            whether to do a stat() on the file afterwards to confirm the file
-            size
-        :param bool preserve_mtime: *Default: False*
-            make the modification time(st_mtime) on the
-            remote file match the time on the local. (st_atime can differ
-            because stat'ing the localfile can/does update it's st_atime)
+        :param str localfile: The local path and filename to copy remotely.
+        :param str remotepath: Remote location to save file, else the remote
+            :atttr:`.pwd` and local filename is used.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param bool confirm: Whether to do a stat() on the file afterwards to
+            the file size
+        :param bool preserve_mtime: *Default: False* Make the modification
+            time(st_mtime) on the remote file match the time on the local.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -508,31 +526,29 @@ class Connection(object):
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
-        :returns:
-            (obj) SFTPAttributes containing attributes about the given file
+        :returns: (obj) SFTPAttributes containing details about the given file.
 
         :raises IOError: if remotepath doesn't exist
-        :raises OSError: if localpath doesn't exist
-
+        :raises OSError: if localfile doesn't exist
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _put(self, localpath, remotepath=None, callback=None,
+        def _put(self, localfile, remotepath=None, callback=None,
                  confirm=True, preserve_mtime=False):
 
             if not remotepath:
-                remotepath = Path(localpath).name
+                remotepath = Path(localfile).name
 
             if not callback:
-                callback = partial(_callback, localpath, logger=logger)
+                callback = partial(_callback, localfile, logger=logger)
 
             if preserve_mtime:
-                local_attributes = Path(localpath).stat()
+                local_attributes = Path(localfile).stat()
                 local_times = (local_attributes.st_atime,
                                local_attributes.st_mtime)
 
             with self._sftp_channel() as channel:
-                remote_attributes = channel.put(localpath,
+                remote_attributes = channel.put(localfile,
                                                 remotepath=remotepath,
                                                 callback=callback,
                                                 confirm=confirm)
@@ -543,7 +559,7 @@ class Connection(object):
 
             return remote_attributes
 
-        return _put(self, localpath, remotepath=remotepath, callback=callback,
+        return _put(self, localfile, remotepath=remotepath, callback=callback,
                     confirm=confirm, preserve_mtime=preserve_mtime)
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
@@ -551,19 +567,17 @@ class Connection(object):
               delay=1, logger=log, silent=False):
         '''Copies a local directory's contents to a remotepath
 
-        :param str localdir: the local path to copy (source)
-        :param str remotedir:
-            the remote path to copy to (target)
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param bool confirm:
-            whether to do a stat() on the file afterwards to confirm the file
-            size
-        :param bool preserve_mtime: *Default: False*
-            make the modification time(st_mtime) on the
-            remote file match the time on the local. (st_atime can differ
-            because stat'ing the localfile can/does update it's st_atime)
+        :param str localdir: The local directory to copy remotely.
+        :param str remotedir: The remote location to save directory.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param bool confirm: Whether to do a stat() on the file afterwards to
+            confirm the file size.
+        :param bool preserve_mtime: *Default: False* Make the modification
+            time(st_mtime) on the remote file match the time on the local.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -626,19 +640,17 @@ class Connection(object):
               delay=1, logger=log, silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
-        :param str localdir: the local path to copy (source)
-        :param str remotedir:
-            the remote path to copy to (target)
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param bool confirm:
-            whether to do a stat() on the file afterwards to confirm the file
-            size
-        :param bool preserve_mtime: *Default: False*
-            make the modification time(st_mtime) on the
-            remote file match the time on the local. (st_atime can differ
-            because stat'ing the localfile can/does update it's st_atime)
+        :param str localdir: The local directory to copy remotely.
+        :param str remotedir: The remote location to save directory.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param bool confirm: Whether to do a stat() on the file afterwards to
+            confirm the file size.
+        :param bool preserve_mtime: *Default: False* Make the modification
+            time(st_mtime) on the remote file match the time on the local.
+            (st_atime can differ because stat'ing the localfile can/does update
+            it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -675,17 +687,15 @@ class Connection(object):
               delay=1, logger=log, silent=False):
         '''Copies the contents of a file like object to remotepath.
 
-        :param flo: a file-like object that supports .read()
-        :param str remotepath: the remote path.
-        :param int file_size:
-            the size of flo, if not given the second param passed to the
-            callback function will always be 0.
-        :param callable callback:
-            optional callback function (form: ``func(int, int``)) that accepts
-            the bytes transferred so far and the total bytes to be transferred.
-        :param bool confirm:
-            whether to do a stat() on the file afterwards to confirm the file
-            size
+        :param flo: File-like object that supports .read()
+        :param str remotepath: The remote location to save contents of object.
+        :param int file_size: The size of flo, if not given the second param
+            passed to the callback function will always be 0.
+        :param callable callback: Optional callback function (form: ``func(
+            int, int``)) that accepts the bytes transferred so far and the
+            total bytes to be transferred.
+        :param bool confirm: Whether to do a stat() on the file afterwards to
+            confirm the file size.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -699,11 +709,9 @@ class Connection(object):
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
-        :returns:
-            (obj) SFTPAttributes containing attributes about the given file
+        :returns: (obj) SFTPAttributes containing details about the given file.
 
         :raises: TypeError, if remotepath not specified, any underlying error
-
         '''
         @retry(exceptions, tires=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
@@ -733,7 +741,7 @@ class Connection(object):
         '''Execute the given commands on a remote machine.  The command is
         executed without regard to the remote :attr:`.pwd`.
 
-        :param str command: the command to execute.
+        :param str command: Command to execute.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -747,10 +755,9 @@ class Connection(object):
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
-        :returns: (list of str) representing the results of the command
+        :returns: (list of str) Results of the command.
 
         :raises: Any exception raised by command will be passed through.
-
         '''
         @retry(exceptions, backoff=backoff, delay=delay, logger=logger,
                silent=silent, tries=tries)
@@ -772,8 +779,8 @@ class Connection(object):
         '''Context manager that can change to a optionally specified remote
         directory and restores the old pwd on exit.
 
-        :param str|None remotepath: *Default: None* -
-            remotepath to temporarily make the current directory
+        :param str|None remotepath: *Default: None* - Remote path to maintain
+            as the current working directory.
 
         :returns: None
 
@@ -793,47 +800,39 @@ class Connection(object):
     def chdir(self, remotepath):
         '''Change the current working directory on the remote
 
-        :param str remotepath: the remote path to change to
+        :param str remotepath: Remote path to set as current working directory.
 
         :returns: None
 
         :raises: IOError, if path does not exist
-
         '''
         with self._sftp_channel() as channel:
             channel.chdir(remotepath)
             self._default_path = channel.normalize('.')
 
     def chmod(self, remotepath, mode=777):
-        '''Set the mode of a remotepath to mode, where mode is an integer
-        representation of the octal mode to use.
+        '''Set the permission mode of a remotepath, where mode is an octal.
 
-        :param str remotepath: the remote path/file to modify
-        :param int mode: *Default: 777* -
-            int representation of octal mode for directory
+        :param str remotepath: Remote path to modify permission.
+        :param int mode: *Default: 777* - Octal mode to apply on path.
 
         :returns: None
 
         :raises: IOError, if the file doesn't exist
-
         '''
         with self._sftp_channel() as channel:
             channel.chmod(remotepath, mode=int(str(mode), 8))
 
     def chown(self, remotepath, uid=None, gid=None):
-        '''Set uid and/or gid on a remotepath, you may specify either or both.
-        Unless you have **permission** to do this on the remote server, you
-        will raise an IOError: 13 - permission denied
+        '''Set uid/gid on remotepath, you may specify either or both.
 
-        :param str remotepath: the remote path/file to modify
-        :param int uid: the user id to set on the remotepath
-        :param int gid: the group id to set on the remotepath
+        :param str remotepath: Remote path to modify ownership.
+        :param int uid: User id to set as owner of remote path.
+        :param int gid: Group id to set on the remote path.
 
         :returns: None
 
-        :raises:
-            IOError, if you don't have permission or the file doesn't exist
-
+        :raises: IOError, if user lacks permission or if the file doesn't exist
         '''
         with self._sftp_channel() as channel:
             if uid is None or gid is None:
@@ -848,26 +847,27 @@ class Connection(object):
             channel.chown(remotepath, uid=uid, gid=gid)
 
     def close(self):
-        '''Closes the connection and cleans up.'''
-        # Close the SSH Transport.
-        if self._transport and self._transport.is_active():
-            self._transport.close()
+        '''Terminate transport connection and clean up the bits.'''
+        try:
+            # Close the transport.
+            if self._transport and self._transport.is_active():
+                self._transport.close()
             self._transport = None
-        # Clean up any loggers
-        if self._cnopts.log:
-            # if handlers are active they hang around until the app Exits
-            # this closes and removes the handlers if in use at close
-            lgr = getLogger(__name__)
-            if lgr:
-                lgr.handlers = []
+            # Clean up any loggers
+            if self._cnopts.log:
+                # remove lingering handlers if any
+                lgr = getLogger(__name__)
+                if lgr:
+                    lgr.handlers = []
+        except Exception as err:
+            raise err
 
     def exists(self, remotepath):
         '''Test whether a remotepath exists.
 
-        :param str remotepath: the remote path to verify
+        :param str remotepath: Remote location to verify existance of.
 
-        :returns: (bool) True, if remotepath exists, else False
-
+        :returns: (bool) True, if remotepath exists, else False.
         '''
         with self._sftp_channel() as channel:
             try:
@@ -883,8 +883,7 @@ class Connection(object):
     def getcwd(self):
         '''Return the current working directory on the remote.
 
-        :returns: (str) the current remote path. None, if not set.
-
+        :returns: (str) Remote current working directory. None, if not set.
         '''
         with self._sftp_channel() as channel:
             cwd = channel.getcwd()
@@ -892,12 +891,11 @@ class Connection(object):
         return cwd
 
     def isdir(self, remotepath):
-        '''Return true, if remotepath is a directory
+        '''Determine if remotepath is a directory.
 
-        :param str remotepath: the path to test
+        :param str remotepath: Remote location to test.
 
         :returns: (bool)
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -909,12 +907,11 @@ class Connection(object):
         return result
 
     def isfile(self, remotepath):
-        '''Return true if remotepath is a file
+        '''Determine if remotepath is a file.
 
-        :param str remotepath: the path to test
+        :param str remotepath: Remote location to test.
 
         :returns: (bool)
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -926,13 +923,11 @@ class Connection(object):
         return result
 
     def lexists(self, remotepath):
-        '''Test whether a remotepath exists.  Returns True for broken symbolic
-        links
+        '''Determine whether remotepath exists.
 
-        :param str remotepath: the remote path to verify
+        :param str remotepath: Remote location to test.
 
         :returns: (bool), True, if lexists, else False
-
         '''
         with self._sftp_channel() as channel:
             try:
@@ -943,12 +938,11 @@ class Connection(object):
         return True
 
     def listdir(self, remotepath='.'):
-        '''Return a list of files/directories for the given remote path.
-        Unlike, paramiko, the directory listing is sorted.
+        '''Return a sorted list of a directory's contents.
 
-        :param str remotepath: path to list on the server
+        :param str remotepath: Remote location to search.
 
-        :returns: (list of str) directory entries, sorted
+        :returns: (list of str) Sorted directory content.
 
         '''
         with self._sftp_channel() as channel:
@@ -957,19 +951,17 @@ class Connection(object):
         return directory
 
     def listdir_attr(self, remotepath='.'):
-        '''return a list of SFTPAttribute objects of the files/directories for
-        the given remote path. The list is in arbitrary order. It does not
-        include the special entries '.' and '..'.
+        '''Return a non-sorted list of SFTPAttribute objects for the remote
+        directory contents. Will not include the special entries '.' and '..'.
 
         The returned SFTPAttributes objects will each have an additional field:
         longname, which may contain a formatted string of the file's
         attributes, in unix format. The content of this string will depend on
         the SFTP server.
 
-        :param str remotepath: path to list on the server
+        :param str remotepath: Remote location to search.
 
-        :returns: (list of SFTPAttributes), sorted
-
+        :returns: (list of SFTPAttributes) Sorted directory content as objects.
         '''
         with self._sftp_channel() as channel:
             directory = sorted(channel.listdir_attr(remotepath),
@@ -978,49 +970,41 @@ class Connection(object):
         return directory
 
     def lstat(self, remotepath):
-        '''return information about file/directory for the given remote path,
-        without following symbolic links. Otherwise, the same as .stat()
+        '''Return information about remote location without following symbolic
+        links. Otherwise, the same as .stat().
 
-        :param str remotepath: path to stat
+        :param str remotepath: Remote location to stat.
 
         :returns: (obj) SFTPAttributes object
-
         '''
         with self._sftp_channel() as channel:
             lstat = channel.lstat(remotepath)
 
         return lstat
 
-    def mkdir(self, remotepath, mode=777):
-        '''Create a directory named remotepath with mode. On some systems,
-        mode is ignored. Where it is used, the current umask value is first
-        masked out.
+    def mkdir(self, remotedir, mode=777):
+        '''Create a directory and set permission mode. On some systems, mode
+        is ignored. Where used, the current umask value is first masked out.
 
-        :param str remotepath: directory to create`
-        :param int mode: *Default: 777* -
-            int representation of octal mode for directory
+        :param str remotedir: Remote location to create.
+        :param int mode: *Default: 777* - Octal mode to apply on path.
 
         :returns: None
-
         '''
         with self._sftp_channel() as channel:
-            channel.mkdir(remotepath, mode=int(str(mode), 8))
+            channel.mkdir(remotedir, mode=int(str(mode), 8))
 
     def mkdir_p(self, remotedir, mode=777):
-        '''Create all directories in remotedir path as needed, setting their
-        mode to mode, if created.
+        '''Create a directory and any missing parent locations as needed. Set
+        permission mode, if created. Silently complete if remotedir already
+        exists.
 
-        If remotedir already exists, silently complete. If a regular file is
-        in the way, raise an exception.
-
-        :param str remotedir: the directory structure to create
-        :param int mode: *Default: 777* -
-            int representation of octal mode for directory
+        :param str remotedir: Remote location to create.
+        :param int mode: *Default: 777* - Octal mode to apply on created paths.
 
         :returns: None
 
         :raises: OSError
-
         '''
         try:
             if self.isdir(remotedir):
@@ -1039,13 +1023,13 @@ class Connection(object):
             raise err
 
     def normalize(self, remotepath):
-        '''Return the expanded path, w.r.t the server, of a given path.  This
-        can be used to resolve symlinks or determine what the server believes
-        to be the :attr:`.pwd`, by passing '.' as remotepath.
+        '''Return the fully expanded path of a given location. This can be used
+        to resolve symlinks or determine what the server believes to be the
+        :attr:`.pwd`, by passing '.' as remotepath.
 
-        :param str remotepath: path to be normalized
+        :param str remotepath: Remote location to be normalized.
 
-        :return: (str) normalized form of the given path
+        :return: (str) Normalized path.
 
         :raises: IOError, if remotepath can't be resolved
         '''
@@ -1054,36 +1038,28 @@ class Connection(object):
 
         return expanded_path
 
-    def open(self, remote_file, mode='r', bufsize=-1):
-        '''Open a file on the remote server. If not closed explicitly
-        connection will be closed with underlying transport.
+    def open(self, remotefile, mode='r', bufsize=-1):
+        '''Open a file on the remote server.
 
-        See http://paramiko-docs.readthedocs.org/en/latest/api/sftp.html for
-        details.
+        :param str remotefile: Path of the file to open.
+        :param str mode: File access mode, defaults to read-only.
+        :param int bufsize: *Default: -1* - Buffering in bytes.
 
-        :param str remote_file: name of the file to open.
-        :param str mode:
-            mode (Python-style) to open file (always assumed binary)
-        :param int bufsize: *Default: -1* - desired buffering
-
-        :returns: (obj) SFTPFile, a handle the remote open file
+        :returns: (obj) SFTPFile, a file-like object handler.
 
         :raises: IOError, if the file could not be opened.
-
         '''
         with self._sftp_channel(keepalive=True) as channel:
-            flo = channel.open(remote_file, mode=mode, bufsize=bufsize)
+            flo = channel.open(remotefile, mode=mode, bufsize=bufsize)
 
         return flo
 
     def readlink(self, remotelink):
-        '''Return the target of a symlink (shortcut).  The result will be
-        an absolute pathname.
+        '''Return the target of a symlink as an absolute path.
 
-        :param str remotelink: remote path of the symlink
+        :param str remotelink: Remote location of the symlink.
 
-        :return: (str) absolute path to target
-
+        :return: (str) Absolute path to target.
         '''
         with self._sftp_channel() as channel:
             link_destination = channel.normalize(channel.readlink(remotelink))
@@ -1094,22 +1070,19 @@ class Connection(object):
         '''recursively descend remote directory mapping the tree to a
         dictionary container.
 
-        :param dict container: dictionary object to save directory tree
+        :param dict container: Hash table to save remote directory tree.
             {remotedir:
                  [(remotedir/sub-directory,
                    localdir/remotedir/sub-directory)],}
-        :param str remotedir:
-            root of remote directory to descend, use '.' to start at
-            :attr:`.pwd`
-        :param str localdir:
-            root of local directory to append remotedir too
+        :param str remotedir: Remote location to descend, use '.' to start at
+            :attr:`.pwd`.
+        :param str localdir: Location used as root of appended remote paths.
         :param bool recurse: *Default: True*. To recurse or not to recurse
-            that is the question
+            that is the question.
 
         :returns: None
 
         :raises: Exception
-
         '''
         try:
             localdir = Path(localdir).expanduser().as_posix()
@@ -1120,7 +1093,7 @@ class Connection(object):
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
                         Path(remote).relative_to(
-                            Path(remotedir).root).as_posix()).as_posix()
+                            Path(remotedir).anchor).as_posix()).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
@@ -1132,10 +1105,10 @@ class Connection(object):
             raise err
 
     def remove(self, remotefile):
-        '''Remove the file @ remotefile, remotefile may include a path, if no
-        path, then :attr:`.pwd` is used.  This method only works on files
+        '''Delete the remote file. May include a path, if no path, then
+        :attr:`.pwd` is used. This method only works on files.
 
-        :param str remotefile: the remote file to delete
+        :param str remotefile: Remote file to delete.
 
         :returns: None
 
@@ -1144,39 +1117,36 @@ class Connection(object):
         with self._sftp_channel() as channel:
             channel.remove(remotefile)
 
-    def rename(self, remote_src, remote_dest):
-        '''Rename a file or directory on the remote host.
+    def rename(self, remotepath, newpath):
+        '''Rename a path on the remote host.
 
-        :param str remote_src: the remote file/directory to rename
+        :param str remotepath: Remote path to rename.
 
-        :param str remote_dest: the remote file/directory to put it
+        :param str newpath: New name for remote path.
 
         :returns: None
 
         :raises: IOError
-
         '''
         with self._sftp_channel() as channel:
-            channel.posix_rename(remote_src, remote_dest)
+            channel.posix_rename(remotepath, newpath)
 
-    def rmdir(self, remotepath):
-        '''remove remote directory
+    def rmdir(self, remotedir):
+        '''Delete remote directory.
 
-        :param str remotepath: the remote directory to remove
+        :param str remotedir: Remote directory to delete.
 
         :returns: None
-
         '''
         with self._sftp_channel() as channel:
-            channel.rmdir(remotepath)
+            channel.rmdir(remotedir)
 
     def stat(self, remotepath):
-        '''Return information about file/directory for the given remote path
+        '''Return information about remote location.
 
-        :param str remotepath: path to stat
+        :param str remotepath: Remote location to stat.
 
         :returns: (obj) SFTPAttributes
-
         '''
         with self._sftp_channel() as channel:
             stat = channel.stat(remotepath)
@@ -1184,17 +1154,14 @@ class Connection(object):
         return stat
 
     def symlink(self, remote_src, remote_dest):
-        '''create a symlink for a remote file on the server
+        '''Create a symlink for a remote file on the server
 
         :param str remote_src: path of original file
         :param str remote_dest: path of the created symlink
 
         :returns: None
 
-        :raises:
-            any underlying error, IOError if something already exists at
-            remote_dest
-
+        :raises: any underlying error, IOError if remote_dest already exists
         '''
         with self._sftp_channel() as channel:
             channel.symlink(remote_src, remote_dest)
@@ -1210,7 +1177,6 @@ class Connection(object):
         :returns: (int) new size of file
 
         :raises: IOError, if file does not exist
-
         '''
         with self._sftp_channel() as channel:
             channel.truncate(remotepath, size)
@@ -1225,18 +1191,15 @@ class Connection(object):
         :returns:
             (tuple of  str) currently used ciphers (local_cipher,
             remote_cipher)
-
         '''
         return self._transport.local_cipher, self._transport.remote_cipher
 
     @property
     def active_compression(self):
-        '''Get tuple of currently used local and remote compression.
+        '''Get tuple of local and remote compression status.
 
-        :returns:
-            (tuple of  str) currently used compression (local_compression,
-            remote_compression)
-
+        :returns: (tuple of str) Compression status.
+            (local_compression, remote_compression)
         '''
         local_compression = self._transport.local_compression
         remote_compression = self._transport.remote_compression
@@ -1245,19 +1208,17 @@ class Connection(object):
 
     @property
     def logfile(self):
-        '''return the name of the file used for logging or False it not logging
+        '''Return logging setting.
 
-        :returns: (str)logfile or (bool) False
-
+        :returns: (str) logfile or (bool) False
         '''
         return self._cnopts.log
 
     @property
     def pwd(self):
-        '''return the current working directory
+        '''Return the current working directory.
 
-        :returns: (str) current working directory
-
+        :returns: (str) Current working directory.
         '''
         with self._sftp_channel() as channel:
             pwd = channel.normalize('.')
@@ -1266,45 +1227,37 @@ class Connection(object):
 
     @property
     def remote_server_key(self):
-        '''return the remote server's key'''
+        '''Return the remote server's key'''
         return self._transport.get_remote_server_key()
 
     @property
     def security_options(self):
-        '''return the available security options recognized by paramiko.
+        '''Return the transport security options.
 
-        :returns:
-            (obj) security preferences of the ssh transport. These are tuples
-            of acceptable `.ciphers`, `.digests`, `.key_types`, and key
-            exchange algorithms `.kex`, listed in order of preference.
-
+        :returns: (obj) Security preferences for the underlying transport.
+            These are tuples of acceptable `.ciphers`, `.digests`, `.key_types`
+            and key exchange algorithms `.kex`, listed in order of preference.
         '''
         return self._transport.get_security_options()
 
     @property
     def sftp_client(self):
-        '''Give access to the underlying, connected paramiko SFTPClient object.
-        Client is not handled by context manager. If not closed explicitly
-        connection will be closed with underlying transport.
-
-        see https://paramiko-docs.readthedocs.org/en/latest/api/sftp.html
+        '''Provide access to the underlying SFTPClient object. Client is not
+        handled by context manager. Connection is closed with underlying
+        transport if not done explicitly.
 
         :params: None
 
-        :returns: (obj) the active SFTPClient object
-
+        :returns: (obj) Active SFTPClient object.
         '''
         with self._sftp_channel(keepalive=True) as channel:
             return channel
 
     @property
     def timeout(self):
-        ''' (float|None) *Default: None* -
-            get or set the underlying socket timeout for pending read/write
-            ops.
+        '''Get or set the underlying socket timeout for pending IO operations.
 
-        :returns:
-            (float|None) seconds to wait for a pending read/write operation
+        :returns: (float|None) Seconds to wait for pending read/write operation
             before raising socket.timeout, or None for no timeout
         '''
         with self._sftp_channel() as channel:
@@ -1315,15 +1268,16 @@ class Connection(object):
 
     @timeout.setter
     def timeout(self, val):
-        '''setter for timeout'''
+        '''Setter for timeout'''
         self._timeout = val
 
     def __del__(self):
-        '''Attempt to clean up if not explicitly closed.'''
+        '''Attempt to garbage collect if not explicitly closed.'''
         self.close()
 
     def __enter__(self):
         return self
 
-    def __exit__(self, etype, value, traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        '''GTFO'''
         self.close()
