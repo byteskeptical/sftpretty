@@ -28,7 +28,7 @@ jobs:
     - name: Build package
       run: python -m build --sdist --wheel --outdir /dist .
     - name: Publish distribution to Test PyPI
-      uses: pypa/gh-action-pypi-publish@71db3780a74499e7acb070cd49b1edd3c8da5b97
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         print_hash: true
@@ -36,7 +36,7 @@ jobs:
         user: __token__
     - name: Publish distribution to PyPI
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@71db3780a74499e7acb070cd49b1edd3c8da5b97
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         print_hash: true
