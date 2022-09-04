@@ -713,7 +713,7 @@ class Connection(object):
 
         :raises: TypeError, if remotepath not specified, any underlying error
         '''
-        @retry(exceptions, tires=tries, backoff=backoff, delay=delay,
+        @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
         def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
                    confirm=True):
