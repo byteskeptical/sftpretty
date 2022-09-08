@@ -24,15 +24,18 @@ def test_localtree(sftpserver):
 
             dvalues = [[(f'{localpath}/home/test/pub',
                          f'{localpath}/home/test/pub')],
-                       [(f'{localpath}/home/test/pub/foo2',
-                         f'{localpath}/home/test/pub/foo2'),
-                        (f'{localpath}/home/test/pub/foo1',
-                         f'{localpath}/home/test/pub/foo1')],
+                       [(f'{localpath}/home/test/pub/foo1',
+                         f'{localpath}/home/test/pub/foo1'),
+                        (f'{localpath}/home/test/pub/foo2',
+                         f'{localpath}/home/test/pub/foo2')],
                        [(f'{localpath}/home/test/pub/foo2/bar1',
                          f'{localpath}/home/test/pub/foo2/bar1')]]
 
+            for localdir in sorted(directories.values()):
+                dvalues.remove(localdir)
+
             assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
+            assert dvalues == []
 
     # cleanup local
     rmdir(localpath)
