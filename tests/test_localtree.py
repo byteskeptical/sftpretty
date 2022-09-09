@@ -31,11 +31,8 @@ def test_localtree(sftpserver):
                        [(f'{localpath}/home/test/pub/foo2/bar1',
                          f'{localpath}/home/test/pub/foo2/bar1')]]
 
-            for localdir in sorted(directories.values()):
-                dvalues.remove(localdir)
-
             assert sorted(directories.keys()) == dkeys
-            assert dvalues == []
+            assert sorted(directories.values()) == dvalues
 
     # cleanup local
     rmdir(localpath)
