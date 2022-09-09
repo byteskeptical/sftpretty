@@ -83,7 +83,8 @@ def localtree(container, localdir, remotedir, recurse=True):
                 if localdir.as_posix() in container.keys():
                     container[localdir.as_posix()].append((local, remote))
                 else:
-                    container[localdir.as_posix()] = [(local, remote)].sort()
+                    container[localdir.as_posix()] = [(local, remote)]
+                container[localdir.as_posix()].sort()
                 if recurse:
                     localtree(container, local, remotedir,
                               recurse=recurse)
