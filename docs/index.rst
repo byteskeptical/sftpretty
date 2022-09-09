@@ -12,7 +12,7 @@ is a Python3 optimized fork of pysftp with additional features & improvements.
 * More tests
 * Multi-threaded directory transfers
 * Progress notifications
-* Support for ciphers, digests, key types & kex connection options
+* Support for ciphers, digests, kex & key type connection options
 * Support for ED25519 & ECDSA keys
 * Support for private key passwords
 * Thread-safe connection manager
@@ -82,7 +82,7 @@ paramiko >= 1.17.0
 
 Supports
 --------
-Tested on Python 3.6, 3.7, 3.8, 3.9
+Tested on Python 3.6, 3.7, 3.8, 3.9, 3.10
 
 Contents
 --------
