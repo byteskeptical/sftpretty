@@ -40,6 +40,9 @@ class CnOpts(object):
         key types to use for connection.
     :ivar list|None kex: initial value: None - Ordered list of preferred
         key exchange algorithms to use for connection.
+    :ivar dict|None disabled_algorithms: initial value: None - Disabled 
+        algorithms list, the same one that can be passed to paramiko.Transport
+        object.
     :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
         host key verifcation.
     :param filepath|None knownhosts: initial value: None - Location to load
@@ -55,6 +58,7 @@ class CnOpts(object):
         self.hostkeys = hostkeys.HostKeys()
         self.key_types = None
         self.kex = None
+        self.disabled_algorithms = None
         self.log = False
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
@@ -239,6 +243,10 @@ class Connection(object):
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
 
+            # Set disabled algorithms
+            if self._cnopts.disabled_algorithms is not None:
+                self._transport.disabled_algorithms = self._cnopts.disabled_algorithms
+                
             self._transport.start_client(timeout=self._timeout)
 
             if self._transport.is_active():
