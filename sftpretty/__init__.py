@@ -34,12 +34,14 @@ class CnOpts(object):
     :ivar list|None ciphers: initial value: None - Ordered list of allowed
         ciphers to use for connection.
     :ivar list|None digests: initial value: None - Ordered list of preferred
-        digests to use for connection.
-        List of digests to use in order.
-    :ivar list|None key_types: initial value: None - Ordered list of allowed
-        key types to use for connection.
+        digests to use for connection in provided order.
+    :ivar dict|None disabled_algorithms: initial value: None - Mapping type to
+        an iterable of algorithm identifiers, which will be disabled for the
+        lifetime of the transport. Keys should match class builtin attribute.
     :ivar list|None kex: initial value: None - Ordered list of preferred
         key exchange algorithms to use for connection.
+    :ivar list|None key_types: initial value: None - Ordered list of allowed
+        key types to use for connection.
     :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
         host key verifcation.
     :param filepath|None knownhosts: initial value: None - Location to load
@@ -52,9 +54,10 @@ class CnOpts(object):
         self.ciphers = None
         self.compression = False
         self.digests = None
+        self.disabled_algorithms = None
         self.hostkeys = hostkeys.HostKeys()
-        self.key_types = None
         self.kex = None
+        self.key_types = None
         self.log = False
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
@@ -230,14 +233,18 @@ class Connection(object):
             if self._cnopts.digests is not None:
                 digests = self._cnopts.digests
                 self._transport.get_security_options().digests = digests
-            # Set allowed key types
-            if self._cnopts.key_types is not None:
-                key_types = self._cnopts.key_types
-                self._transport.get_security_options().key_types = key_types
+            # Set disabled algorithms
+            if self._cnopts.disabled_algorithms is not None:
+                disabled_algorithms = self._cnopts.disabled_algorithms
+                self._transport.disabled_algorithms = disabled_algorithms
             # Set connection kex
             if self._cnopts.kex is not None:
                 kex = self._cnopts.kex
                 self._transport.get_security_options().kex = kex
+            # Set allowed key types
+            if self._cnopts.key_types is not None:
+                key_types = self._cnopts.key_types
+                self._transport.get_security_options().key_types = key_types
 
             self._transport.start_client(timeout=self._timeout)
 
