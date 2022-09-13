@@ -1,9 +1,20 @@
 Change Log
 =========
 
-1.0.1 (current, released 2022-07-22)
+1.0.3 (current, released 2022-09-13)
 ------------------------------------
-    * added key types Connection options for transport
+    * added disabled algorithms Connection option for transport
+
+
+1.0.2 (released 2022-09-09)
+---------------------------
+    * bug fix for typo in put_d()
+    * added sort to localtree() for test continuity
+
+
+1.0.1 (released 2022-07-22)
+---------------------------
+    * added key types Connection option for transport
     * bug fixes for close()
     * default to private key authentication
     * enabled timeout setting for channel and transport

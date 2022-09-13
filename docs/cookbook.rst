@@ -117,6 +117,7 @@ OTHER AVAILABLE CONNECTION OPTIONS via CnOpts:
   * .compression - False (Default) no compression, True - enable compression 
   * .ciphers - replaces the ciphers parameter in the Connection method.
   * .digests - replaces the digests parameter in the Connection method.
+  * .disabled_algorithms - algorithm identifiers to disable in the Connection method.
   * .kex - replaces the kex parameter in the Connection method.
   * .key_types - replaces the key types parameter in the Connection method.
   * .log - replaces the log parameter in the Connection method
