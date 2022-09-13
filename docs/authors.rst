@@ -5,6 +5,7 @@ Authors
 
 Acknowledgment
 ---------------
+    * PR #12 by erans
     * ftpretty by codebynumbers
     * paramiko by Robey Pointer
     * pysftp by dundeemt

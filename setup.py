@@ -18,7 +18,7 @@ DESCRIPTION = "Pretty secure file transfer made easy."
 
 setup(
     name='sftpretty',
-    version='1.0.2',
+    version='1.0.3',
 
     packages=['sftpretty', ],
 
@@ -29,7 +29,7 @@ setup(
     author_email='40208858+byteskeptical@users.noreply.github.com',
     description=DESCRIPTION,
     license='BSD',
-    keywords='scp sftp ssh ftp',
+    keywords='ftp scp sftp ssh',
     url='https://github.com/byteskeptical/sftpretty',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/x-rst',
