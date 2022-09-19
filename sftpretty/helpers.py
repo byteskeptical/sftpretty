@@ -76,8 +76,8 @@ def localtree(container, localdir, remotedir, recurse=True):
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
         else:
-            localdir = Path(localdir).absolute().expanduser()
-        for localpath in localdir.iterdir():
+            localdir = Path(localdir).expanduser().absolute()
+        for localpath in Path(localdir).iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()
                 remote = Path(remotedir).joinpath(

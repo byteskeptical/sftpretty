@@ -62,7 +62,7 @@ class CnOpts(object):
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
         try:
-            self.hostkeys.load(knownhosts)
+            self.hostkeys.load(Path(knownhosts).absolute().as_posix())
         except FileNotFoundError:
             # no known_hosts in the default unix location, windows has none
             raise UserWarning((f'No file or host key found in [{knownhosts}]. '
@@ -132,10 +132,10 @@ class Connection(object):
         if private_key is not None:
             # Use path or provided key object
             if isinstance(private_key, str):
-                private_key_file = Path(private_key).expanduser().as_posix()
-                if Path(private_key_file).is_file():
+                private_key_file = Path(private_key).expanduser().absolute()
+                if private_key_file.is_file():
                     try:
-                        with open(private_key_file, 'rb') as key:
+                        with open(private_key_file.as_posix(), 'rb') as key:
                             key_head = key.readline().decode('utf8')
                         if 'DSA' in key_head:
                             key_type = DSSKey
@@ -155,7 +155,8 @@ class Connection(object):
                     finally:
                         try:
                             private_key = key_type.from_private_key_file(
-                                private_key_file, password=private_key_pass)
+                                private_key_file.as_posix(),
+                                password=private_key_pass)
                         except PasswordRequiredException as err:
                             raise CredentialException(('Key is encrypted and '
                                                        'no password was '
@@ -607,8 +608,6 @@ class Connection(object):
 
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir)
 
         paths = [
                  (localpath.as_posix(),
@@ -617,7 +616,7 @@ class Connection(object):
                           localdir.root).as_posix()).as_posix(),
                   callback, confirm, preserve_mtime, exceptions, tries,
                   backoff, delay, logger, silent)
-                 for localpath in localdir.iterdir()
+                 for localpath in Path(localdir).iterdir()
                  if localpath.is_file()
                 ]
 
@@ -645,7 +644,7 @@ class Connection(object):
                         logger.info(f'Thread [{name}]: [COMPLETE]')
                         return data
         else:
-            logger.info(f'No files found in directory [{localdir.as_posix()}]')
+            logger.info(f'No files found in directory [{localdir}]')
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
