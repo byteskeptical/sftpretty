@@ -1,7 +1,7 @@
 from functools import wraps
 from hashlib import new, sha3_512
 from io import BytesIO, IOBase
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from stat import S_IMODE
 from time import sleep
 
@@ -73,7 +73,10 @@ def localtree(container, localdir, remotedir, recurse=True):
 
     '''
     try:
-        localdir = Path(localdir).absolute().expanduser()
+        if localdir.startswith(':', 1) or localdir.startswith('\\'):
+            localdir = PureWindowsPath(localdir)
+        else:
+            localdir = Path(localdir).absolute().expanduser()
         for localpath in localdir.iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()

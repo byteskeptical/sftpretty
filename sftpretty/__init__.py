@@ -9,7 +9,7 @@ from paramiko import (hostkeys, SFTPClient, Transport, util,
                       AuthenticationException, PasswordRequiredException,
                       SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
                       RSAKey)
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
@@ -605,14 +605,19 @@ class Connection(object):
         '''
         self.mkdir_p(remotedir)
 
+        if localdir.startswith(':', 1) or localdir.startswith('\\'):
+            localdir = PureWindowsPath(localdir)
+        else:
+            localdir = Path(localdir)
+
         paths = [
                  (localpath.as_posix(),
                   Path(remotedir).joinpath(
                       localpath.relative_to(
-                          Path(localdir).root).as_posix()).as_posix(),
+                          localdir.root).as_posix()).as_posix(),
                   callback, confirm, preserve_mtime, exceptions, tries,
                   backoff, delay, logger, silent)
-                 for localpath in Path(localdir).iterdir()
+                 for localpath in localdir.iterdir()
                  if localpath.is_file()
                 ]
 
@@ -640,7 +645,7 @@ class Connection(object):
                         logger.info(f'Thread [{name}]: [COMPLETE]')
                         return data
         else:
-            logger.info(f'No files found in directory [{localdir}]')
+            logger.info(f'No files found in directory [{localdir.as_posix()}]')
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
