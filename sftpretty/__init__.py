@@ -2,8 +2,8 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (basicConfig, getLogger,
-                     DEBUG, debug, ERROR, error, INFO, info, WARNING, warning)
+from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info,
+                     WARNING, warning)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport, util,
                       AuthenticationException, PasswordRequiredException,
@@ -19,7 +19,6 @@ from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
 
-basicConfig(level=INFO)
 log = getLogger(__name__)
 
 
