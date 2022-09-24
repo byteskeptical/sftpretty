@@ -1,9 +1,10 @@
 Change Log
 ==========
 
-1.0.4 (current, released 2022-09-23)
+1.0.4 (current, released 2022-09-24)
 ------------------------------------
     * added Windows Pure Path logic in put_d() and put_r() through localtree()
+    * fix for regression in _sftp_channel() causing UnboundLocalError
     * improved support for dot notation in known_hosts and private key file
     * removed basicConfig() call for improved embedded behavior
 

@@ -199,6 +199,8 @@ class Connection(object):
     @contextmanager
     def _sftp_channel(self, keepalive=False):
         '''Establish new SFTP channel.'''
+        _channel = None
+
         try:
             _channel = SFTPClient.from_transport(self._transport)
 
@@ -214,7 +216,7 @@ class Connection(object):
         except Exception as err:
             raise err
         finally:
-            if not keepalive:
+            if _channel and not keepalive:
                 _channel.close()
 
     def _start_transport(self, host, port):
