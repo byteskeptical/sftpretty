@@ -105,6 +105,8 @@ class Connection(object):
         encrypted private_key.
     :param float|None timeout: *Default: None* - Set channel timeout.
     :param str|None username: *Default: None* - User for remote machine.
+    :param bool use_single_channel: *Default: False* - Enable support for
+        single channel servers that do not accept multiple channels
     :returns: (obj) Connection to the requested host.
     :raises ConnectionException:
     :raises CredentialException:
@@ -115,7 +117,7 @@ class Connection(object):
     '''
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
-                 timeout=None, username=None):
+                 timeout=None, username=None, use_single_channel=False):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
@@ -125,6 +127,8 @@ class Connection(object):
         # Begin transport
         self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
+        self._use_single_channel = use_single_channel
+        self._single_channel = None
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate to transport. Prefer private key if given'''
@@ -199,25 +203,33 @@ class Connection(object):
     @contextmanager
     def _sftp_channel(self, keepalive=False):
         '''Establish new SFTP channel.'''
-        _channel = None
 
-        try:
-            _channel = SFTPClient.from_transport(self._transport)
+        if self._single_channel is None:
+            _channel = None
 
-            channel = _channel.get_channel()
-            channel.set_name(uuid().hex)
-            channel.settimeout(self._timeout)
+            try:
+                _channel = SFTPClient.from_transport(self._transport)
 
-            if self._default_path is not None:
-                _channel.chdir(self._default_path)
-                log.info(f'Current Working Directory: [{self._default_path}]')
+                if self._use_single_channel:
+                    self._single_channel = _channel
 
-            yield _channel
-        except Exception as err:
-            raise err
-        finally:
-            if _channel and not keepalive:
-                _channel.close()
+                channel = _channel.get_channel()
+                channel.set_name(uuid().hex)
+                channel.settimeout(self._timeout)
+
+                if self._default_path is not None:
+                    _channel.chdir(self._default_path)
+                    log.info(f'Current Working Directory: [{self._default_path}]')
+
+                yield _channel
+            except Exception as err:
+                raise err
+            finally:
+                if not self._use_single_channel and _channel and not keepalive:
+                    self._single_channel = None
+                    _channel.close()
+        else:
+            yield self._single_channel
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
