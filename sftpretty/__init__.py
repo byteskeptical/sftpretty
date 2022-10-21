@@ -219,7 +219,9 @@ class Connection(object):
 
                 if self._default_path is not None:
                     _channel.chdir(self._default_path)
-                    log.info(f'Current Working Directory: [{self._default_path}]')
+                    log.info(
+                        f'Current Working Directory: [{self._default_path}]'
+                    )
 
                 yield _channel
             except Exception as err:
