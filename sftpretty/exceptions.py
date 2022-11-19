@@ -26,3 +26,9 @@ class HostKeysException(Exception):
     '''Exception raised for HostKeys problems'''
 
     pass
+
+
+class LoggingException(Exception):
+    '''Exception raised for log level problems'''
+
+    pass

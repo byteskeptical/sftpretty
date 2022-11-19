@@ -2,16 +2,15 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info,
-                     WARNING, warning)
+from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info)
 from os import environ, utime
-from paramiko import (hostkeys, SFTPClient, Transport, util,
+from paramiko import (hostkeys, SFTPClient, Transport,
                       AuthenticationException, PasswordRequiredException,
                       SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
                       RSAKey)
 from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
-                                  HostKeysException)
+                                  HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
@@ -19,32 +18,31 @@ from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
 
-log = getLogger(__name__)
-
-
 class CnOpts(object):
     '''additional connection options beyond authentication
 
-    :ivar bool|str log: initial value: False - Log connection details. If set
-        to True, creates a temporary file used to capture logs. If set to an
-        existing filepath, logs will be appended.
-    :ivar bool compression: initial value: False - Enables compression on the
-        transport, if set to True.
     :ivar list|None ciphers: initial value: None - Ordered list of allowed
         ciphers to use for connection.
+    :ivar bool compression: initial value: False - Enables compression on the
+        transport, if set to True.
     :ivar list|None digests: initial value: None - Ordered list of preferred
         digests to use for connection in provided order.
     :ivar dict|None disabled_algorithms: initial value: None - Mapping type to
         an iterable of algorithm identifiers, which will be disabled for the
         lifetime of the transport. Keys should match class builtin attribute.
+    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
+        host key verifcation.
     :ivar list|None kex: initial value: None - Ordered list of preferred
         key exchange algorithms to use for connection.
     :ivar list|None key_types: initial value: None - Ordered list of allowed
         key types to use for connection.
-    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
-        host key verifcation.
-    :param filepath|None knownhosts: initial value: None - Location to load
+    :param str|None knownhosts: initial value: None - Location to load
         hostkeys. If None, tries default unix location  ~/.ssh/known_hosts.
+    :ivar bool|str log: initial value: False - Log connection details. If
+        set to True, creates a temporary file used to capture logs. If set to
+        an existing filepath, logs will be appended.
+    :ivar str log_level: initial value: info - Set logging level for connection.
+        Choose between debug, error, or info.
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
     :raises HostKeysException:
@@ -58,6 +56,7 @@ class CnOpts(object):
         self.kex = None
         self.key_types = None
         self.log = False
+        self.log_level = 'info'
         if knownhosts is None:
             knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
         try:
@@ -106,12 +105,13 @@ class Connection(object):
     :param float|None timeout: *Default: None* - Set channel timeout.
     :param str|None username: *Default: None* - User for remote machine.
     :returns: (obj) Connection to the requested host.
+    :raises AuthenticationException:
     :raises ConnectionException:
     :raises CredentialException:
-    :raises SSHException:
-    :raises AuthenticationException:
-    :raises PasswordRequiredException:
     :raises HostKeysException:
+    :raises LoggingException:
+    :raises PasswordRequiredException:
+    :raises SSHException:
     '''
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
@@ -175,14 +175,20 @@ class Connection(object):
 
     def _set_logging(self):
         '''Set logging for connection'''
+        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
+
         if self._cnopts.log:
             if isinstance(self._cnopts.log, bool):
                 # Log to a temporary file.
                 flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
-                util.log_to_file(flo)
-            else:
-                util.log_to_file(self._cnopts.log)
-            log.info(f'Logging to file: [{self._cnopts.log}]')
+            basicConfig(filename=self._cnopts.log)
+
+        log = getLogger(__name__)
+        try:
+            log.setLevel(level_map[self._cnopts.log_level.lower()])
+        except KeyError:
+            raise LoggingException(('Log level must set to one of following: '
+                                    '[debug, error, info].'))
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
