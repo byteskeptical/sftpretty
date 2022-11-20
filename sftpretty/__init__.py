@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info)
 from os import environ, utime
-from paramiko import (hostkeys, SFTPClient, Transport,
+from paramiko import (basicConfig, hostkeys, SFTPClient, Transport,
                       AuthenticationException, PasswordRequiredException,
                       SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
                       RSAKey)
@@ -16,6 +16,9 @@ from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
+
+
+log = getLogger(__name__)
 
 
 class CnOpts(object):
@@ -174,7 +177,7 @@ class Connection(object):
             raise CredentialException('No password or key specified.')
 
     def _set_logging(self):
-        '''Set logging for connection'''
+        '''Set logging location and level for connection'''
         level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
 
         if self._cnopts.log:
