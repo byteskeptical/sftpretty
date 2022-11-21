@@ -2,9 +2,10 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info)
+from logging import (basicConfig, DEBUG, debug, ERROR, error, getLogger, INFO,
+                     info)
 from os import environ, utime
-from paramiko import (basicConfig, hostkeys, SFTPClient, Transport,
+from paramiko import (hostkeys, SFTPClient, Transport,
                       AuthenticationException, PasswordRequiredException,
                       SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
                       RSAKey)
