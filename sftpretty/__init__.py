@@ -2,8 +2,8 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (basicConfig, DEBUG, debug, ERROR, error, getLogger, INFO,
-                     info)
+from logging import (basicConfig, DEBUG, debug, ERROR, error, Formatter,
+                     getLogger, INFO, info, StreamHandler)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       AuthenticationException, PasswordRequiredException,
@@ -17,9 +17,6 @@ from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4 as uuid
-
-
-log = getLogger(__name__)
 
 
 class CnOpts(object):
@@ -45,8 +42,8 @@ class CnOpts(object):
     :ivar bool|str log: initial value: False - Log connection details. If
         set to True, creates a temporary file used to capture logs. If set to
         an existing filepath, logs will be appended.
-    :ivar str log_level: initial value: info - Set logging level for connection.
-        Choose between debug, error, or info.
+    :ivar str log_level: initial value: info - Set logging level for connection
+        . Choose between debug, error, or info.
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
     :raises HostKeysException:
@@ -123,7 +120,7 @@ class Connection(object):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
-        self._set_logging()
+        log = self._set_logging()
         self._set_username(username)
         self._timeout = timeout
         # Begin transport
@@ -181,18 +178,26 @@ class Connection(object):
         '''Set logging location and level for connection'''
         level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
 
-        if self._cnopts.log:
-            if isinstance(self._cnopts.log, bool):
-                # Log to a temporary file.
-                flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
-            basicConfig(filename=self._cnopts.log)
-
-        log = getLogger(__name__)
         try:
-            log.setLevel(level_map[self._cnopts.log_level.lower()])
+            if self._cnopts.log:
+                if isinstance(self._cnopts.log, bool):
+                    # Log to a temporary file.
+                    flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
+                basicConfig(datefmt='%Y-%m-%d %H:%M:%S',
+                            filename=self._cnopts.log,
+                            format=('[%(asctime)s] {%(pathname)s:%(lineno)d} '
+                                    '%(levelname)s - %(message)s'),
+                            level=level_map[self._cnopts.log_level.lower()])
+            console = StreamHandler()
+            console.setLevel(level_map[self._cnopts.log_level.lower()])
+            console:setFormat(Formatter(('[%(asctime)s] %(levelname)-8s '
+                                         '%(message)s')))
+            getLogger('').addHandler(console)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
+        finally:
+            return getLogger(__name__)
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
@@ -876,11 +881,10 @@ class Connection(object):
                 self._transport.close()
             self._transport = None
             # Clean up any loggers
-            if self._cnopts.log:
+            if log.hasHandlers():
                 # remove lingering handlers if any
-                lgr = getLogger(__name__)
-                if lgr:
-                    lgr.handlers = []
+                for handle in log.handlers:
+                    log.removeHandler(handle)
         except Exception as err:
             raise err
 
