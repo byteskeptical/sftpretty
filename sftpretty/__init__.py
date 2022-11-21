@@ -769,7 +769,7 @@ class Connection(object):
 
     def execute(self, command,
                 exceptions=None, tries=None, backoff=2, delay=1,
-                logger=self._log, silent=False):
+                logger=log, silent=False):
         '''Execute the given commands on a remote machine.  The command is
         executed without regard to the remote :attr:`.pwd`.
 
