@@ -120,7 +120,7 @@ class Connection(object):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
-        log = self._set_logging()
+        self.log = self._set_logging()
         self._set_username(username)
         self._timeout = timeout
         # Begin transport
@@ -190,8 +190,8 @@ class Connection(object):
                             level=level_map[self._cnopts.log_level.lower()])
             console = StreamHandler()
             console.setLevel(level_map[self._cnopts.log_level.lower()])
-            console:setFormat(Formatter(('[%(asctime)s] %(levelname)-8s '
-                                         '%(message)s')))
+            formatter = Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+            console.setFormatter(formatter)
             getLogger('').addHandler(console)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
