@@ -120,7 +120,7 @@ class Connection(object):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
-        self.log = self._set_logging()
+        self._log = self._set_logging()
         self._set_username(username)
         self._timeout = timeout
         # Begin transport
@@ -225,7 +225,8 @@ class Connection(object):
 
             if self._default_path is not None:
                 _channel.chdir(self._default_path)
-                log.info(f'Current Working Directory: [{self._default_path}]')
+                self._log.info(('Current Working Directory: '
+                               f'[{self._default_path}]'))
 
             yield _channel
         except Exception as err:
@@ -268,15 +269,15 @@ class Connection(object):
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
                 remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
-                log.info((f'[{host}] Host Key:\n\t'
-                          f'Name: {remote_hostkey.get_name()}\n\t'
-                          f'Fingerprint: {remote_fingerprint}\n\t'
-                          f'Size: {remote_hostkey.get_bits():d}'))
+                self._log.info((f'[{host}] Host Key:\n\t'
+                                f'Name: {remote_hostkey.get_name()}\n\t'
+                                f'Fingerprint: {remote_fingerprint}\n\t'
+                                f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)
                     user_fingerprint = hexlify(user_hostkey.get_fingerprint())
-                    log.info(f'Known Fingerprint: {user_fingerprint}')
+                    self._log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
                                                  '[FAILED]'))
@@ -292,7 +293,7 @@ class Connection(object):
 
     def get(self, remotefile, localpath=None, callback=None,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=log, silent=False):
+            delay=1, logger=self._log, silent=False):
         '''Copies a file between the remote host and the local host.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -314,7 +315,7 @@ class Connection(object):
         :param int delay: Default is 1. Initial delay between retries in
             seconds.
         :param logging.Logger logger: Defaults to built in logger object.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: Default is False. If set then no logging will
             be attempted.
 
@@ -349,7 +350,7 @@ class Connection(object):
 
     def get_d(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=self._log, silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
 
         :param str remotedir: The remote directory to copy locally.
@@ -372,7 +373,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -384,7 +385,7 @@ class Connection(object):
 
         if not Path(localdir).is_dir():
             Path(localdir).mkdir(exist_ok=True, parents=True)
-            log.info(f'Creating Folder [{localdir}]!')
+            logger.info(f'Creating Folder [{localdir}]!')
 
         if not pattern:
             paths = [
@@ -432,7 +433,7 @@ class Connection(object):
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=self._log, silent=False):
         '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: The remote directory to recursively copy.
@@ -455,7 +456,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -481,7 +482,7 @@ class Connection(object):
                            delay=delay, logger=logger, silent=silent)
 
     def getfo(self, remotefile, flo, callback=None, exceptions=None,
-              tries=None, backoff=2, delay=1, logger=log, silent=False):
+              tries=None, backoff=2, delay=1, logger=self._log, silent=False):
         '''Copy a remote file (remotepath) to a file-like object, flo.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -498,7 +499,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -522,7 +523,7 @@ class Connection(object):
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=log, silent=False):
+            delay=1, logger=self._log, silent=False):
         '''Copies a file between the local host and the remote host.
 
         :param str localfile: The local path and filename to copy remotely.
@@ -546,7 +547,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -588,7 +589,7 @@ class Connection(object):
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=self._log, silent=False):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -611,7 +612,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -664,7 +665,7 @@ class Connection(object):
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=self._log, silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -687,7 +688,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -711,7 +712,7 @@ class Connection(object):
 
     def putfo(self, flo, remotepath=None, file_size=0, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=self._log, silent=False):
         '''Copies the contents of a file like object to remotepath.
 
         :param flo: File-like object that supports .read()
@@ -732,7 +733,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -763,8 +764,8 @@ class Connection(object):
                       callback=callback, confirm=confirm)
 
     def execute(self, command,
-                exceptions=None, tries=None, backoff=2, delay=1, logger=log,
-                silent=False):
+                exceptions=None, tries=None, backoff=2, delay=1,
+                logger=self._log, silent=False):
         '''Execute the given commands on a remote machine.  The command is
         executed without regard to the remote :attr:`.pwd`.
 
@@ -778,7 +779,7 @@ class Connection(object):
         :param int delay: *Default is 1*. Initial delay between retries in
             seconds.
         :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
+            Logger to use.
         :param bool silent: *Default is False*. If set then no logging will
             be attempted.
 
@@ -881,10 +882,10 @@ class Connection(object):
                 self._transport.close()
             self._transport = None
             # Clean up any loggers
-            if log.hasHandlers():
+            if self._log.hasHandlers():
                 # remove lingering handlers if any
-                for handle in log.handlers:
-                    log.removeHandler(handle)
+                for handle in self._log.handlers:
+                    self._log.removeHandler(handle)
         except Exception as err:
             raise err
 
