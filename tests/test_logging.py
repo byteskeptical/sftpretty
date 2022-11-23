@@ -18,7 +18,7 @@ def test_log_cnopts_explicit_false(sftpserver):
             assert sftp.logfile is False
 
 
-def test_log_cnopts_log_level():
+def test_log_cnopts_log_level(sftpserver):
     '''test log level is passed to application logger'''
     copts = conn(sftpserver)
     cnopts = CnOpts(knownhosts='sftpserver.pub')
