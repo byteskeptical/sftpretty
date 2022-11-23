@@ -18,7 +18,7 @@ DESCRIPTION = "Pretty secure file transfer made easy."
 
 setup(
     name='sftpretty',
-    version='1.0.4',
+    version='1.0.5',
 
     packages=['sftpretty', ],
 
@@ -43,6 +43,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
 )

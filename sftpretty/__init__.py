@@ -19,9 +19,6 @@ from tempfile import mkstemp
 from uuid import uuid4 as uuid
 
 
-log = getLogger(__name__)
-
-
 class CnOpts(object):
     '''additional connection options beyond authentication
 
@@ -154,23 +151,25 @@ class Connection(object):
                                                        'provided: '
                                                       f'[{private_key_file}]'))
                     except PermissionError as err:
+                        self._log.error(('File permission preventing access '
+                                        f'to: [{private_key_file}] by user.'))
                         raise err
                     finally:
                         try:
                             private_key = key_type.from_private_key_file(
                                 private_key_file.as_posix(),
                                 password=private_key_pass)
-                        except PasswordRequiredException as err:
+                        except PasswordRequiredException:
                             raise CredentialException(('Key is encrypted and '
                                                        'no password was '
                                                        'provided.'))
                         except SSHException as err:
                             raise err
                 else:
-                    raise CredentialException(('Path provided is not a file '
-                                               'or does not exist, please '
-                                               'revise and provide a path to '
-                                               'a valid private key.'))
+                    raise CredentialException(('Path provided is an invalid '
+                                               'key file or does not exist, '
+                                               'please revise and provide a '
+                                               'path to a valid private key.'))
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
             self._transport.auth_password(self._username, password)
@@ -187,7 +186,8 @@ class Connection(object):
                     # Log to a temporary file.
                     flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
                 basicConfig(datefmt='%Y-%m-%d %H:%M:%S',
-                            filename=self._cnopts.log,
+                            filename=flo or self._cnopts.log,
+                            filemode='w',
                             format=('[%(asctime)s] {%(pathname)s:%(lineno)d} '
                                     '%(levelname)s - %(message)s'),
                             level=level_map[self._cnopts.log_level.lower()])
@@ -195,7 +195,8 @@ class Connection(object):
             console.setLevel(level_map[self._cnopts.log_level.lower()])
             formatter = Formatter('[%(asctime)s] %(levelname)s - %(message)s')
             console.setFormatter(formatter)
-            getLogger('').addHandler(console)
+            getLogger().addHandler(console)
+            global log
             log = getLogger(__name__)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '

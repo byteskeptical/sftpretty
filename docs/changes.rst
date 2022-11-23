@@ -1,7 +1,12 @@
 Change Log
 ==========
 
-1.0.4 (current, released 2022-09-24)
+1.0.5 (current, released 2022-11-22)
+------------------------------------
+    * added log_level to connection options for the quiet types
+    * switched to using native logging module instead of paramiko util 
+
+1.0.4 (released 2022-09-24)
 ------------------------------------
     * added Windows Pure Path logic in put_d() and put_r() through localtree()
     * fix for regression in _sftp_channel() causing UnboundLocalError
