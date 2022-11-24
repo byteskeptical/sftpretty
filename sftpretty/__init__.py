@@ -120,7 +120,7 @@ class Connection(object):
         self._transport = None
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
-        self._log = self._set_logging()
+        self._set_logging()
         self._set_username(username)
         self._timeout = timeout
         # Begin transport
@@ -151,8 +151,8 @@ class Connection(object):
                                                        'provided: '
                                                       f'[{private_key_file}]'))
                     except PermissionError as err:
-                        self._log.error(('File permission preventing access '
-                                        f'to: [{private_key_file}] by user.'))
+                        log.error(('File permission preventing access '
+                                  f'to: [{private_key_file}] by user.'))
                         raise err
                     finally:
                         try:
@@ -186,7 +186,7 @@ class Connection(object):
                     # Log to a temporary file.
                     flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
                 basicConfig(datefmt='%Y-%m-%d %H:%M:%S',
-                            filename=flo or self._cnopts.log,
+                            filename=self._cnopts.log,
                             filemode='w',
                             format=('[%(asctime)s] {%(pathname)s:%(lineno)d} '
                                     '%(levelname)s - %(message)s'),
@@ -198,8 +198,6 @@ class Connection(object):
             getLogger().addHandler(console)
             global log
             log = getLogger(__name__)
-
-            return log
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
@@ -230,8 +228,7 @@ class Connection(object):
 
             if self._default_path is not None:
                 _channel.chdir(self._default_path)
-                self._log.info(('Current Working Directory: '
-                               f'[{self._default_path}]'))
+                log.info(f'Current Working Directory: [{self._default_path}]')
 
             yield _channel
         except Exception as err:
@@ -274,15 +271,15 @@ class Connection(object):
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
                 remote_fingerprint = hexlify(remote_hostkey.get_fingerprint())
-                self._log.info((f'[{host}] Host Key:\n\t'
-                                f'Name: {remote_hostkey.get_name()}\n\t'
-                                f'Fingerprint: {remote_fingerprint}\n\t'
-                                f'Size: {remote_hostkey.get_bits():d}'))
+                log.info((f'[{host}] Host Key:\n\t'
+                          f'Name: {remote_hostkey.get_name()}\n\t'
+                          f'Fingerprint: {remote_fingerprint}\n\t'
+                          f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)
                     user_fingerprint = hexlify(user_hostkey.get_fingerprint())
-                    self._log.info(f'Known Fingerprint: {user_fingerprint}')
+                    log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
                                                  '[FAILED]'))
@@ -888,10 +885,10 @@ class Connection(object):
                 self._transport.close()
             self._transport = None
             # Clean up any loggers
-            if self._log.hasHandlers():
+            if log.hasHandlers():
                 # remove lingering handlers if any
-                for handle in self._log.handlers:
-                    self._log.removeHandler(handle)
+                for handle in log.handlers:
+                    log.removeHandler(handle)
         except Exception as err:
             raise err
 
