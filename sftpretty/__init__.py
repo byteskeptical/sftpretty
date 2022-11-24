@@ -298,7 +298,7 @@ class Connection(object):
 
     def get(self, remotefile, localpath=None, callback=None,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=self._log, silent=False):
+            delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the remote host and the local host.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -355,7 +355,7 @@ class Connection(object):
 
     def get_d(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=self._log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
 
         :param str remotedir: The remote directory to copy locally.
@@ -438,7 +438,7 @@ class Connection(object):
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=self._log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: The remote directory to recursively copy.
@@ -487,7 +487,8 @@ class Connection(object):
                            delay=delay, logger=logger, silent=silent)
 
     def getfo(self, remotefile, flo, callback=None, exceptions=None,
-              tries=None, backoff=2, delay=1, logger=self._log, silent=False):
+              tries=None, backoff=2, delay=1, logger=getLogger(__name__),
+              silent=False):
         '''Copy a remote file (remotepath) to a file-like object, flo.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -528,7 +529,7 @@ class Connection(object):
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=self._log, silent=False):
+            delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the local host and the remote host.
 
         :param str localfile: The local path and filename to copy remotely.
@@ -594,7 +595,7 @@ class Connection(object):
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=self._log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -670,7 +671,7 @@ class Connection(object):
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=self._log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -717,7 +718,7 @@ class Connection(object):
 
     def putfo(self, flo, remotepath=None, file_size=0, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=self._log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Copies the contents of a file like object to remotepath.
 
         :param flo: File-like object that supports .read()
@@ -770,7 +771,7 @@ class Connection(object):
 
     def execute(self, command,
                 exceptions=None, tries=None, backoff=2, delay=1,
-                logger=self._log, silent=False):
+                logger=getLogger(__name__), silent=False):
         '''Execute the given commands on a remote machine.  The command is
         executed without regard to the remote :attr:`.pwd`.
 
