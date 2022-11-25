@@ -2,7 +2,7 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (DEBUG, debug, ERROR, error, Formatter,
+from logging import (DEBUG, debug, ERROR, error, FileHandler, Formatter,
                      getLogger, INFO, info, StreamHandler)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
