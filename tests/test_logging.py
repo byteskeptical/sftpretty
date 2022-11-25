@@ -1,11 +1,8 @@
-'''test CnOpts.log param, CnOpts.log_level param and temporary log file creation'''
-
-import pytest
+'''test CnOpts.log, CnOpts.log_level params and temporary log file creation'''
 
 from common import conn, VFS
 from pathlib import Path
 from sftpretty import CnOpts, Connection
-
 
 
 def test_log_cnopts_explicit_false(sftpserver):
@@ -27,7 +24,7 @@ def test_log_cnopts_log_level(sftpserver):
     copts['cnopts'] = cnopts
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
-           assert sftp._log.log_level == 10
+            assert sftp.log.log_level == 10
 
 
 def test_log_cnopts_true(sftpserver):

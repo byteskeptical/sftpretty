@@ -2,7 +2,7 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (basicConfig, DEBUG, debug, ERROR, error, Formatter,
+from logging import (DEBUG, debug, ERROR, error, Formatter,
                      getLogger, INFO, info, StreamHandler)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
@@ -167,8 +167,8 @@ class Connection(object):
                             raise err
                 else:
                     raise CredentialException(('Path provided is an invalid '
-                                               'key file or does not exist, '
-                                               'please revise and provide a '
+                                               'key file, a directory or does not '
+                                               'exist, please revise and provide a '
                                                'path to a valid private key.'))
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
@@ -184,20 +184,20 @@ class Connection(object):
             if self._cnopts.log:
                 if isinstance(self._cnopts.log, bool):
                     # Log to a temporary file.
-                    flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
-                basicConfig(datefmt='%Y-%m-%d %H:%M:%S',
-                            filename=self._cnopts.log,
-                            filemode='w',
-                            format=('[%(asctime)s] {%(pathname)s:%(lineno)d} '
-                                    '%(levelname)s - %(message)s'),
-                            level=level_map[self._cnopts.log_level.lower()])
+                     flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
+                logfile = FileHandler(self._cnopts.log, mode='a', encoding='utf8')
+                logfile.setLevel = (level_map[self._cnopts.log_level.lower()])
+                logfile_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
+                                               '%(message)s'))
+                getLogger().addHandler(logfile)
             console = StreamHandler()
             console.setLevel(level_map[self._cnopts.log_level.lower()])
-            formatter = Formatter('[%(asctime)s] %(levelname)s - %(message)s')
-            console.setFormatter(formatter)
+            console_formatter = Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+            console.setFormatter(console_formatter)
             getLogger().addHandler(console)
             global log
             log = getLogger(__name__)
+            log.setLevel(level_map[self._cnopts.log_level.lower()])
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
