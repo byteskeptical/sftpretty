@@ -796,10 +796,10 @@ class Connection(object):
 
             output = channel.makefile('rb', -1).readlines()
 
-             if output:
-                 return output
-             else:
-                 return channel.makefile_stderr('rb', -1).readlines()
+            if output:
+                return output
+            else:
+                return channel.makefile_stderr('rb', -1).readlines()
 
         return _execute(self, command)
 
