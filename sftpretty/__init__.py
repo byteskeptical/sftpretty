@@ -19,46 +19,47 @@ from uuid import uuid4
 
 
 class CnOpts(object):
-    '''additional connection options beyond authentication
+    '''Additional connection options beyond authentication.
 
-    :ivar list|None ciphers: initial value: None - Ordered list of allowed
-        ciphers to use for connection.
-    :ivar bool compression: initial value: False - Enables compression on the
-        transport, if set to True.
-    :ivar list|None digests: initial value: None - Ordered list of preferred
-        digests to use for connection in provided order.
-    :ivar dict|None disabled_algorithms: initial value: None - Mapping type to
-        an iterable of algorithm identifiers, which will be disabled for the
+    :ivar tuple ciphers: *Default: paramiko.Transport.preferred_ciphers* -
+         Ordered list of preferred ciphers for connection.
+    :ivar tuple compression: *Default: paramiko.Transport.preferred_compression
+        * - Ordered tuple of preferred compression algorithms for connection.
+    :ivar tuple digests: *Default: paramiko.Transport.preferred_macs* - 
+        Ordered tuple of preferred digests/macs for connection.
+    :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an 
+        iterable of algorithm identifiers, which will be disabled for the 
         lifetime of the transport. Keys should match class builtin attribute.
-    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
+    :ivar paramiko.hostkeys.HostKeys hostkeys: HostKeys object used for 
         host key verifcation.
-    :ivar list|None kex: initial value: None - Ordered list of preferred
-        key exchange algorithms to use for connection.
-    :ivar list|None key_types: initial value: None - Ordered list of allowed
-        key types to use for connection.
-    :param str|None knownhosts: initial value: None - Location to load
-        hostkeys. If None, tries default unix location  ~/.ssh/known_hosts.
-    :ivar bool|str log: initial value: False - Log connection details. If
-        set to True, creates a temporary file used to capture logs. If set to
-        an existing filepath, logs will be appended.
-    :ivar str log_level: initial value: info - Set logging level for connection
-        . Choose between debug, error, or info.
-    :returns: (obj) CnOpts - Connection options object, used for passing
+    :ivar tuple kex: *Default: paramiko.Transport.preferred_kex* - Ordered 
+        tuple of preferred key exchange algorithms for connection.
+    :ivar tuple key_types: *Default: paramiko.Transport.preferred_pubkeys* 
+        - Ordered tuple of preferred public key types for connection.
+    :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
+        hostkeys from.
+    :ivar bool|str log: *Default: False* - Log connection details. If set to
+        True, creates a temporary file used to capture logs. If set to an
+        existing filepath, logs will be appended.
+    :ivar str log_level: *Default: info* - Set logging level for connection. 
+        Choose between debug, error, or info.
+    :returns: (obj) CnOpts - Connection options object, used for passing 
         extended options to a Connection object.
     :raises HostKeysException:
     '''
-    def __init__(self, knownhosts=None):
-        self.ciphers = None
-        self.compression = False
-        self.digests = None
-        self.disabled_algorithms = None
+    def __init__(self, knownhosts=\
+                 Path('~/.ssh/known_hosts').expanduser().as_posix()):
+        # dummy connection for version agnostic security options defaults
+        self._transport = Transport('localhost', 22)
+        self.ciphers = self._transport.preferred_ciphers
+        self.compression = self._transport.preferred_compression
+        self.digests = self._transport.preferred_macs
+        self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = None
-        self.key_types = None
+        self.kex = self._transport.preferred_kex
+        self.key_types = self._transport.preferred_pubkeys
         self.log = False
         self.log_level = 'info'
-        if knownhosts is None:
-            knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
         try:
             self.hostkeys.load(Path(knownhosts).absolute().as_posix())
         except FileNotFoundError:
@@ -94,6 +95,8 @@ class Connection(object):
     :param str host: *Required* - Hostname or address of the remote machine.
     :param None|CnOpts cnopts: *Default: None* - Extended connection options
         set as a CnOpts object.
+    :param bool compress: *Default: False* - Enables compression on the
+        transport if set to True.
     :param str|None default_path: *Default: None* - Set the default working
         directory upon connection.
     :param str|None password: *Default: None* - Credential for remote machine.
@@ -112,17 +115,17 @@ class Connection(object):
     :raises PasswordRequiredException:
     :raises SSHException:
     '''
-    def __init__(self, host, cnopts=None, default_path=None, password=None,
-                 port=22, private_key=None, private_key_pass=None,
-                 timeout=None, username=None):
-        self._transport = None
+    def __init__(self, host, cnopts=None, compress=False, default_path=None,
+                 password=None, port=22, private_key=None,
+                 private_key_pass=None, timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
         self._set_username(username)
         self._timeout = timeout
+        self._transport = None
         # Begin transport
-        self._start_transport(host, port)
+        self._start_transport(host, port, compress=compress)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
@@ -231,34 +234,40 @@ class Connection(object):
             if _channel and not keepalive:
                 _channel.close()
 
-    def _start_transport(self, host, port):
+    def _start_transport(self, host, port, compress=False):
         '''Start the transport and set connection options if specified.'''
         try:
             self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
-            self._transport.use_compression(self._cnopts.compression)
+            self._transport.use_compression(compress=compress)
 
-            # Set allowed ciphers
-            if self._cnopts.ciphers is not None:
-                ciphers = self._cnopts.ciphers
-                self._transport.get_security_options().ciphers = ciphers
-            # Set connection digests
-            if self._cnopts.digests is not None:
-                digests = self._cnopts.digests
-                self._transport.get_security_options().digests = digests
             # Set disabled algorithms
-            if self._cnopts.disabled_algorithms is not None:
-                disabled_algorithms = self._cnopts.disabled_algorithms
-                self._transport.disabled_algorithms = disabled_algorithms
+            disabled_algorithms = self._cnopts.disabled_algorithms
+            self._transport.disabled_algorithms = disabled_algorithms
+            log.debug(f'Disabled Algorithms: [{disabled_algorithms}]')
+
+            # Security Options
+            # Set allowed ciphers
+            ciphers = self._cnopts.ciphers
+            self._transport.get_security_options().ciphers = ciphers
+            log.debug(f'Ciphers: [{ciphers}]')
+            # Set compression algorithms
+            compression = self._cnopts.compression
+            self._transport.get_security_options().compression = compression
+            log.debug(f'Compression: [{compression}]')
+            # Set connection digests
+            digests = self._cnopts.digests
+            self._transport.get_security_options().digests = digests
+            log.debug(f'MACs: [{digests}]')
             # Set connection kex
-            if self._cnopts.kex is not None:
-                kex = self._cnopts.kex
-                self._transport.get_security_options().kex = kex
+            kex = self._cnopts.kex
+            self._transport.get_security_options().kex = kex
+            log.debug(f'KEX: [{kex}]')
             # Set allowed key types
-            if self._cnopts.key_types is not None:
-                key_types = self._cnopts.key_types
-                self._transport.get_security_options().key_types = key_types
+            key_types = self._cnopts.key_types
+            self._transport.get_security_options().key_types = key_types
+            log.debug(f'Public Key Types: [{key_types}]')
 
             self._transport.start_client(timeout=self._timeout)
 
