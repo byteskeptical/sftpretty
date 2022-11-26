@@ -6,7 +6,7 @@ from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
-                      PasswordRequiredException, SSHException
+                      PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
@@ -215,8 +215,10 @@ class Connection(object):
             _channel = SFTPClient.from_transport(self._transport)
 
             channel = _channel.get_channel()
-            channel.set_name(uuid4().hex)
+            channel_name = uuid4().hex
+            channel.set_name(channel_name)
             channel.settimeout(self._timeout)
+            log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
                 _channel.chdir(self._default_path)
@@ -274,7 +276,7 @@ class Connection(object):
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
-                                                 '[FAILED]'))
+                                                  '[FAILED]'))
             else:
                 err = self._transport.get_exception()
                 if err:
@@ -400,7 +402,9 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid4().hex) as pool:
+            thread_prefix = uuid4().hex
+            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+                logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
@@ -633,7 +637,9 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid4().hex) as pool:
+            thread_prefix = uuid4().hex
+            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+                logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.put, local, remote,
                                        callback=callback, confirm=confirm,
