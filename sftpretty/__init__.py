@@ -791,15 +791,15 @@ class Connection(object):
         @retry(exceptions, backoff=backoff, delay=delay, logger=logger,
                silent=silent, tries=tries)
         def _execute(self, command):
-            with self._sftp_channel() as channel:
-                channel.exec_command(command)
+            channel = self._transport.open_session()
+            channel.exec_command(command)
 
-                output = channel.makefile('rb', -1).readlines()
+            output = channel.makefile('rb', -1).readlines()
 
-                if output:
-                    return output
-                else:
-                    return channel.makefile_stderr('rb', -1).readlines()
+             if output:
+                 return output
+             else:
+                 return channel.makefile_stderr('rb', -1).readlines()
 
         return _execute(self, command)
 
