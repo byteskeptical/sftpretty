@@ -159,7 +159,7 @@ class Connection(object):
                     raise err
                 finally:
                     private_key = key_type.from_private_key_file(
-                    private_key_file.as_posix(), password=private_key_pass)
+                        private_key_file.as_posix(), password=private_key_pass)
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
             self._transport.auth_password(self._username, password)
@@ -183,7 +183,8 @@ class Connection(object):
                 getLogger().addHandler(logfile)
             console = StreamHandler()
             console.setLevel(level_map[self._cnopts.log_level.lower()])
-            console_formatter = Formatter('[%(asctime)s] %(levelname)s - %(message)s')
+            console_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
+                                           '%(message)s'))
             console.setFormatter(console_formatter)
             getLogger().addHandler(console)
             global log
@@ -192,7 +193,6 @@ class Connection(object):
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
-
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
@@ -276,7 +276,7 @@ class Connection(object):
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
-                                                  '[FAILED]'))
+                                                 '[FAILED]'))
             else:
                 err = self._transport.get_exception()
                 if err:
@@ -791,17 +791,17 @@ class Connection(object):
         @retry(exceptions, backoff=backoff, delay=delay, logger=logger,
                silent=silent, tries=tries)
         def _execute(self, command):
-            channel = self._transport.open_session()
-            channel.exec_command(command)
+            with self._sftp_channel() as channel:
+                channel.exec_command(command)
 
-            output = channel.makefile('rb', -1).readlines()
+                output = channel.makefile('rb', -1).readlines()
 
-            if output:
-                return output
-            else:
-                return channel.makefile_stderr('rb', -1).readlines()
+                if output:
+                    return output
+                else:
+                    return channel.makefile_stderr('rb', -1).readlines()
 
-        _execute(self, command)
+        return _execute(self, command)
 
     @contextmanager
     def cd(self, remotepath=None):

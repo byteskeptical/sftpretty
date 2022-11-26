@@ -24,7 +24,7 @@ def test_log_cnopts_log_level(sftpserver):
     copts['cnopts'] = cnopts
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
-            sftp.execute('ls')
+            print(sftp.execute('ls'))
             assert sftp.logger.log_level == 10
 
 

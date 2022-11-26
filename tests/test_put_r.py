@@ -7,6 +7,7 @@ from common import SKIP_IF_CI
 from pathlib import Path
 from tempfile import mkdtemp
 
+
 # TODO 2
 @SKIP_IF_CI
 def test_put_r(lsftp):
