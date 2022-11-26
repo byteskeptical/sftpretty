@@ -2,13 +2,12 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (DEBUG, debug, ERROR, error, FileHandler, Formatter,
-                     getLogger, INFO, info, StreamHandler)
+from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
+                     StreamHandler)
 from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
-                      AuthenticationException, PasswordRequiredException,
-                      SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
-                      RSAKey)
+                      PasswordRequiredException, SSHException
+                      DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
@@ -16,7 +15,7 @@ from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
-from uuid import uuid4 as uuid
+from uuid import uuid4
 
 
 class CnOpts(object):
@@ -106,7 +105,6 @@ class Connection(object):
     :param float|None timeout: *Default: None* - Set channel timeout.
     :param str|None username: *Default: None* - User for remote machine.
     :returns: (obj) Connection to the requested host.
-    :raises AuthenticationException:
     :raises ConnectionException:
     :raises CredentialException:
     :raises HostKeysException:
@@ -130,51 +128,43 @@ class Connection(object):
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate to transport. Prefer private key if given'''
         if private_key is not None:
-            # Use path or provided key object
+            # Use key path or provided key object
+            key_map = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
+                       'RSA': RSAKey}
             if isinstance(private_key, str):
                 private_key_file = Path(private_key).expanduser().absolute()
-                if private_key_file.is_file():
-                    try:
-                        with open(private_key_file.as_posix(), 'rb') as key:
-                            key_head = key.readline().decode('utf8')
-                        if 'DSA' in key_head:
-                            key_type = DSSKey
-                        elif 'EC' in key_head:
-                            key_type = ECDSAKey
-                        elif 'OPENSSH' in key_head:
-                            key_type = Ed25519Key
-                        elif 'RSA' in key_head:
-                            key_type = RSAKey
-                        else:
-                            raise CredentialException(('Unable to identify '
-                                                       'key type from file '
-                                                       'provided: '
-                                                      f'[{private_key_file}]'))
-                    except PermissionError as err:
-                        log.error(('File permission preventing access '
-                                  f'to: [{private_key_file}] by user.'))
-                        raise err
-                    finally:
-                        try:
-                            private_key = key_type.from_private_key_file(
-                                private_key_file.as_posix(),
-                                password=private_key_pass)
-                        except PasswordRequiredException:
-                            raise CredentialException(('Key is encrypted and '
-                                                       'no password was '
-                                                       'provided.'))
-                        except SSHException as err:
-                            raise err
-                else:
-                    raise CredentialException(('Path provided is an invalid '
-                                               'key file, a directory or does not '
-                                               'exist, please revise and provide a '
-                                               'path to a valid private key.'))
+                try:
+                    with open(private_key_file.as_posix(), 'r') as key:
+                        key_head = key.readline()
+                    key_head = key_head.removeprefix('-----BEGIN ')\
+                                       .removesuffix(' PRIVATE KEY-----\n')
+                    log.debug(f'Key Head: [{key_head}]')
+                    key_type = key_map[key_head.strip()]
+                except KeyError as err:
+                    log.error(('Unable to identify key type from file provided:'
+                              f'\n[{private_key_file}]'))
+                    raise err
+                except PasswordRequiredException as err:
+                    log.error(('No password provided for encrypted private '
+                               'key encrypted private key.'))
+                    raise err
+                except PermissionError as err:
+                    log.error(('File permission preventing user access to:\n'
+                              f'[{private_key_file}]'))
+                    raise err
+                except SSHException as err:
+                    log.error(('Path provided is an invalid key file, a '
+                               'directory or does not exist, please revise '
+                               'and provide a path to a valid private key.'))
+                    raise err
+                finally:
+                    private_key = key_type.from_private_key_file(
+                    private_key_file.as_posix(), password=private_key_pass)
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
             self._transport.auth_password(self._username, password)
         else:
-            raise CredentialException('No password or key specified.')
+            raise CredentialException('No password or private key specified.')
 
     def _set_logging(self):
         '''Set logging location and level for connection'''
@@ -184,11 +174,12 @@ class Connection(object):
             if self._cnopts.log:
                 if isinstance(self._cnopts.log, bool):
                     # Log to a temporary file.
-                     flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
-                logfile = FileHandler(self._cnopts.log, mode='a', encoding='utf8')
+                    flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
+                logfile = FileHandler(self._cnopts.log, encoding='utf8')
                 logfile.setLevel = (level_map[self._cnopts.log_level.lower()])
                 logfile_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
                                                '%(message)s'))
+                logfile.setFormatter(logfile_formatter)
                 getLogger().addHandler(logfile)
             console = StreamHandler()
             console.setLevel(level_map[self._cnopts.log_level.lower()])
@@ -201,6 +192,7 @@ class Connection(object):
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
+
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
@@ -223,7 +215,7 @@ class Connection(object):
             _channel = SFTPClient.from_transport(self._transport)
 
             channel = _channel.get_channel()
-            channel.set_name(uuid().hex)
+            channel.set_name(uuid4().hex)
             channel.settimeout(self._timeout)
 
             if self._default_path is not None:
@@ -408,7 +400,7 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            with ThreadPoolExecutor(thread_name_prefix=uuid4().hex) as pool:
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
@@ -641,7 +633,7 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            with ThreadPoolExecutor(thread_name_prefix=uuid4().hex) as pool:
                 threads = {
                            pool.submit(self.put, local, remote,
                                        callback=callback, confirm=confirm,

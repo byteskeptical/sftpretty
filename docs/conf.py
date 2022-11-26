@@ -85,7 +85,7 @@ exclude_patterns = ['_build']
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+# show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -195,16 +195,16 @@ htmlhelp_basename = 'sftprettydoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+# latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-# 'papersize': 'letterpaper',
+#    'papersize': 'letterpaper',
 
 # The font size ('10pt', '11pt' or '12pt').
-# 'pointsize': '10pt',
+#    'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-# 'preamble': '',
-}
+#    'preamble': '',
+# }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
