@@ -21,12 +21,13 @@ def test_log_cnopts_log_level(sftpserver):
     copts = conn(sftpserver)
     cnopts = CnOpts(knownhosts='sftpserver.pub')
     cnopts.log = True
-    cnopts.log_level = 'debug'
+    cnopts.log_level = 'error'
     copts['cnopts'] = cnopts
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
+            sftp.listdir()
             log = getLogger('sftpretty')
-            assert log.level == 10
+            assert log.level == 40
 
 
 def test_log_cnopts_true(sftpserver):

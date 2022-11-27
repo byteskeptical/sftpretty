@@ -480,6 +480,7 @@ class Connection(object):
                                        cwd.lstrip('/')).as_posix())]
 
         self.remotetree(directories, cwd, localdir, recurse=True)
+        log.debug(f'Remote Tree: [{directories}]')
 
         for tld in directories.keys():
             for remote, local in directories[tld]:
@@ -712,6 +713,7 @@ class Connection(object):
                                 Path(remotedir).joinpath(localdir).as_posix())]
 
         localtree(directories, localdir, remotedir, recurse=True)
+        log.debug(f'Local Tree: [{directories}]')
 
         for tld in directories.keys():
             for local, remote in directories[tld]:
@@ -1078,7 +1080,7 @@ class Connection(object):
     def open(self, remotefile, mode='r', bufsize=-1):
         '''Open a file on the remote server.
 
-        :param str remotefile: Path of the file to open.
+        :param str remotefile: Path of remote file to open.
         :param str mode: File access mode, defaults to read-only.
         :param int bufsize: *Default: -1* - Buffering in bytes.
 
