@@ -1,6 +1,6 @@
 '''test CnOpts.log, CnOpts.log_level params and temporary log file creation'''
 
-from common import conn, tempfile_containing, VFS
+from common import conn, VFS
 from pathlib import Path
 from sftpretty import CnOpts, Connection
 
@@ -24,10 +24,8 @@ def test_log_cnopts_log_level(sftpserver):
     copts['cnopts'] = cnopts
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
-            with tempfile_containing(contents='') as fname:
-                sftp.get('read.me', fname)
-            assert sftp.logger.log_level == 10
-
+            log = getLogger('sftpretty')
+            assert log.log_level == 10
 
 def test_log_cnopts_true(sftpserver):
     '''test .logfile returns temp filename when CnOpts.log is set to True'''

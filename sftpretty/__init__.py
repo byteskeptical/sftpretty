@@ -25,29 +25,29 @@ class CnOpts(object):
          Ordered list of preferred ciphers for connection.
     :ivar tuple compression: *Default: paramiko.Transport.preferred_compression
         * - Ordered tuple of preferred compression algorithms for connection.
-    :ivar tuple digests: *Default: paramiko.Transport.preferred_macs* - 
+    :ivar tuple digests: *Default: paramiko.Transport.preferred_macs* -
         Ordered tuple of preferred digests/macs for connection.
-    :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an 
-        iterable of algorithm identifiers, which will be disabled for the 
+    :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
+        iterable of algorithm identifiers, which will be disabled for the
         lifetime of the transport. Keys should match class builtin attribute.
-    :ivar paramiko.hostkeys.HostKeys hostkeys: HostKeys object used for 
+    :ivar paramiko.hostkeys.HostKeys hostkeys: HostKeys object used for
         host key verifcation.
-    :ivar tuple kex: *Default: paramiko.Transport.preferred_kex* - Ordered 
+    :ivar tuple kex: *Default: paramiko.Transport.preferred_kex* - Ordered
         tuple of preferred key exchange algorithms for connection.
-    :ivar tuple key_types: *Default: paramiko.Transport.preferred_pubkeys* 
+    :ivar tuple key_types: *Default: paramiko.Transport.preferred_pubkeys*
         - Ordered tuple of preferred public key types for connection.
     :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
         hostkeys from.
     :ivar bool|str log: *Default: False* - Log connection details. If set to
         True, creates a temporary file used to capture logs. If set to an
         existing filepath, logs will be appended.
-    :ivar str log_level: *Default: info* - Set logging level for connection. 
+    :ivar str log_level: *Default: info* - Set logging level for connection.
         Choose between debug, error, or info.
-    :returns: (obj) CnOpts - Connection options object, used for passing 
+    :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
     :raises HostKeysException:
     '''
-    def __init__(self, knownhosts=\
+    def __init__(self, knownhosts=
                  Path('~/.ssh/known_hosts').expanduser().as_posix()):
         # dummy connection for version agnostic security options defaults
         self._transport = Transport('localhost', 22)
@@ -144,8 +144,8 @@ class Connection(object):
                     log.debug(f'Key Head: [{key_head}]')
                     key_type = key_map[key_head.strip()]
                 except KeyError as err:
-                    log.error(('Unable to identify key type from file provided:'
-                              f'\n[{private_key_file}]'))
+                    log.error(('Unable to identify key type from file provided'
+                              f':\n[{private_key_file}]'))
                     raise err
                 except PasswordRequiredException as err:
                     log.error(('No password provided for encrypted private '
