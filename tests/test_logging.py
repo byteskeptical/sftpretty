@@ -1,6 +1,7 @@
 '''test CnOpts.log, CnOpts.log_level params and temporary log file creation'''
 
 from common import conn, VFS
+from logging import getLogger
 from pathlib import Path
 from sftpretty import CnOpts, Connection
 
