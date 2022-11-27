@@ -47,17 +47,17 @@ class CnOpts(object):
         extended options to a Connection object.
     :raises HostKeysException:
     '''
-    def __init__(self, knownhosts=
-                 Path('~/.ssh/known_hosts').expanduser().as_posix()):
+    def __init__(self, knownhosts=Path(
+                 '~/.ssh/known_hosts').expanduser().as_posix()):
         # dummy connection for version agnostic security options defaults
-        self._transport = Transport('localhost', 22)
-        self.ciphers = self._transport.preferred_ciphers
-        self.compression = self._transport.preferred_compression
-        self.digests = self._transport.preferred_macs
+        self.__transport = Transport('localhost', 22)
+        self.ciphers = self.__transport.preferred_ciphers
+        self.compression = self.__transport.preferred_compression
+        self.digests = self.__transport.preferred_macs
         self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = self._transport.preferred_kex
-        self.key_types = self._transport.preferred_pubkeys
+        self.kex = self.__transport.preferred_kex
+        self.key_types = self.__transport.preferred_pubkeys
         self.log = False
         self.log_level = 'info'
         try:

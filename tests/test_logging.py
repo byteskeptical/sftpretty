@@ -28,6 +28,7 @@ def test_log_cnopts_log_level(sftpserver):
             log = getLogger('sftpretty')
             assert log.level == 10
 
+
 def test_log_cnopts_true(sftpserver):
     '''test .logfile returns temp filename when CnOpts.log is set to True'''
     copts = conn(sftpserver)
