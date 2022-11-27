@@ -132,7 +132,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
             message = 'Retry: [DISABLED]'
             if not silent:
                 if logger:
-                    logger.info(message)
+                    logger.debug(message)
                 else:
                     print(message)
 
