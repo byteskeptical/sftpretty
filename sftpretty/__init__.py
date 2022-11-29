@@ -124,21 +124,18 @@ class Connection(object):
     '''
     def __init__(self, host, cnopts=None, compress=False, default_path=None,
                  password=None, port=22, private_key=None,
-                 private_key_pass=None, timeout=None,
-                 username=environ.get('LOGNAME', None)):
+                 private_key_pass=None, timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
+        self._set_username(username)
         self._timeout = timeout
         self._transport = None
-        self._username = username
         self._start_transport(host, port, compress=compress)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate to transport. Prefer private key if given'''
-        if self._username is None:
-            raise CredentialException('No username specified.')
         if private_key is not None:
             # Use key path or provided key object
             key_map = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
@@ -205,6 +202,18 @@ class Connection(object):
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
+
+    def _set_username(self, username):
+        '''Set the username for the connection. If not passed, then look to
+        the environment. Still nothing? Throw exception.'''
+        local_username = environ.get('LOGNAME', None)
+
+        if username is not None:
+            self._username = username
+        elif local_username is not None:
+            self._username = local_username
+        else:
+            raise CredentialException('No username specified.')
 
     @contextmanager
     def _sftp_channel(self, keepalive=False):
