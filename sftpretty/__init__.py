@@ -2,64 +2,71 @@ from binascii import hexlify
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
-from logging import (DEBUG, debug, ERROR, error, getLogger, INFO, info,
-                     WARNING, warning)
+from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
+                     StreamHandler)
 from os import environ, utime
-from paramiko import (hostkeys, SFTPClient, Transport, util,
-                      AuthenticationException, PasswordRequiredException,
-                      SSHException, AgentKey, DSSKey, ECDSAKey, Ed25519Key,
-                      RSAKey)
+from paramiko import (hostkeys, SFTPClient, Transport,
+                      PasswordRequiredException, SSHException,
+                      DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
-                                  HostKeysException)
+                                  HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
-from uuid import uuid4 as uuid
-
-
-log = getLogger(__name__)
+from uuid import uuid4
 
 
 class CnOpts(object):
-    '''additional connection options beyond authentication
+    '''Additional connection options beyond authentication.
 
-    :ivar bool|str log: initial value: False - Log connection details. If set
-        to True, creates a temporary file used to capture logs. If set to an
-        existing filepath, logs will be appended.
-    :ivar bool compression: initial value: False - Enables compression on the
-        transport, if set to True.
-    :ivar list|None ciphers: initial value: None - Ordered list of allowed
-        ciphers to use for connection.
-    :ivar list|None digests: initial value: None - Ordered list of preferred
-        digests to use for connection in provided order.
-    :ivar dict|None disabled_algorithms: initial value: None - Mapping type to
-        an iterable of algorithm identifiers, which will be disabled for the
+    :ivar tuple ciphers: *Default: paramiko.Transport.preferred_ciphers* -
+         Ordered list of preferred ciphers for connection.
+    :ivar tuple compression: *Default: paramiko.Transport.preferred_compression
+        * - Ordered tuple of preferred compression algorithms for connection.
+    :ivar tuple digests: *Default: paramiko.Transport.preferred_macs* -
+        Ordered tuple of preferred digests/macs for connection.
+    :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
+        iterable of algorithm identifiers, which will be disabled for the
         lifetime of the transport. Keys should match class builtin attribute.
-    :ivar list|None kex: initial value: None - Ordered list of preferred
-        key exchange algorithms to use for connection.
-    :ivar list|None key_types: initial value: None - Ordered list of allowed
-        key types to use for connection.
-    :ivar paramiko.hostkeys.HostKeys|None hostkeys: HostKeys object used for
+    :ivar paramiko.hostkeys.HostKeys hostkeys: HostKeys object used for
         host key verifcation.
-    :param filepath|None knownhosts: initial value: None - Location to load
-        hostkeys. If None, tries default unix location  ~/.ssh/known_hosts.
+    :ivar tuple kex: *Default: paramiko.Transport.preferred_kex* - Ordered
+        tuple of preferred key exchange algorithms for connection.
+    :ivar tuple key_types: *Default: paramiko.Transport.preferred_pubkeys*
+        - Ordered tuple of preferred public key types for connection.
+    :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
+        hostkeys from.
+    :ivar bool|str log: *Default: False* - Log connection details. If set to
+        True, creates a temporary file used to capture logs. If set to an
+        existing filepath, logs will be appended.
+    :ivar str log_level: *Default: info* - Set logging level for connection.
+        Choose between debug, error, or info.
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
     :raises HostKeysException:
     '''
-    def __init__(self, knownhosts=None):
-        self.ciphers = None
-        self.compression = False
-        self.digests = None
-        self.disabled_algorithms = None
+    def __init__(self, knownhosts=Path(
+                 '~/.ssh/known_hosts').expanduser().as_posix()):
+        self.ciphers = ('aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
+                        'aes192-cbc', 'aes128-cbc', '3des-cbc')
+        self.compression = ('none',)
+        self.digests = ('hmac-sha2-512', 'hmac-sha2-256',
+                        'hmac-sha2-512-etm@openssh.com',
+                        'hmac-sha2-256-etm@openssh.com',
+                        'hmac-sha1', 'hmac-md5')
+        self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = None
-        self.key_types = None
+        self.kex = ('ecdh-sha2-nistp521', 'ecdh-sha2-nistp384',
+                    'ecdh-sha2-nistp256', 'diffie-hellman-group16-sha512',
+                    'diffie-hellman-group-exchange-sha256',
+                    'diffie-hellman-group-exchange-sha1')
+        self.key_types = ('ssh-ed25519', 'ecdsa-sha2-nistp521',
+                          'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp256',
+                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
         self.log = False
-        if knownhosts is None:
-            knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
+        self.log_level = 'info'
         try:
             self.hostkeys.load(Path(knownhosts).absolute().as_posix())
         except FileNotFoundError:
@@ -95,6 +102,8 @@ class Connection(object):
     :param str host: *Required* - Hostname or address of the remote machine.
     :param None|CnOpts cnopts: *Default: None* - Extended connection options
         set as a CnOpts object.
+    :param bool compress: *Default: False* - Enables compression on the
+        transport if set to True.
     :param str|None default_path: *Default: None* - Set the default working
         directory upon connection.
     :param str|None password: *Default: None* - Credential for remote machine.
@@ -108,81 +117,91 @@ class Connection(object):
     :returns: (obj) Connection to the requested host.
     :raises ConnectionException:
     :raises CredentialException:
-    :raises SSHException:
-    :raises AuthenticationException:
-    :raises PasswordRequiredException:
     :raises HostKeysException:
+    :raises LoggingException:
+    :raises PasswordRequiredException:
+    :raises SSHException:
     '''
-    def __init__(self, host, cnopts=None, default_path=None, password=None,
-                 port=22, private_key=None, private_key_pass=None,
-                 timeout=None, username=None):
-        self._transport = None
+    def __init__(self, host, cnopts=None, compress=False, default_path=None,
+                 password=None, port=22, private_key=None,
+                 private_key_pass=None, timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
         self._set_username(username)
         self._timeout = timeout
-        # Begin transport
-        self._start_transport(host, port)
+        self._transport = None
+        self._start_transport(host, port, compress=compress)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate to transport. Prefer private key if given'''
         if private_key is not None:
-            # Use path or provided key object
+            # Use key path or provided key object
+            key_map = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
+                       'RSA': RSAKey}
             if isinstance(private_key, str):
                 private_key_file = Path(private_key).expanduser().absolute()
-                if private_key_file.is_file():
-                    try:
-                        with open(private_key_file.as_posix(), 'rb') as key:
-                            key_head = key.readline().decode('utf8')
-                        if 'DSA' in key_head:
-                            key_type = DSSKey
-                        elif 'EC' in key_head:
-                            key_type = ECDSAKey
-                        elif 'OPENSSH' in key_head:
-                            key_type = Ed25519Key
-                        elif 'RSA' in key_head:
-                            key_type = RSAKey
-                        else:
-                            raise CredentialException(('Unable to identify '
-                                                       'key type from file '
-                                                       'provided: '
-                                                      f'[{private_key_file}]'))
-                    except PermissionError as err:
-                        raise err
-                    finally:
-                        try:
-                            private_key = key_type.from_private_key_file(
-                                private_key_file.as_posix(),
-                                password=private_key_pass)
-                        except PasswordRequiredException as err:
-                            raise CredentialException(('Key is encrypted and '
-                                                       'no password was '
-                                                       'provided.'))
-                        except SSHException as err:
-                            raise err
-                else:
-                    raise CredentialException(('Path provided is not a file '
-                                               'or does not exist, please '
-                                               'revise and provide a path to '
-                                               'a valid private key.'))
+                try:
+                    with open(private_key_file.as_posix(), 'r') as key:
+                        key_head = key.readline()
+                    key_head = key_head.removeprefix('-----BEGIN ')\
+                                       .removesuffix(' PRIVATE KEY-----\n')
+                    log.debug(f'Key Head: [{key_head}]')
+                    key_type = key_map[key_head.strip()]
+                except KeyError as err:
+                    log.error(('Unable to identify key type from file provided'
+                              f':\n[{private_key_file}]'))
+                    raise err
+                except PasswordRequiredException as err:
+                    log.error(('No password provided for encrypted private '
+                               'key encrypted private key.'))
+                    raise err
+                except PermissionError as err:
+                    log.error(('File permission preventing user access to:\n'
+                              f'[{private_key_file}]'))
+                    raise err
+                except SSHException as err:
+                    log.error(('Path provided is an invalid key file, a '
+                               'directory or does not exist, please revise '
+                               'and provide a path to a valid private key.'))
+                    raise err
+                finally:
+                    private_key = key_type.from_private_key_file(
+                        private_key_file.as_posix(), password=private_key_pass)
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
             self._transport.auth_password(self._username, password)
         else:
-            raise CredentialException('No password or key specified.')
+            raise CredentialException('No password or private key specified.')
 
     def _set_logging(self):
-        '''Set logging for connection'''
-        if self._cnopts.log:
-            if isinstance(self._cnopts.log, bool):
-                # Log to a temporary file.
-                flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
-                util.log_to_file(flo)
-            else:
-                util.log_to_file(self._cnopts.log)
-            log.info(f'Logging to file: [{self._cnopts.log}]')
+        '''Set logging location and level for connection'''
+        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
+
+        try:
+            if self._cnopts.log:
+                if isinstance(self._cnopts.log, bool):
+                    # Log to a temporary file.
+                    flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
+                logfile = FileHandler(self._cnopts.log, encoding='utf8')
+                logfile.setLevel = (level_map[self._cnopts.log_level.lower()])
+                logfile_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
+                                               '%(message)s'))
+                logfile.setFormatter(logfile_formatter)
+                getLogger().addHandler(logfile)
+            console = StreamHandler()
+            console.setLevel(level_map[self._cnopts.log_level.lower()])
+            console_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
+                                           '%(message)s'))
+            console.setFormatter(console_formatter)
+            getLogger().addHandler(console)
+            global log
+            log = getLogger(__name__)
+            log.setLevel(level_map[self._cnopts.log_level.lower()])
+        except KeyError:
+            raise LoggingException(('Log level must set to one of following: '
+                                    '[debug, error, info].'))
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
@@ -205,8 +224,10 @@ class Connection(object):
             _channel = SFTPClient.from_transport(self._transport)
 
             channel = _channel.get_channel()
-            channel.set_name(uuid().hex)
+            channel_name = uuid4().hex
+            channel.set_name(channel_name)
             channel.settimeout(self._timeout)
+            log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
                 _channel.chdir(self._default_path)
@@ -219,34 +240,40 @@ class Connection(object):
             if _channel and not keepalive:
                 _channel.close()
 
-    def _start_transport(self, host, port):
+    def _start_transport(self, host, port, compress=False):
         '''Start the transport and set connection options if specified.'''
         try:
             self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
-            self._transport.use_compression(self._cnopts.compression)
+            self._transport.use_compression(compress=compress)
 
-            # Set allowed ciphers
-            if self._cnopts.ciphers is not None:
-                ciphers = self._cnopts.ciphers
-                self._transport.get_security_options().ciphers = ciphers
-            # Set connection digests
-            if self._cnopts.digests is not None:
-                digests = self._cnopts.digests
-                self._transport.get_security_options().digests = digests
             # Set disabled algorithms
-            if self._cnopts.disabled_algorithms is not None:
-                disabled_algorithms = self._cnopts.disabled_algorithms
-                self._transport.disabled_algorithms = disabled_algorithms
+            disabled_algorithms = self._cnopts.disabled_algorithms
+            self._transport.disabled_algorithms = disabled_algorithms
+            log.debug(f'Disabled Algorithms: [{disabled_algorithms}]')
+
+            # Security Options
+            # Set allowed ciphers
+            ciphers = self._cnopts.ciphers
+            self._transport.get_security_options().ciphers = ciphers
+            log.debug(f'Ciphers: [{ciphers}]')
+            # Set compression algorithms
+            compression = self._cnopts.compression
+            self._transport.get_security_options().compression = compression
+            log.debug(f'Compression: [{compression}]')
+            # Set connection digests
+            digests = self._cnopts.digests
+            self._transport.get_security_options().digests = digests
+            log.debug(f'MACs: [{digests}]')
             # Set connection kex
-            if self._cnopts.kex is not None:
-                kex = self._cnopts.kex
-                self._transport.get_security_options().kex = kex
+            kex = self._cnopts.kex
+            self._transport.get_security_options().kex = kex
+            log.debug(f'KEX: [{kex}]')
             # Set allowed key types
-            if self._cnopts.key_types is not None:
-                key_types = self._cnopts.key_types
-                self._transport.get_security_options().key_types = key_types
+            key_types = self._cnopts.key_types
+            self._transport.get_security_options().key_types = key_types
+            log.debug(f'Public Key Types: [{key_types}]')
 
             self._transport.start_client(timeout=self._timeout)
 
@@ -268,7 +295,7 @@ class Connection(object):
             else:
                 err = self._transport.get_exception()
                 if err:
-                    self._transport.close()
+                    self.close()
                     raise err
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
@@ -277,7 +304,7 @@ class Connection(object):
 
     def get(self, remotefile, localpath=None, callback=None,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=log, silent=False):
+            delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the remote host and the local host.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -286,21 +313,22 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int)``) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: Default is 2. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: Default is 1. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: Defaults to built in logger object.
-            Logger to use. If None, print.
-        :param bool silent: Default is False. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -334,7 +362,7 @@ class Connection(object):
 
     def get_d(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
 
         :param str remotedir: The remote directory to copy locally.
@@ -342,23 +370,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param str pattern: Filter applied to filenames to transfer only subset
-            of files in a directory.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param str pattern: *Default: None* - Filter applied to filenames to
+            transfer only subset of files in a directory.
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -369,7 +398,7 @@ class Connection(object):
 
         if not Path(localdir).is_dir():
             Path(localdir).mkdir(exist_ok=True, parents=True)
-            log.info(f'Creating Folder [{localdir}]!')
+            logger.info(f'Creating Folder [{localdir}]!')
 
         if not pattern:
             paths = [
@@ -390,7 +419,9 @@ class Connection(object):
                     ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            thread_prefix = uuid4().hex
+            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+                logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
@@ -417,7 +448,7 @@ class Connection(object):
 
     def get_r(self, remotedir, localdir, callback=None, pattern=None,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: The remote directory to recursively copy.
@@ -425,23 +456,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param str pattern: Filter applied to filenames to transfer only subset
-            of files in a directory.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param str pattern: *Default: None* - Filter applied to all filenames
+            transfering only the subset of files that match.
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -457,6 +489,7 @@ class Connection(object):
                                        cwd.lstrip('/')).as_posix())]
 
         self.remotetree(directories, cwd, localdir, recurse=True)
+        log.debug(f'Remote Tree: [{directories}]')
 
         for tld in directories.keys():
             for remote, local in directories[tld]:
@@ -466,7 +499,8 @@ class Connection(object):
                            delay=delay, logger=logger, silent=silent)
 
     def getfo(self, remotefile, flo, callback=None, exceptions=None,
-              tries=None, backoff=2, delay=1, logger=log, silent=False):
+              tries=None, backoff=2, delay=1, logger=getLogger(__name__),
+              silent=False):
         '''Copy a remote file (remotepath) to a file-like object, flo.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -477,14 +511,15 @@ class Connection(object):
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (int) The number of bytes written to the opened file object
@@ -507,7 +542,7 @@ class Connection(object):
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=log, silent=False):
+            delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the local host and the remote host.
 
         :param str localfile: The local path and filename to copy remotely.
@@ -516,23 +551,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            the file size
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (obj) SFTPAttributes containing details about the given file.
@@ -573,7 +609,7 @@ class Connection(object):
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -581,23 +617,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -622,7 +659,9 @@ class Connection(object):
                 ]
 
         if paths != []:
-            with ThreadPoolExecutor(thread_name_prefix=uuid().hex) as pool:
+            thread_prefix = uuid4().hex
+            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+                logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.put, local, remote,
                                        callback=callback, confirm=confirm,
@@ -649,7 +688,7 @@ class Connection(object):
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -657,23 +696,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -686,6 +726,7 @@ class Connection(object):
                                 Path(remotedir).joinpath(localdir).as_posix())]
 
         localtree(directories, localdir, remotedir, recurse=True)
+        log.debug(f'Local Tree: [{directories}]')
 
         for tld in directories.keys():
             for local, remote in directories[tld]:
@@ -696,7 +737,7 @@ class Connection(object):
 
     def putfo(self, flo, remotepath=None, file_size=0, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=log, silent=False):
+              delay=1, logger=getLogger(__name__), silent=False):
         '''Copies the contents of a file like object to remotepath.
 
         :param flo: File-like object that supports .read()
@@ -706,19 +747,19 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
         :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (obj) SFTPAttributes containing details about the given file.
@@ -748,8 +789,8 @@ class Connection(object):
                       callback=callback, confirm=confirm)
 
     def execute(self, command,
-                exceptions=None, tries=None, backoff=2, delay=1, logger=log,
-                silent=False):
+                exceptions=None, tries=None, backoff=2, delay=1,
+                logger=getLogger(__name__), silent=False):
         '''Execute the given commands on a remote machine.  The command is
         executed without regard to the remote :attr:`.pwd`.
 
@@ -757,14 +798,15 @@ class Connection(object):
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
-            Logger to use. If None, print.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param logging.Logger logger: *Default: Logger(__name__)* -
+            Logger to use.
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (list of str) Results of the command.
@@ -784,7 +826,7 @@ class Connection(object):
             else:
                 return channel.makefile_stderr('rb', -1).readlines()
 
-        _execute(self, command)
+        return _execute(self, command)
 
     @contextmanager
     def cd(self, remotepath=None):
@@ -866,11 +908,10 @@ class Connection(object):
                 self._transport.close()
             self._transport = None
             # Clean up any loggers
-            if self._cnopts.log:
+            if log.hasHandlers():
                 # remove lingering handlers if any
-                lgr = getLogger(__name__)
-                if lgr:
-                    lgr.handlers = []
+                for handle in log.handlers:
+                    log.removeHandler(handle)
         except Exception as err:
             raise err
 
@@ -1053,8 +1094,8 @@ class Connection(object):
     def open(self, remotefile, mode='r', bufsize=-1):
         '''Open a file on the remote server.
 
-        :param str remotefile: Path of the file to open.
-        :param str mode: File access mode, defaults to read-only.
+        :param str remotefile: Path of remote file to open.
+        :param str mode: *Default: read-only* - File access mode.
         :param int bufsize: *Default: -1* - Buffering in bytes.
 
         :returns: (obj) SFTPFile, a file-like object handler.
@@ -1089,7 +1130,7 @@ class Connection(object):
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
         :param str localdir: Location used as root of appended remote paths.
-        :param bool recurse: *Default: True*. To recurse or not to recurse
+        :param bool recurse: *Default: True* - To recurse or not to recurse
             that is the question.
 
         :returns: None

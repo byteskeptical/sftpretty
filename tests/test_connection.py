@@ -28,6 +28,7 @@ def test_connection_bad_host():
         cnopts.hostkeys = None
         sftp = Connection('localhost.home.arpa', cnopts=CnOpts(),
                           password='badpass', username='badhost')
+        sftp.listdir()
 
 
 @SKIP_IF_CI

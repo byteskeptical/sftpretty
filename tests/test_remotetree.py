@@ -1,7 +1,5 @@
 '''test sftpretty.remotetree'''
 
-import pytest
-
 from common import conn, VFS
 from pathlib import Path
 from sftpretty import Connection

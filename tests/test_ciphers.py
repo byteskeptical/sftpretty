@@ -1,11 +1,7 @@
 '''test CnOpts.ciphers param'''
 
-# pylint: disable=W0142
-
 # these can not use fixtures as we need to set ciphers prior to the connection
 # being made and fixtures are already active connections.
-
-import pytest
 
 from common import SFTP_LOCAL, SKIP_IF_CI
 from sftpretty import CnOpts, Connection

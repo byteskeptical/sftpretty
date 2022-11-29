@@ -7,27 +7,29 @@ from common import SKIP_IF_CI
 from pathlib import Path
 from tempfile import mkdtemp
 
+
 # TODO 1
-# @SKIP_IF_CI
-# def test_put_d(lsftp):
-#    '''test put_d'''
-#    localpath = mkdtemp()
-#    print(localpath)
-#    remote_dir = Path(localpath).stem
-#    build_dir_struct(localpath)
-#    localpath = Path(localpath).joinpath('pub').as_posix()
-#    print(localpath)
-#    # run the op
-#    lsftp.put_d(localpath, remote_dir)
-#
-#    # inspect results
-#
-#    # cleanup remote
-#
-#    # cleanup local
-#    Path(localpath).rmdir()
-#
-#    # check results
+@SKIP_IF_CI
+def test_put_d(lsftp):
+    '''test put_d'''
+    localpath = mkdtemp()
+    print(localpath)
+    remote_dir = Path(localpath).stem
+    build_dir_struct(localpath)
+    localpath = Path(localpath).joinpath('pub').as_posix()
+    print(localpath)
+    # run the op
+    lsftp.put_d(localpath, remote_dir)
+
+    # inspect results
+
+    # cleanup remote
+    lsftp.rmdir(remote_dir)
+
+    # cleanup local
+    Path(localpath).rmdir()
+
+    # check results
 
 
 # TODO
