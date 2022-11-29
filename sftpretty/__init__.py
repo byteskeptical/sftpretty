@@ -49,15 +49,22 @@ class CnOpts(object):
     '''
     def __init__(self, knownhosts=Path(
                  '~/.ssh/known_hosts').expanduser().as_posix()):
-        # dummy connection for version agnostic security options defaults
-        self.__transport = Transport('localhost', 22)
-        self.ciphers = self.__transport.preferred_ciphers
-        self.compression = self.__transport.preferred_compression
-        self.digests = self.__transport.preferred_macs
+        self.ciphers = ('aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
+                        'aes192-cbc', 'aes128-cbc', '3des-cbc')
+        self.compression = ('none',)
+        self.digests = ('hmac-sha2-512', 'hmac-sha2-256',
+                        'hmac-sha2-512-etm@openssh.com',
+                        'hmac-sha2-256-etm@openssh.com',
+                        'hmac-sha1', 'hmac-md5')
         self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = self.__transport.preferred_kex
-        self.key_types = self.__transport.preferred_pubkeys
+        self.kex = ('ecdh-sha2-nistp521', 'ecdh-sha2-nistp384',
+                    'ecdh-sha2-nistp256', 'diffie-hellman-group16-sha512',
+                    'diffie-hellman-group-exchange-sha256',
+                    'diffie-hellman-group-exchange-sha1')
+        self.key_types = ('ssh-ed25519', 'ecdsa-sha2-nistp521',
+                          'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp256',
+                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
         self.log = False
         self.log_level = 'info'
         try:
@@ -117,19 +124,21 @@ class Connection(object):
     '''
     def __init__(self, host, cnopts=None, compress=False, default_path=None,
                  password=None, port=22, private_key=None,
-                 private_key_pass=None, timeout=None, username=None):
+                 private_key_pass=None, timeout=None,
+                 username=environ.get('LOGNAME', None)):
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
-        self._set_username(username)
         self._timeout = timeout
         self._transport = None
-        # Begin transport
+        self._username = username
         self._start_transport(host, port, compress=compress)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate to transport. Prefer private key if given'''
+        if self._username is None:
+            raise CredentialException('No username specified.')
         if private_key is not None:
             # Use key path or provided key object
             key_map = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
@@ -196,18 +205,6 @@ class Connection(object):
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
-
-    def _set_username(self, username):
-        '''Set the username for the connection. If not passed, then look to
-        the environment. Still nothing? Throw exception.'''
-        local_username = environ.get('LOGNAME', None)
-
-        if username is not None:
-            self._username = username
-        elif local_username is not None:
-            self._username = local_username
-        else:
-            raise CredentialException('No username specified.')
 
     @contextmanager
     def _sftp_channel(self, keepalive=False):
@@ -289,7 +286,7 @@ class Connection(object):
             else:
                 err = self._transport.get_exception()
                 if err:
-                    self._transport.close()
+                    self.close()
                     raise err
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
@@ -307,21 +304,22 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int)``) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: Default is 2. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: Default is 1. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: Defaults to built in logger object.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: Default is False. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -363,23 +361,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param str pattern: Filter applied to filenames to transfer only subset
-            of files in a directory.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param str pattern: *Default: None* - Filter applied to filenames to
+            transfer only subset of files in a directory.
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -448,23 +447,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param str pattern: Filter applied to filenames to transfer only subset
-            of files in a directory.
-        :param bool preserve_mtime: *Default: False* Sync the modification
+        :param str pattern: *Default: None* - Filter applied to all filenames
+            transfering only the subset of files that match.
+        :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -502,14 +502,15 @@ class Connection(object):
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (int) The number of bytes written to the opened file object
@@ -541,23 +542,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            the file size
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (obj) SFTPAttributes containing details about the given file.
@@ -606,23 +608,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -684,23 +687,24 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
-        :param bool preserve_mtime: *Default: False* Make the modification
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
+        :param bool preserve_mtime: *Default: False* - Make the modification
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: None
@@ -734,19 +738,19 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param bool confirm: Whether to do a stat() on the file afterwards to
-            confirm the file size.
+        :param bool confirm: *Default: True* - Whether to do a stat() on the
+            file afterwards to confirm the file size.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
         :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (obj) SFTPAttributes containing details about the given file.
@@ -785,14 +789,15 @@ class Connection(object):
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
-        :param int tries: Times to try (not retry) before giving up.
-        :param int backoff: *Default is 2*. Backoff multiplier. Default will
+        :param int tries: *Default: None* - Times to try (not retry) before
+            giving up.
+        :param int backoff: *Default: 2* - Backoff multiplier. Default will
             double the delay each retry.
-        :param int delay: *Default is 1*. Initial delay between retries in
+        :param int delay: *Default: 1* - Initial delay between retries in
             seconds.
-        :param logging.Logger logger: *Defaults to built in logger object*.
+        :param logging.Logger logger: *Default: Logger(__name__)* -
             Logger to use.
-        :param bool silent: *Default is False*. If set then no logging will
+        :param bool silent: *Default: False* - If set then no logging will
             be attempted.
 
         :returns: (list of str) Results of the command.
@@ -1081,7 +1086,7 @@ class Connection(object):
         '''Open a file on the remote server.
 
         :param str remotefile: Path of remote file to open.
-        :param str mode: File access mode, defaults to read-only.
+        :param str mode: *Default: read-only* - File access mode.
         :param int bufsize: *Default: -1* - Buffering in bytes.
 
         :returns: (obj) SFTPFile, a file-like object handler.
@@ -1116,7 +1121,7 @@ class Connection(object):
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
         :param str localdir: Location used as root of appended remote paths.
-        :param bool recurse: *Default: True*. To recurse or not to recurse
+        :param bool recurse: *Default: True* - To recurse or not to recurse
             that is the question.
 
         :returns: None

@@ -114,13 +114,14 @@ you can use tilde notation in your pathing.
 
 OTHER AVAILABLE CONNECTION OPTIONS via CnOpts:
 
-  * .compression - False (Default) no compression, True - enable compression 
+  * .compression - False (Default) no compression, True enable compression 
   * .ciphers - replaces the ciphers parameter in the Connection method.
   * .digests - replaces the digests parameter in the Connection method.
   * .disabled_algorithms - algorithm identifiers to disable in the Connection method.
   * .kex - replaces the kex parameter in the Connection method.
   * .key_types - replaces the key types parameter in the Connection method.
-  * .log - replaces the log parameter in the Connection method
+  * .log - False (Default) log only to console, True logs to temporary file, String sets custom location.
+  * .log_level - Set logger verbosity to either error, info (Default) or debug.
 
 Here is a common scenario, you have your connection information stored in a
 persistence mechanism, like `yamjam <http://yamjam.rtfd.org/>`_ and when you access
