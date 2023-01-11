@@ -16,6 +16,7 @@ from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4
+from warnings import warn
 
 
 class CnOpts(object):
@@ -71,10 +72,10 @@ class CnOpts(object):
             self.hostkeys.load(Path(knownhosts).absolute().as_posix())
         except FileNotFoundError:
             # no known_hosts in the default unix location, windows has none
-            raise UserWarning((f'No file or host key found in [{knownhosts}]. '
-                               'You will need to explicitly load host keys '
-                               '(cnopts.hostkeys.load(filename)) or disable '
-                               'host key checking (cnopts.hostkeys = None).'))
+            warn(f'No file or host key found in [{knownhosts}]. You will '
+                  'need to explicitly load host keys '
+                  '(cnopts.hostkeys.load(filename)) or disable host key '
+                  'checking (cnopts.hostkeys = None).', UserWarning)
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
