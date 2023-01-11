@@ -73,9 +73,9 @@ class CnOpts(object):
         except FileNotFoundError:
             # no known_hosts in the default unix location, windows has none
             warn(f'No file or host key found in [{knownhosts}]. You will '
-                  'need to explicitly load host keys '
-                  '(cnopts.hostkeys.load(filename)) or disable host key '
-                  'checking (cnopts.hostkeys = None).', UserWarning)
+                 'need to explicitly load host keys '
+                 '(cnopts.hostkeys.load(filename)) or disable host key '
+                 'checking (cnopts.hostkeys = None).', UserWarning)
         else:
             if len(self.hostkeys.items()) == 0:
                 raise HostKeysException('No host keys found!')
