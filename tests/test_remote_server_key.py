@@ -25,14 +25,14 @@ def test_remote_server_key(sftpserver):
 
 def test_cnopts_no_knownhosts():
     '''test setting knownhosts to a non-existant file'''
-    with pytest.raises(UserWarning):
+    with pytest.warns(UserWarning):
         CnOpts(knownhosts='i-m-not-there')
 
 
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
     with pytest.raises(HostKeysException):
-        with pytest.raises(UserWarning):
+        with pytest.warns(UserWarning):
             knownhosts = Path('~/knownhosts').expanduser().as_posix()
             Path(knownhosts).touch(mode=0o600)
             CnOpts(knownhosts=knownhosts)
