@@ -45,7 +45,7 @@ def test_cnopts_none_knownhosts():
     if Path(knownhosts).exists():
         Path(knownhosts).unlink()
     cnopts = CnOpts(knownhosts=None)
-    assert isinstance(cnopts.hostkeys, None)
+    assert cnopts.hostkeys is None
 
 
 def test_hostkey_not_found():
