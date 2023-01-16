@@ -12,4 +12,3 @@ Acknowledgment
     * paramiko by Robey Pointer
     * pysftp by dundeemt
     * ssh.py by Zeth
-    * PR #19 by coreyhartley
