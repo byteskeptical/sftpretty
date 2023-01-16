@@ -68,17 +68,22 @@ class CnOpts(object):
                           'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
         self.log = False
         self.log_level = 'info'
-        try:
-            self.hostkeys.load(Path(knownhosts).absolute().as_posix())
-        except FileNotFoundError:
-            # no known_hosts in the default unix location, windows has none
-            warn(f'No file or host key found in [{knownhosts}]. You will '
-                 'need to explicitly load host keys '
-                 '(cnopts.hostkeys.load(filename)) or disable host key '
-                 'checking (cnopts.hostkeys = None).', UserWarning)
+
+        if knownhosts is not None:
+            try:
+                self.hostkeys.load(Path(knownhosts).resolve().as_posix())
+            except FileNotFoundError:
+                # no known_hosts in the default unix location, windows has none
+                raise UserWarning((f'No file or host key found in [{knownhosts'
+                                   '}]. You will need to explicitly load host '
+                                   'keys (cnopts.hostkeys.load(filename)) or '
+                                   'disable host key verification (cnopts.'
+                                   'hostkeys = None).'))
+            else:
+                if len(self.hostkeys.items()) == 0:
+                    raise HostKeysException('No host keys found!')
         else:
-            if len(self.hostkeys.items()) == 0:
-                raise HostKeysException('No host keys found!')
+            self.hostkeys = None
 
     def get_hostkey(self, host):
         '''Return the matching known hostkey to be used for verification or
@@ -341,10 +346,10 @@ class Connection(object):
         def _get(self, remotefile, localpath=None, callback=None,
                  preserve_mtime=False):
 
-            if not localpath:
+            if localpath is None:
                 localpath = Path(remotefile).name
 
-            if not callback:
+            if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
@@ -401,7 +406,7 @@ class Connection(object):
             Path(localdir).mkdir(exist_ok=True, parents=True)
             logger.info(f'Creating Folder [{localdir}]!')
 
-        if not pattern:
+        if pattern is None:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
@@ -531,7 +536,7 @@ class Connection(object):
                logger=logger, silent=silent)
         def _getfo(self, remotefile, flo, callback=None):
 
-            if not callback:
+            if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
@@ -582,10 +587,10 @@ class Connection(object):
         def _put(self, localfile, remotepath=None, callback=None,
                  confirm=True, preserve_mtime=False):
 
-            if not remotepath:
+            if remotepath is None:
                 remotepath = Path(localfile).name
 
-            if not callback:
+            if callback is None:
                 callback = partial(_callback, localfile, logger=logger)
 
             if preserve_mtime:
@@ -772,10 +777,10 @@ class Connection(object):
         def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
                    confirm=True):
 
-            if not remotepath:
+            if remotepath is None:
                 remotepath = Path(flo.name).name
 
-            if not callback:
+            if callback is None:
                 callback = partial(_callback, flo, logger=logger)
 
             with self._sftp_channel() as channel:
