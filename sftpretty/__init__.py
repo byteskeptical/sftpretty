@@ -74,11 +74,12 @@ class CnOpts(object):
                 self.hostkeys.load(Path(knownhosts).resolve().as_posix())
             except FileNotFoundError:
                 # no known_hosts in the default unix location, windows has none
-                raise UserWarning((f'No file or host key found in [{knownhosts'
-                                   '}]. You will need to explicitly load host '
-                                   'keys (cnopts.hostkeys.load(filename)) or '
-                                   'disable host key verification (cnopts.'
-                                   'hostkeys = None).'))
+                raise UserWarning(
+                    f'No file or host key found in [{knownhosts}]. '
+                    'You will need to explicitly load host keys '
+                    '(cnopts.hostkeys.load(filename)) or disable host '
+                    'key verification (cnopts.hostkeys = None).'
+                )
             else:
                 if len(self.hostkeys.items()) == 0:
                     raise HostKeysException('No host keys found!')
