@@ -16,7 +16,6 @@ from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from uuid import uuid4
-from warnings import warn
 
 
 class CnOpts(object):
