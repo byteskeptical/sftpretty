@@ -5,6 +5,7 @@ Authors
 
 Acknowledgment
 --------------
+    * PR #19 by coreyhartley
     * PR #15 by RobertCochran
     * PR #12 by erans
     * ftpretty by codebynumbers

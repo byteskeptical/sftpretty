@@ -23,12 +23,6 @@ def test_remote_server_key(sftpserver):
             hks.save('sftpserver.pub')
 
 
-def test_cnopts_no_knownhosts():
-    '''test setting knownhosts to a non-existant file'''
-    with pytest.raises(UserWarning):
-        CnOpts(knownhosts='i-m-not-there')
-
-
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
     with pytest.raises(HostKeysException):
@@ -37,6 +31,21 @@ def test_cnopts_bad_knownhosts():
             Path(knownhosts).touch(mode=0o600)
             CnOpts(knownhosts=knownhosts)
             Path(knownhosts).unlink()
+
+
+def test_cnopts_no_knownhosts():
+    '''test setting knownhosts to a non-existant file'''
+    with pytest.raises(UserWarning):
+        CnOpts(knownhosts='i-m-not-there')
+
+
+def test_cnopts_none_knownhosts():
+    '''test setting knownhosts to None for those with no default known_hosts'''
+    knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
+    if Path(knownhosts).exists():
+        Path(knownhosts).unlink()
+    cnopts = CnOpts(knownhosts=None)
+    assert cnopts.hostkeys is None
 
 
 def test_hostkey_not_found():

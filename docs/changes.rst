@@ -1,7 +1,12 @@
 Change Log
 ==========
 
-1.0.5 (current, released 2022-11-29)
+1.0.6 (current, released 2023-01-15)
+------------------------------------
+    * allow CnOpts knownhost to be set to None directly
+    * standardize on using is for None checks 
+
+1.0.5 (released 2022-11-29)
 ------------------------------------
     * added log_level to connection options
     * added compression security option for Transport
@@ -23,8 +28,8 @@ Change Log
 
 1.0.2 (released 2022-09-09)
 ---------------------------
-    * bug fix for typo in put_d()
     * added sort to localtree() for test continuity
+    * bug fix for typo in put_d()
 
 1.0.1 (released 2022-07-22)
 ---------------------------
