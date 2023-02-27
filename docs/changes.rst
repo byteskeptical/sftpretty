@@ -1,7 +1,11 @@
 Change Log
 ==========
 
-1.0.6 (current, released 2023-01-15)
+1.0.7 (current, released 2023-02-27)
+------------------------------------
+    * fix reversion in put_d
+
+1.0.6 (released 2023-01-15)
 ------------------------------------
     * allow CnOpts knownhost to be set to None directly
     * standardize on using is for None checks 
