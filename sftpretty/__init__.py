@@ -8,7 +8,7 @@ from os import environ, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePath, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
@@ -652,6 +652,8 @@ class Connection(object):
 
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
+        else:
+            localdir = PurePath(localdir)
 
         paths = [
                  (localpath.as_posix(),
