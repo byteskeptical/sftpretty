@@ -648,7 +648,7 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        self.mkdir_p(remotedir)
+        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
@@ -659,7 +659,7 @@ class Connection(object):
                  (localpath.as_posix(),
                   Path(remotedir).joinpath(
                       localpath.relative_to(
-                          localdir.root).as_posix()).as_posix(),
+                          localdir.parent).as_posix()).as_posix(),
                   callback, confirm, preserve_mtime, exceptions, tries,
                   backoff, delay, logger, silent)
                  for localpath in Path(localdir).iterdir()
