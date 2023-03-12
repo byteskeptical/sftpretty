@@ -6,7 +6,7 @@ from common import SKIP_IF_CI, tempfile_containing
 from pathlib import Path
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_remove(lsftp):
     '''test the remove method'''
     with tempfile_containing() as fname:
@@ -21,7 +21,7 @@ def test_remove(lsftp):
     assert not_there
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_unlink(lsftp):
     '''test the unlink function'''
     with tempfile_containing() as fname:

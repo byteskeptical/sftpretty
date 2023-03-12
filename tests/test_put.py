@@ -9,7 +9,7 @@ from time import sleep
 from unittest.mock import Mock
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put_callback(lsftp):
     '''test the callback feature of put'''
     cback = Mock(return_value=None)
@@ -23,7 +23,7 @@ def test_put_callback(lsftp):
     assert cback.call_count
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put_confirm(lsftp):
     '''test the confirm feature of put'''
     with tempfile_containing() as fname:
@@ -40,7 +40,7 @@ def test_put_confirm(lsftp):
     assert result.st_mtime
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put(lsftp):
     '''run test on localhost'''
     contents = 'now is the time\nfor all good...'
@@ -77,7 +77,7 @@ def test_put_bad_local(sftpserver):
 #             psftp.put(fname)
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put_preserve_mtime(lsftp):
     '''test that m_time is preserved from local to remote, when put'''
     with tempfile_containing() as fname:

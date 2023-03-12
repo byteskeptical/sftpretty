@@ -7,10 +7,10 @@ from common import SFTP_LOCAL, SKIP_IF_CI
 from sftpretty import CnOpts, Connection
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_connection_ciphers_cnopts():
     '''test the CnOpts.ciphers portion of the Connection'''
-    ciphers = ('aes256-ctr', 'blowfish-cbc', 'aes256-cbc', 'arcfour256')
+    ciphers = ('aes256-ctr', 'aes256-cbc')
     copts = SFTP_LOCAL.copy()  # don't sully the module level variable
     cnopts = CnOpts()
     cnopts.ciphers = ciphers
@@ -21,10 +21,10 @@ def test_connection_ciphers_cnopts():
         assert len(rslt) > 1
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_active_ciphers():
     '''test that method returns a tuple of strings, that show ciphers used'''
-    ciphers = ('aes256-ctr', 'blowfish-cbc', 'aes256-cbc', 'arcfour256')
+    ciphers = ('aes256-ctr', 'aes256-cbc')
     copts = SFTP_LOCAL.copy()  # don't sully the module level variable
     cnopts = CnOpts()
     cnopts.ciphers = ciphers

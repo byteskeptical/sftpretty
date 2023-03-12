@@ -15,7 +15,7 @@ def test_chmod_not_exist(sftpserver):
                 psftp.chmod('i-do-not-exist.txt', 666)
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_chmod_simple(lsftp):
     '''test basic chmod with octal mode represented by an int'''
     new_mode = 744      # user=rwx g=r o=r

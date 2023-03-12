@@ -31,7 +31,7 @@ def test_connection_bad_host():
         sftp.listdir()
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_connection_bad_credentials():
     '''attempt connection to a non-existing server'''
     copts = SFTP_LOCAL.copy()

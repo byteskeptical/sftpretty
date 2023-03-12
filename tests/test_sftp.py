@@ -8,7 +8,7 @@ from sftpretty import Connection
 from stat import S_ISLNK
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_sftp_client(lsftp):
     '''test for access to the underlying, active sftpclient'''
     # with Connection(**SFTP_PUBLIC) as sftp:
@@ -18,7 +18,7 @@ def test_sftp_client(lsftp):
     assert 'readlink' in dir(lsftp.sftp_client)
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_mkdir_p(lsftp):
     '''test mkdir_p simple, testing 2 things, oh well'''
     rdir = 'foo/bar/baz'
@@ -43,7 +43,7 @@ def test_mkdir_p(lsftp):
 #     assert psftp.lexists(rsym)
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_symlink(lsftp):
     '''test symlink creation'''
     rdest = '/home/test/honey-boo-boo'
@@ -68,7 +68,7 @@ def test_exists(sftpserver):
             assert sftp.exists('pub')
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_lexists(lsftp):
     '''test .lexists() functionality'''
     with tempfile_containing() as fname:

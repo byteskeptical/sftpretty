@@ -4,7 +4,7 @@ from common import SKIP_IF_CI, tempfile_containing
 from pathlib import Path
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_rename(lsftp):
     '''test rename on remote'''
     contents = 'now is the time\nfor all good...'

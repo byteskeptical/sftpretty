@@ -7,7 +7,7 @@ from io import BytesIO
 from unittest.mock import call, Mock
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_putfo_callback_fsize(lsftp):
     '''test putfo with callback and file_size'''
     rfile = 'a-test-file'
@@ -24,7 +24,7 @@ def test_putfo_callback_fsize(lsftp):
     assert cback.call_args_list == [call(bwrote, fsize)]
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_putfo_callback(lsftp):
     '''test putfo with callback'''
     rfile = 'a-test-file'
@@ -39,7 +39,7 @@ def test_putfo_callback(lsftp):
     assert cback.call_args_list == [call(len(buf), 0)]
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_putfo_flo(lsftp):
     '''test putfo in simple form'''
     rfile = 'a-test-file'
@@ -53,7 +53,7 @@ def test_putfo_flo(lsftp):
     assert rslt.st_size == len(buf)
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_putfo_no_remotepath(lsftp):
     '''test putfo raises TypeError when not specifying a remotepath'''
     buf = b'I will not buy this record, it is scratched\nMy hovercraft'\

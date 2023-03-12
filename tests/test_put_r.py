@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 
 
 # TODO 2
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put_r(lsftp):
     '''test put_r'''
     localpath = mkdtemp()
@@ -40,7 +40,7 @@ def test_put_r(lsftp):
 #         psftp.put_r('.', '.')
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_put_r_bad_local(lsftp):
     '''test put_r failure on non-existing local directory'''
     # run the op

@@ -13,7 +13,7 @@ def test_stat(sftpserver):
             assert rslt.st_size >= 0
 
 
-@SKIP_IF_CI
+#@SKIP_IF_CI
 def test_lstat(lsftp):
     '''test lstat  minimal, have to use real server, plugin doesn't support
     lstat'''
