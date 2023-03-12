@@ -9,7 +9,7 @@ from sftpretty import CnOpts
 from tempfile import mkstemp
 
 # pytest-sftpserver plugin information
-SFTP_INTERNAL = {'host': 'localhost', 'username': 'user', 'password': 'test1357'}
+SFTP_INTERNAL = {'host': 'localhost', 'username': 'test', 'password': 'test1357'}
 # used if ptest-sftpserver plugin does not support what we are testing
 SFTP_LOCAL = {'host': 'localhost', 'username': 'test', 'password': 'test1357'}
 
