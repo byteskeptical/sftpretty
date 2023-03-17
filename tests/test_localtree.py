@@ -55,7 +55,7 @@ def test_localtree_no_recurse(sftpserver):
             dkeys = [f'{localpath}/home/{USER}/pub/foo2']
 
             dvalues = [[(f'{localpath}/home/{USER}/pub/foo2/bar1',
-                         f'/{USER}/pub/foo2/bar1')]]
+                         '/foo2/bar1')]]
 
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues

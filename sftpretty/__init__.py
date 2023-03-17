@@ -10,7 +10,7 @@ from paramiko import (hostkeys, SFTPClient, Transport,
 from pathlib import Path, PurePath, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
-from sftpretty.helpers import _callback, hash, localtree, retry, st_mode_to_int
+from sftpretty.helpers import _callback, hash, localtree, retry
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp

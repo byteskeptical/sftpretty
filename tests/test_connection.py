@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, LOCAL, SKIP_IF_CI, VFS
+from common import conn, LOCAL, VFS
 from pathlib import Path
 from sftpretty import (CnOpts, Connection, ConnectionException,
                        SSHException)

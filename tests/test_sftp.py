@@ -8,9 +8,9 @@ from stat import S_ISLNK
 
 def test_sftp_client(lsftp):
     '''test for access to the underlying, active sftpclient'''
-    # with Connection(**LOCAL) as sftp:
-    #     assert 'normalize' in dir(sftp.sftp_client)
-    #     assert 'readlink' in dir(sftp.sftp_client)
+    with Connection(**LOCAL) as sftp:
+        assert 'normalize' in dir(sftp.sftp_client)
+        assert 'readlink' in dir(sftp.sftp_client)
     assert 'normalize' in dir(lsftp.sftp_client)
     assert 'readlink' in dir(lsftp.sftp_client)
 

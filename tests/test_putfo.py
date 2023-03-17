@@ -29,7 +29,7 @@ def test_putfo_callback(lsftp):
           b' is full of eels.'
     flo = BytesIO(buf)
     cback = Mock(return_value=None)
-    lsftp.putfo(flo, rfile, callback=cback)
+    lsftp.putfo(flo, rfile, callback=None)
     lsftp.remove(rfile)
     assert cback.call_count
     # we didn't specify file size, so second arg is 0

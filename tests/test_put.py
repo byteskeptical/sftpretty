@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, LOCAL, tempfile_containing, VFS
+from common import conn, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep

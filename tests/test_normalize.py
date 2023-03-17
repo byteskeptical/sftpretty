@@ -10,7 +10,8 @@ def test_normalize(sftpserver):
     pubpath = Path.home().joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.normalize('make.txt') == pubpath.parent.joinpath('make.txt').as_posix()
+            assert sftp.normalize('make.txt') ==
+                pubpath.parent.joinpath('make.txt').as_posix()
             assert sftp.normalize('.') == pubpath.parent.as_posix()
             assert sftp.normalize('pub') == pubpath.as_posix()
             sftp.chdir('pub')
