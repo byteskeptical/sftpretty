@@ -20,20 +20,24 @@ from uuid import uuid4
 class CnOpts(object):
     '''Additional connection options beyond authentication.
 
-    :ivar tuple ciphers: *Default: paramiko.Transport.preferred_ciphers* -
-         Ordered list of preferred ciphers for connection.
-    :ivar tuple compression: *Default: paramiko.Transport.preferred_compression
+    :ivar tuple ciphers: *Default: paramiko.Transport.SecurityOptions.ciphers*
+        - Ordered list of preferred ciphers for connection.
+    :ivar bool compress: *Default: paramiko.Transport.use_compression* -
+        Enable or disable compression.
+    :ivar tuple compression:
+        *Default: paramiko.Transport.SecurityOptions.compression
         * - Ordered tuple of preferred compression algorithms for connection.
-    :ivar tuple digests: *Default: paramiko.Transport.preferred_macs* -
-        Ordered tuple of preferred digests/macs for connection.
+    :ivar tuple digests: *Default: paramiko.Transport.SecurityOptions.digests*
+         - Ordered tuple of preferred digests/macs for connection.
     :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
         iterable of algorithm identifiers, which will be disabled for the
         lifetime of the transport. Keys should match class builtin attribute.
     :ivar paramiko.hostkeys.HostKeys hostkeys: HostKeys object used for
         host key verifcation.
-    :ivar tuple kex: *Default: paramiko.Transport.preferred_kex* - Ordered
-        tuple of preferred key exchange algorithms for connection.
-    :ivar tuple key_types: *Default: paramiko.Transport.preferred_pubkeys*
+    :ivar tuple kex: *Default: paramiko.Transport.SecurityOptions.kex* -
+        Ordered tuple of preferred key exchange algorithms for connection.
+    :ivar tuple key_types:
+        *Default: paramiko.Transport.SecurityOptions.key_types*
         - Ordered tuple of preferred public key types for connection.
     :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
         hostkeys from.
@@ -50,6 +54,7 @@ class CnOpts(object):
                  '~/.ssh/known_hosts').expanduser().as_posix()):
         self.ciphers = ('aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
                         'aes192-cbc', 'aes128-cbc', '3des-cbc')
+        self.compress = False
         self.compression = ('none',)
         self.digests = ('hmac-sha2-512', 'hmac-sha2-256',
                         'hmac-sha2-512-etm@openssh.com',
@@ -107,8 +112,6 @@ class Connection(object):
     :param str host: *Required* - Hostname or address of the remote machine.
     :param None|CnOpts cnopts: *Default: None* - Extended connection options
         set as a CnOpts object.
-    :param bool compress: *Default: False* - Enables compression on the
-        transport if set to True.
     :param str|None default_path: *Default: None* - Set the default working
         directory upon connection.
     :param str|None password: *Default: None* - Credential for remote machine.
@@ -127,16 +130,16 @@ class Connection(object):
     :raises PasswordRequiredException:
     :raises SSHException:
     '''
-    def __init__(self, host, cnopts=None, compress=False, default_path=None,
-                 password=None, port=22, private_key=None,
-                 private_key_pass=None, timeout=None, username=None):
+    def __init__(self, host, cnopts=None, default_path=None, password=None,
+                 port=22, private_key=None, private_key_pass=None,
+                 timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
         self._default_path = default_path
         self._set_logging()
         self._set_username(username)
         self._timeout = timeout
         self._transport = None
-        self._start_transport(host, port, compress=compress)
+        self._start_transport(host, port)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
@@ -245,13 +248,13 @@ class Connection(object):
             if _channel and not keepalive:
                 _channel.close()
 
-    def _start_transport(self, host, port, compress=False):
+    def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
         try:
             self._transport = Transport((host, port))
             self._transport.set_keepalive(60)
             self._transport.set_log_channel(host)
-            self._transport.use_compression(compress=compress)
+            self._transport.use_compression(compress=self._cnopts.compress)
 
             # Set disabled algorithms
             disabled_algorithms = self._cnopts.disabled_algorithms
@@ -647,7 +650,7 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
+        self.mkdir_p(Path(remotedir).joinpath(Path(localdir).stem).as_posix())
 
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
@@ -777,9 +780,6 @@ class Connection(object):
                logger=logger, silent=silent)
         def _putfo(self, flo, remotepath=None, file_size=None, callback=None,
                    confirm=True):
-
-            if remotepath is None:
-                remotepath = Path(flo.name).name
 
             if file_size is None:
                 file_size = flo.seek(0, SEEK_END)
@@ -1244,7 +1244,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             channel.truncate(remotepath, size)
-            size = channel.state(remotepath).st_size
+            size = channel.stat(remotepath).st_size
 
         return size
 

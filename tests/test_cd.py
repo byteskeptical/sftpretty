@@ -52,4 +52,4 @@ def test_cd_bad_path(sftpserver):
             with pytest.raises(IOError):
                 with sftp.cd('not-there'):
                     pass
-            assert home == Path.home()
+            assert home == Path.home().as_posix()

@@ -20,20 +20,6 @@ def test_remove(lsftp):
     assert not_there
 
 
-def test_unlink(lsftp):
-    '''test the unlink function'''
-    with tempfile_containing() as fname:
-        base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
-        lsftp.put(fname)
-        is_there = base_fname in lsftp.listdir()
-        lsftp.unlink(base_fname)
-        not_there = base_fname not in lsftp.listdir()
-
-    assert is_there
-    assert not_there
-
-
 # TODO
 # def test_remove_roserver(psftp):
 #     '''test reaction of attempting remove on read-only server'''

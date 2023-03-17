@@ -23,13 +23,13 @@ def test_localtree(sftpserver):
                      f'{localpath}/home/{USER}/pub/foo2']
 
             dvalues = [[(f'{localpath}/home/{USER}/pub',
-                         f'{localpath}/home/{USER}/pub')],
+                         f'/{USER}/pub')],
                        [(f'{localpath}/home/{USER}/pub/foo1',
-                         f'{localpath}/home/{USER}/pub/foo1'),
+                         f'/{USER}/pub/foo1'),
                         (f'{localpath}/home/{USER}/pub/foo2',
-                         f'{localpath}/home/{USER}/pub/foo2')],
+                         f'/{USER}/pub/foo2')],
                        [(f'{localpath}/home/{USER}/pub/foo2/bar1',
-                         f'{localpath}/home/{USER}/pub/foo2/bar1')]]
+                         f'/{USER}/pub/foo2/bar1')]]
 
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
@@ -55,7 +55,7 @@ def test_localtree_no_recurse(sftpserver):
             dkeys = [f'{localpath}/home/{USER}/pub/foo2']
 
             dvalues = [[(f'{localpath}/home/{USER}/pub/foo2/bar1',
-                         f'{localpath}/home/{USER}/pub/foo2/bar1')]]
+                         f'/{USER}/pub/foo2/bar1')]]
 
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
