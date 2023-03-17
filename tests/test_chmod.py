@@ -3,9 +3,9 @@
 import pytest
 
 from common import conn, tempfile_containing, VFS
-from helpers import st_mode_to_int
 from pathlib import Path
 from sftpretty import Connection
+from sftpretty.helpers import st_mode_to_int
 
 
 def test_chmod_not_exist(sftpserver):
