@@ -19,7 +19,7 @@ def test_issue_xx_sftpserver_plugin(sftpserver):
             with sftp.cd():
                 sftp.chdir('pub')
                 assert sftp.pwd == testpath.as_posix()
-            assert home == Path.home()
+            assert home == Path.home().as_posix()
 
 
 def test_issue_xx_local_sftpserver(lsftp):

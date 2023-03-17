@@ -1,6 +1,7 @@
 '''test sftpretty.stat and .lstat'''
 
 from common import conn, VFS
+from pathlib import Path
 from sftpretty import Connection
 
 
