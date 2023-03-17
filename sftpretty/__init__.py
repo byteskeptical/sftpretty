@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
-from os import environ, utime
+from os import environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
@@ -742,15 +742,15 @@ class Connection(object):
                            exceptions=exceptions, tries=tries, backoff=backoff,
                            delay=delay, logger=logger, silent=silent)
 
-    def putfo(self, flo, remotepath=None, file_size=0, callback=None,
+    def putfo(self, flo, remotepath=None, file_size=None, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
               delay=1, logger=getLogger(__name__), silent=False):
         '''Copies the contents of a file like object to remotepath.
 
         :param flo: File-like object that supports .read()
         :param str remotepath: The remote location to save contents of object.
-        :param int file_size: The size of flo, if not given the second param
-            passed to the callback function will always be 0.
+        :param int file_size: The size of flo, if not given, calculated
+            preventing division by zero in default callback function.
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
@@ -775,11 +775,15 @@ class Connection(object):
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _putfo(self, flo, remotepath=None, file_size=0, callback=None,
+        def _putfo(self, flo, remotepath=None, file_size=None, callback=None,
                    confirm=True):
 
             if remotepath is None:
                 remotepath = Path(flo.name).name
+
+            if file_size is None:
+                file_size = flo.seek(0, SEEK_END)
+                flo.seek(0)
 
             if callback is None:
                 callback = partial(_callback, flo, logger=logger)

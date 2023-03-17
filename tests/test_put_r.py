@@ -3,31 +3,26 @@
 import pytest
 
 from blddirs import build_dir_struct
-from common import SKIP_IF_CI
 from pathlib import Path
 from tempfile import mkdtemp
 
 
-# TODO 2
-#@SKIP_IF_CI
 def test_put_r(lsftp):
     '''test put_r'''
     localpath = mkdtemp()
-    print(localpath)
-    remote_dir = Path(localpath).stem
+    remote = Path.home().as_posix()
     build_dir_struct(localpath)
-    localpath = Path(localpath).joinpath('pub').as_posix()
-    print(localpath)
+    local = Path(localpath).joinpath('pub').as_posix()
     # run the op
-    lsftp.put_r(localpath, remote_dir)
+    lsftp.put_r(local, remote)
 
     # inspect results
 
     # cleanup remote
-    lsftp.rmdir(remote_dir)
+    lsftp.rmdir(Path(remote).joinpath(Path(localpath).stem).as_posix())
 
     # cleanup local
-    Path(Path(localpath).parent.as_posix()).rmdir()
+    Path(localpath).rmdir()
 
     # check results
 
@@ -40,7 +35,6 @@ def test_put_r(lsftp):
 #         psftp.put_r('.', '.')
 
 
-#@SKIP_IF_CI
 def test_put_r_bad_local(lsftp):
     '''test put_r failure on non-existing local directory'''
     # run the op

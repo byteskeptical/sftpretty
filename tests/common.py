@@ -3,28 +3,26 @@
 import pytest
 
 from contextlib import contextmanager
-from os import close, getenv
+from os import close, environ
 from pathlib import Path
 from sftpretty import CnOpts
 from tempfile import mkstemp
 
-# pytest-sftpserver plugin information
-SFTP_INTERNAL = {'host': 'localhost', 'username': 'runner', 'password': 'test1357'}
-# used if ptest-sftpserver plugin does not support what we are testing
-SFTP_LOCAL = {'host': 'localhost', 'username': 'runner', 'password': 'test1357'}
 
-# can only reach public, read-only server from CI platform, only test locally
-# if environment variable CI is set  to something to disable local tests
-# the CI env var is set to true by both drone-io and travis
-SKIP_IF_CI = pytest.mark.skipif(getenv('CI', '') > '', reason='Not Local')
+PASS = 'test1357'
+SKIP_IF_CI = pytest.mark.skipif(environ.get('CI', '') > '', reason='Not Local')
 STARS8192 = '*'*8192
+USER = environ.get('USER', environ.get('USERNAME'))
+USER_HOME = Path.home().as_posix()
+
+LOCAL = {'host': 'localhost', 'username': USER, 'password': PASS}
 
 
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    return {'host': sftpsrv.host, 'port': sftpsrv.port, 'username': 'user',
-            'password': 'pw', 'default_path': '/home/test', 'cnopts': cnopts}
+    return {'host': sftpsrv.host, 'port': sftpsrv.port, 'username': USER,
+            'password': PASS, 'default_path': USER_HOME, 'cnopts': cnopts}
 
 
 def rmdir(dir):
@@ -57,7 +55,7 @@ def tempfile_containing(contents=STARS8192, suffix=''):
 # filesystem served by pytest-sftpserver plugin
 VFS = {
        'home': {
-           'test': {
+           f'{USER}': {
                'pub': {
                    'foo1': {
                        'foo1.txt': 'content of foo1.txt',

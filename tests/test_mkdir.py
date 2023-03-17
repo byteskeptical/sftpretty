@@ -1,10 +1,9 @@
 '''test sftpretty.mkdir'''
 
-from common import VFS, conn, SKIP_IF_CI
+from common import VFS, conn
 from sftpretty import Connection, st_mode_to_int
 
 
-#@SKIP_IF_CI
 def test_mkdir_mode(lsftp):
     '''test mkdir with mode set to 711'''
     dirname = 'test-dir'

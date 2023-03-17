@@ -1,24 +1,20 @@
 '''test sftpretty module'''
 
-# psftp and lsftp fixtures are from conftest.py
-
-from common import conn, SKIP_IF_CI, tempfile_containing, VFS
+from common import conn, LOCAL, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from stat import S_ISLNK
 
 
-#@SKIP_IF_CI
 def test_sftp_client(lsftp):
     '''test for access to the underlying, active sftpclient'''
-    # with Connection(**SFTP_PUBLIC) as sftp:
+    # with Connection(**LOCAL) as sftp:
     #     assert 'normalize' in dir(sftp.sftp_client)
     #     assert 'readlink' in dir(sftp.sftp_client)
     assert 'normalize' in dir(lsftp.sftp_client)
     assert 'readlink' in dir(lsftp.sftp_client)
 
 
-#@SKIP_IF_CI
 def test_mkdir_p(lsftp):
     '''test mkdir_p simple, testing 2 things, oh well'''
     rdir = 'foo/bar/baz'
@@ -28,7 +24,7 @@ def test_mkdir_p(lsftp):
     is_dir = lsftp.isdir(rdir)
     lsftp.rmdir(rdir)
     lsftp.rmdir(rdir2)
-    lsftp.mkdir_p(rdir)     # try partially existing path
+    lsftp.mkdir_p(rdir)
     is_dir_partial = lsftp.isdir(rdir)
     lsftp.rmdir(rdir)
     lsftp.rmdir(rdir2)
@@ -43,16 +39,15 @@ def test_mkdir_p(lsftp):
 #     assert psftp.lexists(rsym)
 
 
-#@SKIP_IF_CI
 def test_symlink(lsftp):
     '''test symlink creation'''
-    rdest = '/home/test/honey-boo-boo'
+    rdest = Path.home().joinpath('honey-boo-boo')
     with tempfile_containing() as fname:
         lsftp.put(fname)
-        lsftp.symlink(fname, rdest)
-        rslt = lsftp.lstat(rdest)
+        lsftp.symlink(fname, rdest.as_posix())
+        rslt = lsftp.lstat(rdest.as_posix())
         is_link = S_ISLNK(rslt.st_mode)
-        lsftp.remove(rdest)
+        lsftp.remove(rdest.as_posix())
         lsftp.remove(Path(fname).name)
     assert is_link
 
@@ -68,14 +63,12 @@ def test_exists(sftpserver):
             assert sftp.exists('pub')
 
 
-#@SKIP_IF_CI
 def test_lexists(lsftp):
     '''test .lexists() functionality'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         lsftp.put(fname)
-        # rfile = '/home/test/readme.txt'
-        rbad = '/home/test/peek-a-boo.txt'
+        rbad = Path.home().joinpath('peek-a-boo.txt')
         assert lsftp.lexists(fname)
         lsftp.remove(base_fname)
-        assert lsftp.lexists(rbad) is False
+        assert lsftp.lexists(rbad.as_posix()) is False

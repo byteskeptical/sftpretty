@@ -1,6 +1,6 @@
 '''test sftpretty.stat and .lstat'''
 
-from common import VFS, conn, SKIP_IF_CI
+from common import conn, VFS
 from sftpretty import Connection
 
 
@@ -13,13 +13,12 @@ def test_stat(sftpserver):
             assert rslt.st_size >= 0
 
 
-#@SKIP_IF_CI
 def test_lstat(lsftp):
-    '''test lstat  minimal, have to use real server, plugin doesn't support
+    '''test lstat minimal, have to use real server, plugin doesn't support
     lstat'''
     dirname = 'pub'
     lsftp.mkdir(dirname)
-    lsftp.chdir('/home/test')
+    lsftp.chdir(Path.home().as_posix())
     rslt = lsftp.lstat(dirname)
     lsftp.rmdir(dirname)
     assert rslt.st_size >= 0

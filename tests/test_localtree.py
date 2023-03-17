@@ -1,6 +1,6 @@
 '''test sftpretty.localtree'''
 
-from common import conn, rmdir, VFS
+from common import conn, rmdir, USER, VFS
 from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
@@ -18,18 +18,18 @@ def test_localtree(sftpserver):
 
             localtree(directories, localpath + cwd, Path(localpath).anchor)
 
-            dkeys = [f'{localpath}/home/test',
-                     f'{localpath}/home/test/pub',
-                     f'{localpath}/home/test/pub/foo2']
+            dkeys = [f'{localpath}/home/{USER}',
+                     f'{localpath}/home/{USER}/pub',
+                     f'{localpath}/home/{USER}/pub/foo2']
 
-            dvalues = [[(f'{localpath}/home/test/pub',
-                         f'{localpath}/home/test/pub')],
-                       [(f'{localpath}/home/test/pub/foo1',
-                         f'{localpath}/home/test/pub/foo1'),
-                        (f'{localpath}/home/test/pub/foo2',
-                         f'{localpath}/home/test/pub/foo2')],
-                       [(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
+            dvalues = [[(f'{localpath}/home/{USER}/pub',
+                         f'{localpath}/home/{USER}/pub')],
+                       [(f'{localpath}/home/{USER}/pub/foo1',
+                         f'{localpath}/home/{USER}/pub/foo1'),
+                        (f'{localpath}/home/{USER}/pub/foo2',
+                         f'{localpath}/home/{USER}/pub/foo2')],
+                       [(f'{localpath}/home/{USER}/pub/foo2/bar1',
+                         f'{localpath}/home/{USER}/pub/foo2/bar1')]]
 
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues
@@ -52,10 +52,10 @@ def test_localtree_no_recurse(sftpserver):
             localtree(directories, localpath + cwd, Path(localpath).anchor,
                       recurse=False)
 
-            dkeys = [f'{localpath}/home/test/pub/foo2']
+            dkeys = [f'{localpath}/home/{USER}/pub/foo2']
 
-            dvalues = [[(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
+            dvalues = [[(f'{localpath}/home/{USER}/pub/foo2/bar1',
+                         f'{localpath}/home/{USER}/pub/foo2/bar1')]]
 
             assert sorted(directories.keys()) == dkeys
             assert sorted(directories.values()) == dvalues

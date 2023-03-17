@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, SKIP_IF_CI, tempfile_containing, VFS
+from common import conn, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection, st_mode_to_int
 
@@ -15,7 +15,6 @@ def test_chmod_not_exist(sftpserver):
                 psftp.chmod('i-do-not-exist.txt', 666)
 
 
-#@SKIP_IF_CI
 def test_chmod_simple(lsftp):
     '''test basic chmod with octal mode represented by an int'''
     new_mode = 744      # user=rwx g=r o=r

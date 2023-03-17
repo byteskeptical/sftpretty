@@ -1,9 +1,6 @@
 '''test sftpretty.rmdir'''
 
-from common import SKIP_IF_CI
 
-
-@SKIP_IF_CI
 def test_rmdir(lsftp):
     '''test mkdir'''
     dirname = 'test-rm'
@@ -15,6 +12,6 @@ def test_rmdir(lsftp):
 # TODO
 # def test_rmdir_ro(psftp):
 #     '''test rmdir against read-only server'''
-#     psftp.chdir('/home/test')
+#     psftp.chdir(Path.home().as_posix())
 #     with pytest.raises(IOError):
 #         psftp.rmdir('pub')

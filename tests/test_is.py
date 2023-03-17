@@ -17,7 +17,7 @@ def test_isfile(sftpserver):
 # TODO
 # def test_isfile_2(sftp):
 #     '''test .isfile() functionality against a symlink'''
-#     rsym = '/home/test/readme.sym'
+#     rsym = 'readme.sym'
 #     assert sftp.isfile(rsym)
 
 
@@ -34,5 +34,5 @@ def test_isdir(sftpserver):
 # TODO
 # def test_isdir_2(sftp):
 #     '''test .isdir() functionality against a symlink'''
-#     rsym = '/home/test/readme.sym'
+#     rsym = 'readme.sym'
 #     assert sftp.isdir(rsym) is False

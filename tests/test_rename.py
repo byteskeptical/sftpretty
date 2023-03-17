@@ -1,10 +1,9 @@
 '''test sftpretty.rename'''
 
-from common import SKIP_IF_CI, tempfile_containing
+from common import tempfile_containing
 from pathlib import Path
 
 
-#@SKIP_IF_CI
 def test_rename(lsftp):
     '''test rename on remote'''
     contents = 'now is the time\nfor all good...'
@@ -25,4 +24,4 @@ def test_rename(lsftp):
 # def test_rename_ro(psftp):
 #     '''test rename on a read-only server'''
 #     with pytest.raises(IOError):
-#         psftp.rename('/home/test/readme.txt', 'bob')
+#         psftp.rename('readme.txt', 'bob')
