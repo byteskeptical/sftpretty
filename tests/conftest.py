@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import SFTP_LOCAL
+from common import LOCAL
 from sftpretty import CnOpts, Connection
 
 
@@ -10,7 +10,7 @@ from sftpretty import CnOpts, Connection
 def lsftp(request):
     '''setup a session long connection to the local sftp server'''
     cnopts = CnOpts(knownhosts=None)
-    SFTP_LOCAL['cnopts'] = cnopts
-    lsftp = Connection(**SFTP_LOCAL)
+    LOCAL['cnopts'] = cnopts
+    lsftp = Connection(**LOCAL)
     request.addfinalizer(lsftp.close)
     return lsftp  # provide the fixture value
