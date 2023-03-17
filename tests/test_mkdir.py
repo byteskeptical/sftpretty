@@ -1,7 +1,8 @@
 '''test sftpretty.mkdir'''
 
 from common import VFS, conn
-from sftpretty import Connection, st_mode_to_int
+from helpers import st_mode_to_int
+from sftpretty import Connection
 
 
 def test_mkdir_mode(lsftp):
