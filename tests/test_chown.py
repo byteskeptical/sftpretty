@@ -44,7 +44,6 @@ def test_chown_none(lsftp):
     assert new_attrs.st_uid == org_attrs.st_uid  # confirm no change to uid
 
 
-@SKIP_IF_CI
 def test_chown_not_exist(lsftp):
     '''call .chown on a non-existing path'''
     with pytest.raises(IOError):
