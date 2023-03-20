@@ -1,6 +1,6 @@
 '''test sftpretty.compression param'''
 
-from common import LOCAL
+from common import LOCAL, SKIP_IF_CI
 from sftpretty import CnOpts, Connection
 
 
@@ -9,7 +9,7 @@ def test_compression_default():
     with Connection(**LOCAL) as sftp:
         assert sftp.active_compression == ('none', 'none')
 
-
+@SKIP_IF_CI
 def test_compression_enabled():
     '''test that compress=True results in compression enabled, assuming
     that the server supports compression'''

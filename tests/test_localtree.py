@@ -32,7 +32,7 @@ def test_localtree(sftpserver):
                          f'/{USER}/pub/foo2/bar1')]]
 
             assert sorted(tree.keys()) == dkeys
-            for branch in tree.values():
+            for branch in sorted(tree.values()):
                 for root in dvalues:
                     assert set(root) == set(branch)
 

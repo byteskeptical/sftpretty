@@ -15,9 +15,7 @@ def test_put_d(lsftp):
     local = Path(localpath).joinpath('pub')
     lsftp.put_d(local.as_posix(), remote.as_posix())
 
-    # inspect results
-
-    lsftp.rmdir(remote.joinpath(Path(localpath.lstrip('/')).stem).as_posix())
+    lsftp.rmdir(remote.joinpath('pub').as_posix())
     Path(localpath).rmdir()
 
 
