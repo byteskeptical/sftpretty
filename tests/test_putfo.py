@@ -12,13 +12,12 @@ def test_putfo_callback_fsize(lsftp):
     buf = b'I will not buy this record, it is scratched\nMy hovercraft'\
           b' is full of eels.'
     fsize = len(buf)
-    bwrote = fsize
+    bwrote = fsize - 1
     flo = BytesIO(buf)
     cback = Mock(return_value=None)
-    lsftp.putfo(flo, rfile, file_size=fsize, callback=cback)
+    lsftp.putfo(flo, rfile, file_size=bwrote, callback=cback)
     lsftp.remove(rfile)
     assert cback.call_count
-    # we didn't specify file size, so second arg is 0
     assert cback.call_args_list == [call(bwrote, fsize)]
 
 
@@ -27,13 +26,13 @@ def test_putfo_callback(lsftp):
     rfile = 'a-test-file'
     buf = b'I will not buy this record, it is scratched\nMy hovercraft'\
           b' is full of eels.'
+    fsize = len(buf)
     flo = BytesIO(buf)
     cback = Mock(return_value=None)
-    lsftp.putfo(flo, rfile, callback=None)
+    lsftp.putfo(flo, rfile, callback=cback)
     lsftp.remove(rfile)
     assert cback.call_count
-    # we didn't specify file size, so second arg is 0
-    assert cback.call_args_list == [call(len(buf), 0)]
+    assert cback.call_args_list == [call(fsize), fsize)]
 
 
 def test_putfo_flo(lsftp):

@@ -10,21 +10,16 @@ from tempfile import mkdtemp
 def test_put_r(lsftp):
     '''test put_r'''
     localpath = mkdtemp()
-    remote = Path.home().as_posix()
+    remote = Path.home()
     build_dir_struct(localpath)
-    local = Path(localpath).joinpath('pub').as_posix()
+    local = Path(localpath).joinpath('pub')
     # run the op
-    lsftp.put_r(local, remote)
+    lsftp.put_r(local.as_posix(), remote.as_posix())
 
     # inspect results
 
-    # cleanup remote
-    lsftp.rmdir(Path(remote).joinpath(Path(localpath).stem).as_posix())
-
-    # cleanup local
+    lsftp.rmdir(remote.joinpath(Path(localpath.lstrip('/')).parent).as_posix())
     Path(localpath).rmdir()
-
-    # check results
 
 
 # TODO

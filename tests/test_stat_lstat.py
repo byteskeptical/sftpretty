@@ -18,8 +18,8 @@ def test_lstat(lsftp):
     '''test lstat minimal, have to use real server, plugin doesn't support
     lstat'''
     dirname = 'pub'
-    lsftp.mkdir(dirname, mode=511)
     lsftp.chdir(Path.home().as_posix())
+    lsftp.mkdir(dirname)
     rslt = lsftp.lstat(dirname)
     lsftp.rmdir(dirname)
     assert rslt.st_size >= 0
