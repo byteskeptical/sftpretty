@@ -21,13 +21,15 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Local user
+      - name: ${{ matrix.os }} user
         if: startsWith(matrix.os, 'macos')
         run: |
           (echo ''; echo 'test1357'; echo 'test1357') | sudo passwd runner
+      - name: ${{ matrix.os }} user
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           (echo 'test1357'; echo 'test1357') | sudo passwd runner
+      - name: ${{ matrix.os }} user
         if: startsWith(matrix.os, 'windows')
         run: |
           $pass = ConvertTo-SecureString -String test1357; $user = Get-LocalUser -Name "runner"; $user | Set-LocalUser -Password $pass
