@@ -32,7 +32,7 @@ def test_putfo_callback(lsftp):
     lsftp.putfo(flo, rfile, callback=cback)
     lsftp.remove(rfile)
     assert cback.call_count
-    assert cback.call_args_list == [call(fsize), fsize)]
+    assert cback.call_args_list == [call(fsize, fsize)]
 
 
 def test_putfo_flo(lsftp):
