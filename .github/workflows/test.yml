@@ -32,7 +32,7 @@ jobs:
       - name: ${{ matrix.os }} user
         if: startsWith(matrix.os, 'windows')
         run: |
-          $pass = ConvertTo-SecureString -AsPlainText -Force -String 'test1357'; $user = Get-LocalUser -Name 'runner'; $user | Set-LocalUser -Password $pass
+          $pass = ConvertTo-SecureString -AsPlainText -Force -String 'test1357'; $user = Get-LocalUser -Name (([System.Environment]::UserName)); $user | Set-LocalUser -Password $pass
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
