@@ -9,23 +9,23 @@ from unittest.mock import call, Mock
 def test_putfo_callback_fsize(lsftp):
     '''test putfo with callback and file_size'''
     rfile = 'a-test-file'
-    buf = b'I will not buy this record, it is scratched\nMy hovercraft'\
-          b' is full of eels.'
+    buf = (b'I will not buy this record, it is scratched\nMy hovercraft '
+           b'is full of eels.')
     fsize = len(buf)
-    bwrote = fsize - 1
+    bwrote = fsize - 3
     flo = BytesIO(buf)
     cback = Mock(return_value=None)
     lsftp.putfo(flo, rfile, file_size=bwrote, callback=cback)
     lsftp.remove(rfile)
     assert cback.call_count
-    assert cback.call_args_list == [call(bwrote, fsize)]
+    assert cback.call_args_list == [call(fsize, bwrote)]
 
 
 def test_putfo_callback(lsftp):
     '''test putfo with callback'''
     rfile = 'a-test-file'
-    buf = b'I will not buy this record, it is scratched\nMy hovercraft'\
-          b' is full of eels.'
+    buf = (b'I will not buy this record, it is scratched\nMy hovercraft '
+           b'is full of eels.')
     fsize = len(buf)
     flo = BytesIO(buf)
     cback = Mock(return_value=None)

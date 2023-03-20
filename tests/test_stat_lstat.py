@@ -17,7 +17,7 @@ def test_stat(sftpserver):
 def test_lstat(lsftp):
     '''test lstat minimal, have to use real server, plugin doesn't support
     lstat'''
-    dirname = 'pub'
+    dirname = Path.home().joinpath('pub').as_posix()
     lsftp.chdir(Path.home().as_posix())
     lsftp.mkdir(dirname)
     rslt = lsftp.lstat(dirname)

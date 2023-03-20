@@ -17,7 +17,7 @@ def test_put_d(lsftp):
 
     # inspect results
 
-    lsftp.rmdir(remote.joinpath(Path(localpath.lstrip('/')).parent).as_posix())
+    lsftp.rmdir(remote.joinpath(Path(localpath.lstrip('/')).stem).as_posix())
     Path(localpath).rmdir()
 
 

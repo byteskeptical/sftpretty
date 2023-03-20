@@ -4,12 +4,10 @@ from common import conn, rmdir, USER, VFS
 from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
-from unittest.case import TestCase
 
 
 def test_localtree(sftpserver):
     '''test the localtree function, with recurse'''
-    test = TestCase
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
@@ -36,7 +34,7 @@ def test_localtree(sftpserver):
             assert sorted(tree.keys()) == dkeys
             for branch in tree.values():
                 for root in dvalues:
-                    test.assertCountEqual(root, branch)
+                    assert set(root) == set(branch)
 
     # cleanup local
     rmdir(localpath)
@@ -51,9 +49,9 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            directories = {}
+            tree = {}
 
-            localtree(directories, localpath + cwd, Path(localpath).anchor,
+            localtree(tree, localpath + cwd, Path(localpath).anchor,
                       recurse=False)
 
             dkeys = [f'{localpath}/home/{USER}/pub/foo2']
@@ -61,8 +59,8 @@ def test_localtree_no_recurse(sftpserver):
             dvalues = [[(f'{localpath}/home/{USER}/pub/foo2/bar1',
                          '/foo2/bar1')]]
 
-            assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
+            assert sorted(tree.keys()) == dkeys
+            assert sorted(tree.values()) == dvalues
 
     # cleanup local
     rmdir(localpath)
