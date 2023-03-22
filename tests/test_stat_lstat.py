@@ -1,6 +1,6 @@
 '''test sftpretty.stat and .lstat'''
 
-from blddirs import build_dir_struct
+from blddir import build_dir_struct, remove_dir_struct
 from common import conn, VFS
 from pathlib import Path
 from sftpretty import Connection
@@ -23,5 +23,8 @@ def test_lstat(lsftp):
     build_dir_struct(localpath)
     dirname = Path(localpath).joinpath('pub').as_posix()
     rslt = lsftp.lstat(dirname)
-    lsftp.rmdir(localpath)
+
     assert rslt.st_size >= 0
+
+    remove_dir_struct(localpath)
+    Path.rmdir(localpath)
