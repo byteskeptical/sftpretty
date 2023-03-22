@@ -41,7 +41,7 @@ def tempfile_containing(contents=STARS8192, suffix=''):
     cleanup when finished'''
 
     fd, temp_path = mkstemp(suffix=suffix)
-    close(fd)     # close file descriptor handle returned by mkstemp
+    close(fd)
 
     with open(temp_path, 'wb') as fh:
         fh.write(contents.encode('utf-8'))
