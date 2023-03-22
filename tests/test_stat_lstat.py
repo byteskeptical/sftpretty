@@ -1,6 +1,6 @@
 '''test sftpretty.stat and .lstat'''
 
-from blddir import build_dir_struct, remove_dir_struct
+from blddirs import build_dir_struct, remove_dir_struct
 from common import conn, VFS
 from pathlib import Path
 from sftpretty import Connection
