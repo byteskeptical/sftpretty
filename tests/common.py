@@ -18,6 +18,7 @@ USER_HOME = Path.home().as_posix()
 LOCAL = {'host': 'localhost', 'private_key': 'id_sftpretty',
          'private_key_pass': PASS, 'username': USER}
 
+
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
