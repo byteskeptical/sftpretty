@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Authorize Key
         run: |
-          mkdir ~/.ssh && touch ~/.ssh/authorized_keys
+          mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys
           cat id_sftpretty.pub >> ~/.ssh/authorized_keys
         shell: bash
       - name: Dependencies

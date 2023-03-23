@@ -8,7 +8,7 @@ DIR_LIST = [('pub', ),
             ('pub', 'foo1'),
             ('pub', 'foo2'),
             ('pub', 'foo2', 'bar1')]
-FILE_LIST = [('pub', 'read.me'),
+FILE_LIST = [('read.me',),
              ('pub', 'make.txt'),
              ('pub', 'foo1', 'foo1.txt'),
              ('pub', 'foo2', 'foo2.txt'),
@@ -32,5 +32,5 @@ def remove_dir_struct(local_path):
     '''clean up directory struct'''
     for fparts in FILE_LIST:
         Path(local_path).joinpath(*fparts).unlink()
-    for dparts in DIR_LIST:
+    for dparts in reversed(DIR_LIST):
         Path(local_path).joinpath(*dparts).rmdir()

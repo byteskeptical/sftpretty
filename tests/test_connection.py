@@ -35,6 +35,7 @@ def test_connection_bad_credentials():
     '''attempt connection to a non-existing server'''
     copts = LOCAL.copy()
     copts['password'] = 'badword'
+    del copts['private_key'], copts['private_key_pass']
     with pytest.raises(SSHException):
         with Connection(**copts) as sftp:
             sftp.listdir()
