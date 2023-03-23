@@ -22,9 +22,19 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+      - name: SSH
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+          Start-Service sshd
+          Set-Service -Name sshd -StartupType 'Automatic'
       - name: Authorize Key
         run: |
-          mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys
+          mkdir -p ~/.ssh
+          touch ~/.ssh/authorized_keys
           cat id_sftpretty.pub >> ~/.ssh/authorized_keys
         shell: bash
       - name: Dependencies
