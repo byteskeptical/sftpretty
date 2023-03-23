@@ -15,14 +15,15 @@ STARS8192 = '*'*8192
 USER = environ.get('USER', environ.get('USERNAME'))
 USER_HOME = Path.home().as_posix()
 
-LOCAL = {'host': 'localhost', 'username': USER, 'password': PASS}
-
+LOCAL = {'host': 'localhost', 'private_key': 'id_sftpretty',
+         'private_key_pass': PASS, 'username': USER}
 
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    return {'host': sftpsrv.host, 'port': sftpsrv.port, 'username': USER,
-            'password': PASS, 'default_path': USER_HOME, 'cnopts': cnopts}
+    return {'cnopts': cnopts, 'default_path': USER_HOME, 'host': sftpsrv.host,
+            'port': sftpsrv.port, 'private_key': 'id_sftpretty',
+            'private_key_pass': PASS, 'username': USER}
 
 
 def rmdir(dir):

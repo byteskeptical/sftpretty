@@ -27,4 +27,4 @@ def test_lstat(lsftp):
     assert rslt.st_size >= 0
 
     remove_dir_struct(localpath)
-    Path.rmdir(localpath)
+    Path(localpath).rmdir()

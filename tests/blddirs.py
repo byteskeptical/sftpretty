@@ -32,5 +32,5 @@ def remove_dir_struct(local_path):
     '''clean up directory struct'''
     for fparts in FILE_LIST:
         Path(local_path).joinpath(*fparts).unlink()
-    for dparts in reversed(DIR_LIST):
+    for dparts in DIR_LIST:
         Path(local_path).joinpath(*dparts).rmdir()
