@@ -26,11 +26,3 @@ def build_dir_struct(local_path):
                 fhndl.write(STARS8192)
             except TypeError:
                 fhndl.write(bytes(STARS8192, 'UTF-8'))
-
-
-def remove_dir_struct(local_path):
-    '''clean up directory struct'''
-    for fparts in reversed(FILE_LIST):
-        Path(local_path).joinpath(*fparts).unlink()
-    for dparts in reversed(DIR_LIST):
-        Path(local_path).joinpath(*dparts).rmdir()

@@ -56,22 +56,20 @@ def tempfile_containing(contents=STARS8192, suffix=''):
 
 # filesystem served by pytest-sftpserver plugin
 VFS = {
-       'home': {
-           f'{USER}': {
-               'pub': {
-                   'foo1': {
-                       'foo1.txt': 'content of foo1.txt',
-                       'image01.jpg': 'data for image01.jpg'
-                   },
-                   'make.txt': 'content of make.txt',
-                   'foo2': {
-                       'bar1': {
-                           'bar1.txt': 'contents bar1.txt'
-                       },
-                       'foo2.txt': 'content of foo2.txt'
-                   }
+       f'{USER_HOME}': {
+           'pub': {
+               'foo1': {
+                   'foo1.txt': 'content of foo1.txt',
+                   'image01.jpg': 'data for image01.jpg'
                },
-               'read.me': 'contents of read.me'
-           }
+               'make.txt': 'content of make.txt',
+               'foo2': {
+                   'bar1': {
+                       'bar1.txt': 'contents bar1.txt'
+                   },
+                   'foo2.txt': 'content of foo2.txt'
+               }
+           },
+           'read.me': 'contents of read.me'
        }
       }
