@@ -1,7 +1,14 @@
 Change Log
 ==========
 
-1.0.7 (current, released 2023-02-27)
+1.0.8 (current, released 2023-03-25)
+------------------------------------
+    * moved Connection.compress to CnOpts.compress
+    * reversion in put_d *again*
+    * removed SKIP_IF_CI from all but one test in response to the above
+    * switched to public key auth for all tests ! ¿macOS?¡
+
+1.0.7 (released 2023-02-27)
 ------------------------------------
     * fix reversion in put_d
 

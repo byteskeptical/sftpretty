@@ -2,7 +2,8 @@
 
 import pytest
 
-from blddirs import build_dir_struct, remove_dir_struct
+from blddirs import build_dir_struct
+from common import rmdir
 from pathlib import Path
 from tempfile import mkdtemp
 
@@ -15,8 +16,7 @@ def test_put_d(lsftp):
     local = Path(localpath).joinpath('pub')
     lsftp.put_d(local.as_posix(), remote.as_posix())
 
-    remove_dir_struct(localpath)
-    Path(localpath).rmdir()
+    rmdir(localpath)
 
 
 # TODO
