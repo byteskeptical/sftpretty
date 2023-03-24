@@ -26,6 +26,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           sudo systemsetup -setremotelogin on
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'windows')
         run: |
@@ -43,6 +44,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           touch ~/.ssh/authorized_keys
+          chmod 0600 id_sftpretty
           cat id_sftpretty.pub >> ~/.ssh/authorized_keys
         shell: bash
       - name: Dependencies

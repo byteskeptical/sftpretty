@@ -6,7 +6,8 @@ Change Log
     * moved Connection.compress to CnOpts.compress
     * reversion in put_d *again*
     * removed SKIP_IF_CI from all but one test in response to the above
-    * switched to public key auth for all tests ! ¿macOS?¡
+    * switched to public key auth for all tests !¿macOS?¡
+    * switched from get_fingerprint() using md5 to helpers.hash using sha3_256
 
 1.0.7 (released 2023-02-27)
 ------------------------------------
