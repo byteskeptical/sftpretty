@@ -146,20 +146,18 @@ class Connection(object):
         '''Authenticate to transport. Prefer private key if given'''
         if private_key is not None:
             # Use key path or provided key object
-            key_map = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
-                       'RSA': RSAKey}
+            key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
+                         'RSA': RSAKey}
             if isinstance(private_key, str):
-                private_key_file = Path(private_key).expanduser().absolute()
+                key_file = Path(private_key).expanduser().absolute().as_posix()
                 try:
-                    with open(private_key_file.as_posix(), 'r') as key:
-                        key_head = key.readline()
-                    key_head = key_head.removeprefix('-----BEGIN ')\
-                                       .removesuffix(' PRIVATE KEY-----\n')
-                    log.debug(f'Key Head: [{key_head}]')
-                    key_type = key_map[key_head.strip()]
+                    with open(key_file, 'r', encoding='utf-8') as head:
+                        key_id = head.readline()[11:][:-18]
+                    log.debug(f'Key ID: [{key_id}]')
+                    key = key_types[key_id.strip()]
                 except KeyError as err:
                     log.error(('Unable to identify key type from file provided'
-                              f':\n[{private_key_file}]'))
+                              f':\n[{key_file}]'))
                     raise err
                 except PasswordRequiredException as err:
                     log.error(('No password provided for encrypted private '
@@ -167,7 +165,7 @@ class Connection(object):
                     raise err
                 except PermissionError as err:
                     log.error(('File permission preventing user access to:\n'
-                              f'[{private_key_file}]'))
+                              f'[{key_file}]'))
                     raise err
                 except SSHException as err:
                     log.error(('Path provided is an invalid key file, a '
@@ -175,8 +173,8 @@ class Connection(object):
                                'and provide a path to a valid private key.'))
                     raise err
                 finally:
-                    private_key = key_type.from_private_key_file(
-                        private_key_file.as_posix(), password=private_key_pass)
+                    private_key = key.from_private_key_file(
+                        key_file, password=private_key_pass)
             self._transport.auth_publickey(self._username, private_key)
         elif password is not None:
             self._transport.auth_password(self._username, password)
