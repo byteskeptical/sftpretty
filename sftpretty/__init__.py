@@ -1157,7 +1157,7 @@ class Connection(object):
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
                         Path(remote).relative_to(
-                            Path(remotedir).anchor).as_posix()).as_posix()
+                            Path(remotedir).parent).as_posix()).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
