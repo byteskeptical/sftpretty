@@ -487,22 +487,19 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
         '''
         self.chdir(remotedir)
-
-        directories = {}
         cwd = self._default_path
 
-        directories[cwd] = [(cwd, Path(localdir).joinpath(
-                                       cwd.lstrip('/')).as_posix())]
-
-        self.remotetree(directories, cwd, localdir, recurse=True)
+        directories = [(cwd, localdir)]
+        directories += self.remotetree(cwd, cwd, localdir)
         log.debug(f'Remote Tree: [{directories}]')
 
-        for tld in directories.keys():
-            for remote, local in directories[tld]:
-                self.get_d(remote, local, callback=callback,
-                           pattern=pattern, preserve_mtime=preserve_mtime,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent)
+        for remote, local in directories:
+            self.get_d(
+                remote, local, callback=callback,
+                pattern=pattern, preserve_mtime=preserve_mtime,
+                exceptions=exceptions, tries=tries, backoff=backoff,
+                delay=delay, logger=logger, silent=silent
+            )
 
     def getfo(self, remotefile, flo, callback=None, exceptions=None,
               tries=None, backoff=2, delay=1, logger=getLogger(__name__),
@@ -729,19 +726,17 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        directories = {}
-        directories['root'] = [(localdir,
-                                Path(remotedir).joinpath(localdir).as_posix())]
-
-        localtree(directories, localdir, remotedir, recurse=True)
+        directories = [(localdir, remotedir)]
+        directories += localtree(directories, localdir, remotedir)
         log.debug(f'Local Tree: [{directories}]')
 
-        for tld in directories.keys():
-            for local, remote in directories[tld]:
-                self.put_d(local, remote, callback=callback, confirm=confirm,
-                           preserve_mtime=preserve_mtime,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent)
+        for local, remote in directories:
+            self.put_d(
+                local, remote, callback=callback, confirm=confirm,
+                preserve_mtime=preserve_mtime,
+                exceptions=exceptions, tries=tries, backoff=backoff,
+                delay=delay, logger=logger, silent=silent
+            )
 
     def putfo(self, flo, remotepath=None, file_size=0, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,
