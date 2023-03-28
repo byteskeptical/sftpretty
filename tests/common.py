@@ -15,14 +15,15 @@ STARS8192 = '*'*8192
 USER = environ.get('USER', environ.get('USERNAME'))
 USER_HOME = Path.home().as_posix()
 
-LOCAL = {'host': 'localhost', 'private_key': 'id_sftpretty',
-         'private_key_pass': PASS, 'username': USER}
+LOCAL = {'default_path': USER_HOME, 'host': 'localhost',
+         'private_key': 'id_sftpretty', 'private_key_pass': PASS,
+         'username': USER}
 
 
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    return {'cnopts': cnopts, 'default_path': None, 'host': sftpsrv.host,
+    return {'cnopts': cnopts, 'default_path': USER_HOME, 'host': sftpsrv.host,
             'port': sftpsrv.port, 'private_key': 'id_sftpretty',
             'private_key_pass': PASS, 'username': USER}
 
@@ -56,20 +57,22 @@ def tempfile_containing(contents=STARS8192, suffix=''):
 
 # filesystem served by pytest-sftpserver plugin
 VFS = {
-       f'{USER_HOME}': {
-           'pub': {
-               'foo1': {
-                   'foo1.txt': 'content of foo1.txt',
-                   'image01.jpg': 'data for image01.jpg'
-               },
-               'make.txt': 'content of make.txt',
-               'foo2': {
-                   'bar1': {
-                       'bar1.txt': 'contents bar1.txt'
+       'home': {
+           f'{USER}': {
+               'pub': {
+                   'foo1': {
+                       'foo1.txt': 'content of foo1.txt',
+                       'image01.jpg': 'data for image01.jpg'
                    },
-                   'foo2.txt': 'content of foo2.txt'
-               }
-           },
-           'read.me': 'contents of read.me'
+                   'make.txt': 'content of make.txt',
+                   'foo2': {
+                       'bar1': {
+                           'bar1.txt': 'contents bar1.txt'
+                       },
+                       'foo2.txt': 'content of foo2.txt'
+                   }
+               },
+               'read.me': 'contents of read.me'
+           }
        }
       }
