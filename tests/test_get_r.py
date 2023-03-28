@@ -15,7 +15,9 @@ def test_get_r(sftpserver):
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, localpath, remote_cwd)
+            local_tree.sort()
             remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
+            remote_tree.sort()
 
             assert len(local_tree) == len(remote_tree)
             for i in range(0, len(local_tree)):
@@ -35,7 +37,9 @@ def test_get_r_pwd(sftpserver):
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, localpath, remote_cwd)
+            local_tree.sort()
             remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
+            remote_tree.sort()
 
             assert len(local_tree) == len(remote_tree)
             for i in range(0, len(local_tree)):
@@ -56,7 +60,9 @@ def test_get_r_pathed(sftpserver):
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, localpath, remote_cwd)
+            local_tree.sort()
             remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
+            remote_tree.sort()
 
             actual = hash(Path(localpath).joinpath('bar1/bar1.txt').as_posix())
             expected = ('a69f73cca23a9ac5c8b567dc185a756e97c982164fe258'
@@ -83,7 +89,9 @@ def test_get_r_cdd(sftpserver):
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, localpath, remote_cwd)
+            local_tree.sort()
             remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
+            remote_tree.sort()
 
             assert len(local_tree) == len(remote_tree)
             for i in range(0, len(local_tree)):
