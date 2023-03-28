@@ -1127,43 +1127,46 @@ class Connection(object):
 
         return link_destination
 
-    def remotetree(self, container, remotedir, localdir, recurse=True):
+    def remotetree(self, remotebase, remotedir, localdir, recurse=True):
         '''recursively descend remote directory mapping the tree to a
-        dictionary container.
+        list of tuples.
 
-        :param dict container: Hash table to save remote directory tree.
-            {remotedir:
-                 [(remotedir/sub-directory,
-                   localdir/remotedir/sub-directory)],}
+        :param str remotebase: The base of all `remotedir` paths
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
         :param str localdir: Location used as root of appended remote paths.
         :param bool recurse: *Default: True* - To recurse or not to recurse
             that is the question.
 
-        :returns: None
+        :returns: List of tuples, containing pairs of remote directories and
+            local directories.
+            [
+                (remote-dir/sub-dir, local-dir/sub-dir),
+                (remote-dir/sub-dir/sub-dir, local-dir/sub-dir/sub-dir),
+                ...
+            ]
 
         :raises: Exception
         '''
+        tree = []
         try:
-            localdir = Path(localdir).expanduser().as_posix()
-            remotedir = self.normalize(remotedir)
-            for attribute in self.listdir_attr(remotedir):
+            localdir = Path(localdir).expanduser()
+            remotedir = Path(self.normalize(remotedir))
+            for attribute in self.listdir_attr(remotedir.as_posix()):
                 if S_ISDIR(attribute.st_mode):
-                    remote = Path(remotedir).joinpath(
-                        attribute.filename).as_posix()
-                    local = Path(localdir).joinpath(
-                        Path(remote).relative_to(
-                            Path(remotedir).anchor).as_posix()).as_posix()
-                    if remotedir in container.keys():
-                        container[remotedir].append((remote, local))
-                    else:
-                        container[remotedir] = [(remote, local)]
+                    remote = remotedir / attribute.filename
+                    local = localdir / remote.relative_to(remotebase)
+                    tree.append((remote.as_posix(), local.as_posix()))
                     if recurse:
-                        self.remotetree(container, remote, localdir,
-                                        recurse=recurse)
+                        tree += self.remotetree(
+                            remotebase,
+                            remote.as_posix(),
+                            localdir.as_posix(),
+                            recurse=recurse
+                        )
         except Exception as err:
             raise err
+        return tree
 
     def remove(self, remotefile):
         '''Delete the remote file. May include a path, if no path, then
