@@ -416,46 +416,41 @@ after the operation.
 :meth:`sftpretty.Connection.remotetree`
 ----------------------------------
 Is a powerful method that can recursively (*default*) walk a **remote**
-directory structure and calls a user-supplied container (dictionary) where
-entries are stored in ``{directory: tuple(sub-directories, localdir)}`` form.
-It is used in the get_r method of sftpretty and can be used with great effect
-to grab whole directories in parallel.
+directory structure where entries are stored in
+``[tuple(sub-directories, localdir)]`` form. It is used in the get_r method
+of sftpretty and can be used with great effect to grab whole directories in
+parallel.
 
 .. code-block:: python
 
     import sftpretty
     >>> with sftpretty.Connection('hostname', username='me', password='secret') as sftp:
-            directories = {}
-            sftp.remotetree(directories, '/', '/tmp')
+            directories = sftp.remotetree('/', '/', '/tmp')
     >>> directories
-    {'/': [('/archives', '/tmp/archives'),
-           ('/incoming', '/tmp/incoming'),
-           ('/outgoing', '/tmp/outgoing')
-          ],
-     '/incoming': [('/incoming/amrs', '/tmp/incoming/amrs'),
-                   ('/incoming/ffopc', '/tmp/incoming/ffopc'),
-                   ('/incoming/gpb', '/tmp/incoming/gpb'),
-                   ('/incoming/mgmp', '/tmp/incoming/mgmp'),
-                   ('/incoming/temp', '/tmp/incoming/temp')
-                  ]
-    }
+    [('/archives', '/tmp/archives'),
+     ('/incoming', '/tmp/incoming'),
+     ('/outgoing', '/tmp/outgoing')
+    ],
+    [('/incoming/amrs', '/tmp/incoming/amrs'),
+     ('/incoming/ffopc', '/tmp/incoming/ffopc'),
+     ('/incoming/gpb', '/tmp/incoming/gpb'),
+     ('/incoming/mgmp', '/tmp/incoming/mgmp'),
+     ('/incoming/temp', '/tmp/incoming/temp')
+    ]
 
 :attr:`sftpretty.localtree`
 -----------------------
 Is similar to :meth:`pysftp.Connection.remotetree` except that it walks a **local**
-directory structure. It has the same output and likewise needs a user-supplied
-container (dictionary) to store results.
+directory structure. It has the same output.
 
 .. code-block:: python
 
     import sftpretty
-    >>> directories = {}
-    >>> sftpretty.localtree(directories, '/home/user/downloads', '/tmp')
+    >>> directories = sftpretty.localtree('/home/user/downloads', '/home/user/downloads', '/tmp')
     >>> directories
-    {'/home/user/downloads': [('/home/user/downloads/percona', '/tmp/home/user/downloads/percona'),
-                              ('/home/user/downloads/wallstreet', '/tmp/home/user/downloads/wallstreet')
-                             ]
-    }
+    [('/home/user/downloads/percona', '/tmp/percona'),
+     ('/home/user/downloads/wallstreet', '/tmp/wallstreet')
+    ]
 
 :attr:`sftpretty.Connection.sftp_client`
 -------------------------------------
