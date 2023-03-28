@@ -34,6 +34,8 @@ def test_localtree(sftpserver):
 
             for branch in sorted(tree.keys()):
                 assert set(local[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
 
     rmdir(localpath)
 
@@ -60,5 +62,7 @@ def test_localtree_no_recurse(sftpserver):
 
             for branch in sorted(tree.keys()):
                 assert set(local[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
 
     rmdir(localpath)

@@ -42,10 +42,12 @@ jobs:
           }
       - name: Authorize Key
         run: |
-          mkdir -p ~/.ssh
-          touch ~/.ssh/authorized_keys
+          id
+          env
+          mkdir -p $HOME/.ssh && chmod 0700 $HOME/.ssh
+          touch $HOME/.ssh/authorized_keys
           chmod 0600 id_sftpretty
-          cat id_sftpretty.pub >> ~/.ssh/authorized_keys
+          cat id_sftpretty.pub >> $HOME/.ssh/authorized_keys
         shell: bash
       - name: Dependencies
         run: |

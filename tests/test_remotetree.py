@@ -11,25 +11,29 @@ def test_remotetree(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            directories = {}
             localpath = Path(mkdtemp()).as_posix()
+            tree = {}
 
-            sftp.remotetree(directories, cwd, localpath)
+            sftp.remotetree(tree, cwd, localpath)
 
-            dkeys = [f'/home/{USER}',
-                     f'/home/{USER}/pub',
-                     f'/home/{USER}/pub/foo2']
+            remote = {
+                f'/home/{USER}': [
+                    (f'/home/{USER}/pub', f'{localpath}/pub')
+                ],
+                f'/home/{USER}/pub': [
+                    (f'/home/{USER}/pub/foo1', f'{localpath}/pub/foo1'),
+                    (f'/home/{USER}/pub/foo2', f'{localpath}/pub/foo2')
+                ],
+                f'/home/{USER}/pub/foo2': [
+                    (f'/home/{USER}/pub/foo2/bar1',
+                     f'{localpath}/pub/foo2/bar1')
+                ]
+            }
 
-            dvalues = [[(f'/home/{USER}/pub', f'{localpath}/home/{USER}/pub')],
-                       [(f'/home/{USER}/pub/foo1',
-                         f'{localpath}/home/{USER}/pub/foo1'),
-                        (f'/home/{USER}/pub/foo2',
-                         f'{localpath}/home/{USER}/pub/foo2')],
-                       [(f'/home/{USER}/pub/foo2/bar1',
-                         f'{localpath}/home/{USER}/pub/foo2/bar1')]]
-
-            assert list(directories.keys()) == dkeys
-            assert list(directories.values()) == dvalues
+            for branch in sorted(tree.keys()):
+                assert set(remote[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
 
 
 def test_remotetree_no_recurse(sftpserver):
@@ -37,13 +41,18 @@ def test_remotetree_no_recurse(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            directories = {}
             localpath = Path(mkdtemp()).as_posix()
+            tree = {}
 
-            sftp.remotetree(directories, cwd, localpath, recurse=False)
+            sftp.remotetree(tree, cwd, localpath, recurse=False)
 
-            dkeys = [f'/home/{USER}']
-            dvalues = [[(f'/home/{USER}/pub', f'{localpath}/home/{USER}/pub')]]
+            remote = {
+                f'/home/{USER}': [
+                    (f'/home/{USER}/pub', f'{localpath}/pub')
+                ]
+            }
 
-            assert list(directories.keys()) == dkeys
-            assert list(directories.values()) == dvalues
+            for branch in sorted(tree.keys()):
+                assert set(remote[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
