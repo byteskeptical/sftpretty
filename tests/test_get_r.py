@@ -12,22 +12,15 @@ def test_get_r(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
-
-            local_tree = {}
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
-            local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/')).as_posix()
 
-            localtree(local_tree, local_cwd, localpath)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            local_tree = localtree(localpath, localpath, remote_cwd)
+            remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, '')
-                                for localdir in local_tree.keys()])
-            remotedirs = sorted(remote_tree.keys())
-
-            assert localdirs == remotedirs
+            assert len(local_tree) == len(remote_tree)
+            for i in range(0, len(local_tree)):
+                assert local_tree[i][0] == remote_tree[i][1]
+                assert local_tree[i][1] == remote_tree[i][0]
 
             # cleanup local
             rmdir(localpath)
@@ -39,22 +32,15 @@ def test_get_r_pwd(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('pub/foo2', localpath)
-
-            local_tree = {}
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
-            local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/')).as_posix()
 
-            localtree(local_tree, local_cwd, localpath)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            local_tree = localtree(localpath, localpath, remote_cwd)
+            remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, '')
-                                for localdir in local_tree.keys()])
-            remotedirs = sorted(remote_tree.keys())
-
-            assert localdirs == remotedirs
+            assert len(local_tree) == len(remote_tree)
+            for i in range(0, len(local_tree)):
+                assert local_tree[i][0] == remote_tree[i][1]
+                assert local_tree[i][1] == remote_tree[i][0]
 
             # cleanup local
             rmdir(localpath)
@@ -67,23 +53,20 @@ def test_get_r_pathed(sftpserver):
             sftp.chdir('pub/foo2')
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('./bar1', localpath)
-
-            local_tree = {}
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
-            local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/')).as_posix()
 
-            localtree(local_tree, local_cwd, localpath)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            local_tree = localtree(localpath, localpath, remote_cwd)
+            remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
 
-            actual = hash(Path(local_cwd).joinpath('bar1/bar1.txt').as_posix())
+            actual = hash(Path(localpath).joinpath('bar1/bar1.txt').as_posix())
             expected = ('a69f73cca23a9ac5c8b567dc185a756e97c982164fe258'
                         '59e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3a'
                         'c558f500199d95b6d3e301758586281dcd26')
 
-            assert local_tree.keys() == remote_tree.keys()
+            assert len(local_tree) == len(remote_tree)
+            for i in range(0, len(local_tree)):
+                assert local_tree[i][0] == remote_tree[i][1]
+                assert local_tree[i][1] == remote_tree[i][0]
             assert actual == expected
 
             # cleanup local
@@ -97,22 +80,15 @@ def test_get_r_cdd(sftpserver):
             localpath = Path(mkdtemp()).as_posix()
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
-
-            local_tree = {}
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
-            local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/')).as_posix()
 
-            localtree(local_tree, local_cwd, localpath)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            local_tree = localtree(localpath, localpath, remote_cwd)
+            remote_tree = sftp.remotetree(remote_cwd, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, '')
-                                for localdir in local_tree.keys()])
-            remotedirs = sorted(remote_tree.keys())
-
-            assert localdirs == remotedirs
+            assert len(local_tree) == len(remote_tree)
+            for i in range(0, len(local_tree)):
+                assert local_tree[i][0] == remote_tree[i][1]
+                assert local_tree[i][1] == remote_tree[i][0]
 
             # cleanup local
             rmdir(localpath)

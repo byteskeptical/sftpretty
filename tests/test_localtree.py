@@ -14,25 +14,16 @@ def test_localtree(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            directories = {}
+            directories = localtree(localpath, localpath, cwd)
+            dvalues = [
+                (f'{localpath}/pub', f'{cwd}/pub'),
+                (f'{localpath}/pub/foo1', f'{cwd}/pub/foo1'),
+                (f'{localpath}/pub/foo2', f'{cwd}/pub/foo2'),
+                (f'{localpath}/pub/foo2/bar1', f'{cwd}/pub/foo2/bar1')
+            ]
 
-            localtree(directories, localpath + cwd, Path(localpath).anchor)
-
-            dkeys = [f'{localpath}/home/test',
-                     f'{localpath}/home/test/pub',
-                     f'{localpath}/home/test/pub/foo2']
-
-            dvalues = [[(f'{localpath}/home/test/pub',
-                         f'{localpath}/home/test/pub')],
-                       [(f'{localpath}/home/test/pub/foo1',
-                         f'{localpath}/home/test/pub/foo1'),
-                        (f'{localpath}/home/test/pub/foo2',
-                         f'{localpath}/home/test/pub/foo2')],
-                       [(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
-
-            assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
+            assert len(directories) == len(dvalues)
+            assert sorted(directories) == sorted(dvalues)
 
     # cleanup local
     rmdir(localpath)
@@ -47,18 +38,12 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            directories = {}
+            directories = localtree(localpath, localpath, cwd, recurse=False)
+            dvalues = [
+                (f'{localpath}/bar1', f'{cwd}/bar1')
+            ]
 
-            localtree(directories, localpath + cwd, Path(localpath).anchor,
-                      recurse=False)
-
-            dkeys = [f'{localpath}/home/test/pub/foo2']
-
-            dvalues = [[(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
-
-            assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
+            assert directories == dvalues
 
     # cleanup local
     rmdir(localpath)

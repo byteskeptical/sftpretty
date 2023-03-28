@@ -11,25 +11,20 @@ def test_remotetree(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            directories = {}
             localpath = Path(mkdtemp()).as_posix()
 
-            sftp.remotetree(directories, cwd, localpath)
+            directories = sftp.remotetree(cwd, cwd, localpath)
 
-            dkeys = ['/home/test',
-                     '/home/test/pub',
-                     '/home/test/pub/foo2']
+            dvalues = [
+                (f'{cwd}/pub', f'{localpath}/pub'),
+                (f'{cwd}/pub/foo1', f'{localpath}/pub/foo1'),
+                (f'{cwd}/pub/foo2', f'{localpath}/pub/foo2'),
+                (f'{cwd}/pub/foo2/bar1', f'{localpath}/pub/foo2/bar1'),
+            ]
+            sorted(directories)
 
-            dvalues = [[('/home/test/pub', f'{localpath}/home/test/pub')],
-                       [('/home/test/pub/foo1',
-                         f'{localpath}/home/test/pub/foo1'),
-                        ('/home/test/pub/foo2',
-                         f'{localpath}/home/test/pub/foo2')],
-                       [('/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
-
-            assert list(directories.keys()) == dkeys
-            assert list(directories.values()) == dvalues
+            assert len(directories) == len(dvalues)
+            assert sorted(directories) == sorted(dvalues)
 
 
 def test_remotetree_no_recurse(sftpserver):
@@ -37,13 +32,10 @@ def test_remotetree_no_recurse(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            directories = {}
             localpath = Path(mkdtemp()).as_posix()
 
-            sftp.remotetree(directories, cwd, localpath, recurse=False)
+            directories = sftp.remotetree(cwd, cwd, localpath, recurse=False)
+            dvalues = [(f'{cwd}/pub', f'{localpath}/pub')]
 
-            dkeys = ['/home/test']
-            dvalues = [[('/home/test/pub', f'{localpath}/home/test/pub')]]
-
-            assert list(directories.keys()) == dkeys
-            assert list(directories.values()) == dvalues
+            assert len(directories) == len(dvalues)
+            assert sorted(directories) == sorted(dvalues)
