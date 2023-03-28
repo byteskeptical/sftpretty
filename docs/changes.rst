@@ -5,6 +5,7 @@ Change Log
 ------------------------------------
     * remotetree no longer adds entire remote path when joining paths
     * localtree no longer adds entire local path when joining paths
+    * bumped paramiko dependency to 2.9.2 for rsa-sh2 support
 
 1.0.7 (released 2023-02-27)
 ------------------------------------
