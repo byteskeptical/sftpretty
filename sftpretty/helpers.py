@@ -49,50 +49,46 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
     return algorithm.hexdigest()
 
 
-def localtree(container, localdir, remotedir, recurse=True):
+def localtree(localbase, localdir, remotedir, recurse=True):
     '''recursively descend local directory mapping the tree to a
-    dictionary container.
+        list of tuples.
 
-    :param dict container: dictionary object to save directory tree
-            {localdir:
-                 [(localdir/sub-directory,
-                   remotedir/localdir/sub-directory)],}
-        {localdir: [(content path, remotedir/content path)],}
-    :param str localdir:
-        root of local directory to descend, use '.' to start at
-        :attr:`.pwd`
-    :param str remotedir:
-        root of remote directory to append localdir too
-        path
+    :param str localbase: The base of all `localdir` paths
+    :param str localdir: root of local directory to descend, use '.' to
+        start at :attr:`.pwd`
+    :param str remotedir: root of remote directory to append localdir
+        to path
     :param bool recurse: *Default: True*. To recurse or not to recurse
         that is the question
 
-    :returns: None
+    :returns: List of tuples, containing pairs of local directories and
+        remote directories.
+        [
+            (local-dir/sub-dir, remote-dir/sub-dir),
+            (lcoal-dir/sub-dir/sub-dir, remote-dir/sub-dir/sub-dir),
+            ...
+        ]
 
     :raises: Exception
 
     '''
+    tree = []
     try:
-        if localdir.startswith(':', 1) or localdir.startswith('\\'):
-            localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir).expanduser().absolute()
-        for localpath in Path(localdir).iterdir():
+        localdir = Path(localdir).expanduser().absolute()
+        for localpath in localdir.iterdir():
             if localpath.is_dir():
-                local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(
-                    localpath.relative_to(
-                        localdir.anchor).as_posix()).as_posix()
-                if localdir.as_posix() in container.keys():
-                    container[localdir.as_posix()].append((local, remote))
-                else:
-                    container[localdir.as_posix()] = [(local, remote)]
-                container[localdir.as_posix()].sort()
+                remote = Path(remotedir) / localpath.relative_to(localbase)
+                tree.append((localpath.as_posix(), remote.as_posix()))
                 if recurse:
-                    localtree(container, local, remotedir,
-                              recurse=recurse)
+                    tree += localtree(
+                        localbase,
+                        localpath.as_posix(),
+                        remotedir,
+                        recurse=recurse
+                    )
     except Exception as err:
         raise err
+    return tree
 
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
