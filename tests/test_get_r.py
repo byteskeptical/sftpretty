@@ -10,7 +10,7 @@ def test_get_r(sftpserver):
     '''test the get_r for remotepath is pwd '.' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = Path(mkdtemp()).as_posix()
+            localpath = mkdtemp()
             sftp.get_r('.', localpath)
 
             local_tree = {}
@@ -29,7 +29,6 @@ def test_get_r(sftpserver):
 
             assert localdirs == remotedirs
 
-            # cleanup local
             rmdir(localpath)
 
 
@@ -56,7 +55,6 @@ def test_get_r_pwd(sftpserver):
 
             assert localdirs == remotedirs
 
-            # cleanup local
             rmdir(localpath)
 
 
@@ -86,7 +84,6 @@ def test_get_r_pathed(sftpserver):
             assert local_tree.keys() == remote_tree.keys()
             assert actual == expected
 
-            # cleanup local
             rmdir(localpath)
 
 
@@ -114,5 +111,4 @@ def test_get_r_cdd(sftpserver):
 
             assert localdirs == remotedirs
 
-            # cleanup local
             rmdir(localpath)

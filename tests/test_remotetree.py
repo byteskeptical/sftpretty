@@ -1,6 +1,6 @@
 '''test sftpretty.remotetree'''
 
-from common import conn, USER, VFS
+from common import conn, USER, USER_HOME_PARENT, VFS
 from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
@@ -17,16 +17,18 @@ def test_remotetree(sftpserver):
             sftp.remotetree(tree, cwd, localpath)
 
             remote = {
-                f'/home/{USER}': [
-                    (f'/home/{USER}/pub', f'{localpath}/pub')
+                f'/{USER_HOME_PARENT}/{USER}': [
+                    (f'/{USER_HOME_PARENT}/{USER}/pub', f'{localpath}/{USER}')
                 ],
-                f'/home/{USER}/pub': [
-                    (f'/home/{USER}/pub/foo1', f'{localpath}/pub/foo1'),
-                    (f'/home/{USER}/pub/foo2', f'{localpath}/pub/foo2')
+                f'/{USER_HOME_PARENT}/{USER}/pub': [
+                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo1',
+                     f'{localpath}/{USER}/pub/foo1'),
+                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo2',
+                     f'{localpath}/{USER}/pub/foo2')
                 ],
-                f'/home/{USER}/pub/foo2': [
-                    (f'/home/{USER}/pub/foo2/bar1',
-                     f'{localpath}/pub/foo2/bar1')
+                f'/{USER_HOME_PARENT}/{USER}/pub/foo2': [
+                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
+                     f'{localpath}/{USER}/pub/foo2/bar1')
                 ]
             }
 
@@ -47,8 +49,8 @@ def test_remotetree_no_recurse(sftpserver):
             sftp.remotetree(tree, cwd, localpath, recurse=False)
 
             remote = {
-                f'/home/{USER}': [
-                    (f'/home/{USER}/pub', f'{localpath}/pub')
+                f'/{USER_HOME_PARENT}/{USER}': [
+                    (f'/{USER_HOME_PARENT}/{USER}/pub', f'{localpath}/{USER}')
                 ]
             }
 

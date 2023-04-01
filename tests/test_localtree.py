@@ -1,6 +1,6 @@
 '''test sftpretty.localtree'''
 
-from common import conn, rmdir, USER, VFS
+from common import conn, rmdir, USER, USER_HOME_PARENT, VFS
 from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
@@ -19,15 +19,18 @@ def test_localtree(sftpserver):
             localtree(tree, localpath + cwd, Path(localpath).anchor)
 
             local = {
-                f'{localpath}/home/{USER}': [
-                    (f'{localpath}/home/{USER}/pub', f'/{USER}/pub')
+                f'{localpath}/{USER_HOME_PARENT}/{USER}': [
+                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub',
+                     f'/{USER}/pub')
                 ],
-                f'{localpath}/home/{USER}/pub': [
-                    (f'{localpath}/home/{USER}/pub/foo1', f'/{USER}/pub/foo1'),
-                    (f'{localpath}/home/{USER}/pub/foo2', f'/{USER}/pub/foo2')
+                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub': [
+                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo1',
+                     f'/{USER}/pub/foo1'),
+                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2',
+                     f'/{USER}/pub/foo2')
                 ],
-                f'{localpath}/home/{USER}/pub/foo2': [
-                    (f'{localpath}/home/{USER}/pub/foo2/bar1',
+                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2': [
+                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
                      f'/{USER}/pub/foo2/bar1')
                 ]
             }
@@ -55,8 +58,9 @@ def test_localtree_no_recurse(sftpserver):
                       recurse=False)
 
             local = {
-                f'{localpath}/home/{USER}/pub/foo2': [
-                    (f'{localpath}/home/{USER}/pub/foo2/bar1', '/foo2/bar1')
+                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2': [
+                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
+                     '/foo2/bar1')
                 ]
             }
 
