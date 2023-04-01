@@ -16,9 +16,8 @@ USER = environ.get('USER', environ.get('USERNAME'))
 USER_HOME = Path.home().as_posix()
 USER_HOME_PARENT = Path(USER_HOME).parent.as_posix()
 
-LOCAL = {'default_path': USER_HOME, 'host': 'localhost',
-         'private_key': 'id_sftpretty', 'private_key_pass': PASS,
-         'username': USER}
+LOCAL = {'host': 'localhost', 'private_key': 'id_sftpretty',
+         'private_key_pass': PASS, 'username': USER}
 
 
 def conn(sftpsrv):
