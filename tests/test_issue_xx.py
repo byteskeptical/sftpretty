@@ -1,7 +1,7 @@
 '''a template for creating tests that display or duplicate issues'''
 
 
-from common import conn, VFS
+from common import conn, USER, USER_HOME_PARENT, VFS
 from pathlib import Path
 from sftpretty import Connection
 
@@ -19,14 +19,14 @@ def test_issue_xx_sftpserver_plugin(sftpserver):
             with sftp.cd():
                 sftp.chdir('pub')
                 assert sftp.pwd == testpath.as_posix()
-            assert home == Path.home().as_posix()
+            assert home == '/home/test'
 
 
 def test_issue_xx_local_sftpserver(lsftp):
     '''same as test_issue_xx_sftpserver_plugin but written with the local
     sfptserver mechanism, lsftp'''
     home = lsftp.pwd
-    testpath = Path('/home/test').joinpath('pub')
+    testpath = Path(f'{USER_HOME_PARENT}/{USER}').joinpath('pub')
     # starting condition of default directory should be empty, so we need to
     # construct whatever structure we need prior to peforming the test
     lsftp.mkdir('pub')

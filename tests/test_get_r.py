@@ -18,10 +18,11 @@ def test_get_r(sftpserver):
 
             remote_cwd = sftp.pwd
             local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/home')).as_posix()
+                             remote_cwd.lstrip('/')).as_posix()
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
+            print(local_tree)
 
             localdirs = sorted([localdir.replace(localpath, '')
                                 for localdir in local_tree.keys()])
@@ -44,7 +45,7 @@ def test_get_r_pwd(sftpserver):
 
             remote_cwd = sftp.pwd
             local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/home')).as_posix()
+                             remote_cwd.lstrip('/')).as_posix()
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
@@ -71,7 +72,7 @@ def test_get_r_pathed(sftpserver):
 
             remote_cwd = sftp.pwd
             local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/home')).as_posix()
+                             remote_cwd.lstrip('/')).as_posix()
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
@@ -100,7 +101,7 @@ def test_get_r_cdd(sftpserver):
 
             remote_cwd = sftp.pwd
             local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/home')).as_posix()
+                             remote_cwd.lstrip('/')).as_posix()
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)

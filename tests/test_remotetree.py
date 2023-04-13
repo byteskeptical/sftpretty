@@ -1,6 +1,6 @@
 '''test sftpretty.remotetree'''
 
-from common import conn, USER, USER_HOME_PARENT, VFS
+from common import conn, VFS
 from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
@@ -22,13 +22,13 @@ def test_remotetree(sftpserver):
                 ],
                 '/home/test/pub': [
                     ('/home/test/pub/foo1',
-                     f'{localpath}/test/pub/foo1'),
+                     f'{localpath}/pub'),
                     ('/home/test/pub/foo2',
-                     f'{localpath}/test/pub/foo2')
+                     f'{localpath}/pub')
                 ],
                 '/home/test/pub/foo2': [
                     ('/home/test/pub/foo2/bar1',
-                     f'{localpath}/test/pub/foo2/bar1')
+                     f'{localpath}/foo2')
                 ]
             }
 
