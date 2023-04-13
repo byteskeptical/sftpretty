@@ -17,8 +17,9 @@ def test_get_r(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = Path(localpath).joinpath(
-                             remote_cwd.lstrip('/')).as_posix()
+            local_cwd = '/home/test'
+            #local_cwd = Path(localpath).joinpath(
+            #                 remote_cwd.lstrip('/')).as_posix()
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
