@@ -24,7 +24,7 @@ LOCAL = {'default_path': USER_HOME, 'host': 'localhost',
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    return {'cnopts': cnopts, 'default_path': USER_HOME, 'host': sftpsrv.host,
+    return {'cnopts': cnopts, 'default_path': '/home/test', 'host': sftpsrv.host,
             'port': sftpsrv.port, 'private_key': 'id_sftpretty',
             'private_key_pass': PASS, 'username': USER}
 
@@ -58,8 +58,8 @@ def tempfile_containing(contents=STARS8192, suffix=''):
 
 # filesystem served by pytest-sftpserver plugin
 VFS = {
-       f'{USER_HOME_PARENT}': {
-           f'{USER}': {
+       'home': {
+           'test': {
                'pub': {
                    'foo1': {
                        'foo1.txt': 'content of foo1.txt',

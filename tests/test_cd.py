@@ -2,7 +2,6 @@
 
 import pytest
 
-from blddirs import build_dir_struct
 from common import conn, rmdir, VFS
 from pathlib import Path
 from sftpretty import Connection
@@ -10,8 +9,7 @@ from sftpretty import Connection
 
 def test_cd_none(sftpserver):
     '''test sftpretty.cd with None'''
-    build_dir_struct(Path.home().as_posix())
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
@@ -24,8 +22,7 @@ def test_cd_none(sftpserver):
 
 def test_cd_path(sftpserver):
     '''test sftpretty.cd with a path'''
-    build_dir_struct(Path.home().as_posix())
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
@@ -37,8 +34,7 @@ def test_cd_path(sftpserver):
 
 def test_cd_nested(sftpserver):
     '''test nested cd's'''
-    build_dir_struct(Path.home().as_posix())
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
