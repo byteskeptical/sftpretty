@@ -9,7 +9,7 @@ from sftpretty import Connection
 def test_issue_65(sftpserver):
     '''using the .cd() context manager prior to setting a directory
     via chdir causes an error'''
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         cnn = conn(sftpserver)
         cnn['default_path'] = None

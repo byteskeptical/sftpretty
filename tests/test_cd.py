@@ -17,7 +17,7 @@ def test_cd_none(sftpserver):
                 sftp.chdir('pub')
                 assert sftp.pwd == pubpath.as_posix()
             assert home == pubpath.parent.as_posix()
-    rmdir(Path.home().as_posix())
+#    rmdir(Path.home().as_posix())
 
 
 def test_cd_path(sftpserver):
@@ -29,7 +29,7 @@ def test_cd_path(sftpserver):
             with sftp.cd('pub'):
                 assert sftp.pwd == pubpath.as_posix()
             assert home == pubpath.parent.as_posix()
-    rmdir(Path.home().as_posix())
+#    rmdir(Path.home().as_posix())
 
 
 def test_cd_nested(sftpserver):
@@ -44,7 +44,7 @@ def test_cd_nested(sftpserver):
                     assert sftp.pwd == pubpath.joinpath('foo1').as_posix()
                 assert sftp.pwd == pubpath.as_posix()
             assert home == pubpath.parent.as_posix()
-    rmdir(Path.home().as_posix())
+#    rmdir(Path.home().as_posix())
 
 
 def test_cd_bad_path(sftpserver):

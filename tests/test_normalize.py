@@ -7,7 +7,7 @@ from sftpretty import Connection
 
 def test_normalize(sftpserver):
     '''test the normalize function'''
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             makepath = pubpath.parent.joinpath('make.txt').as_posix()
@@ -29,7 +29,7 @@ def test_normalize(sftpserver):
 
 def test_pwd(sftpserver):
     '''test the pwd property'''
-    pubpath = Path.home().joinpath('pub')
+    pubpath = Path('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo2')

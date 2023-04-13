@@ -17,18 +17,18 @@ def test_remotetree(sftpserver):
             sftp.remotetree(tree, cwd, localpath)
 
             remote = {
-                f'/{USER_HOME_PARENT}/{USER}': [
-                    (f'/{USER_HOME_PARENT}/{USER}/pub', f'{localpath}/{USER}')
+                '/home/test': [
+                    ('/home/test/pub', f'{localpath}/test')
                 ],
-                f'/{USER_HOME_PARENT}/{USER}/pub': [
-                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo1',
-                     f'{localpath}/{USER}/pub/foo1'),
-                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo2',
-                     f'{localpath}/{USER}/pub/foo2')
+                '/home/test/pub': [
+                    ('/home/test/pub/foo1',
+                     f'{localpath}/test/pub/foo1'),
+                    ('/home/test/pub/foo2',
+                     f'{localpath}/test/pub/foo2')
                 ],
-                f'/{USER_HOME_PARENT}/{USER}/pub/foo2': [
-                    (f'/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
-                     f'{localpath}/{USER}/pub/foo2/bar1')
+                '/home/test/pub/foo2': [
+                    ('/home/test/pub/foo2/bar1',
+                     f'{localpath}/test/pub/foo2/bar1')
                 ]
             }
 
@@ -49,8 +49,8 @@ def test_remotetree_no_recurse(sftpserver):
             sftp.remotetree(tree, cwd, localpath, recurse=False)
 
             remote = {
-                f'/{USER_HOME_PARENT}/{USER}': [
-                    (f'/{USER_HOME_PARENT}/{USER}/pub', f'{localpath}/{USER}')
+                '/home/test': [
+                    ('/home/test/pub', f'{localpath}/test')
                 ]
             }
 

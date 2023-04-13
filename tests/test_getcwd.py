@@ -18,12 +18,12 @@ def test_getcwd_default_path(sftpserver):
     '''test .getcwd when using default_path arg'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.getcwd() == Path.home().as_posix()
+            assert sftp.getcwd() == '/home/test'
 
 
 def test_getcwd_after_chdir(sftpserver):
     '''test getcwd after a chdir operation'''
-    pubpath = Path.home().joinpath('pub/foo1')
+    pubpath = Path('/home/test').joinpath('pub/foo1')
     with sftpserver.serve_content(VFS):
         cnn = conn(sftpserver)
         cnn['default_path'] = None
