@@ -17,13 +17,12 @@ def test_get_r(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = '/home/test'
-            #local_cwd = Path(localpath).joinpath(
-            #                 remote_cwd.lstrip('/')).as_posix()
+            local_cwd = Path(localpath).joinpath(
+                             remote_cwd.lstrip('/')).as_posix()
+            cwd = [b.as_posix() for b in local_cwd.iterdir()] 
 
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
-            print(local_tree)
 
             localdirs = sorted([localdir.replace(localpath, '')
                                 for localdir in local_tree.keys()])
