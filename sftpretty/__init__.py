@@ -923,6 +923,8 @@ class Connection(object):
                 # remove lingering handlers if any
                 for handle in log.handlers:
                     log.removeHandler(handle)
+        except AttributeError as err:
+            pass
         except Exception as err:
             raise err
 
@@ -1343,4 +1345,5 @@ class Connection(object):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         '''GTFO'''
+        log.error(f'{exc_type}: {exc_traceback}')
         self.close()
