@@ -24,7 +24,8 @@ def test_get_r(sftpserver):
             localtree(local_tree, local_cwd, localpath)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
-            localdirs = sorted(local_tree.keys())
+            localdirs = sorted([localdir.replace(localpath, '')
+                                for localdir in local_tree.keys()])
             remotedirs = sorted(remote_tree.keys())
 
             assert localdirs == remotedirs

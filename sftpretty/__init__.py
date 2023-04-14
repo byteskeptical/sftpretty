@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
-from os import environ, SEEK_END, utime
+from os import _exit, environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
@@ -924,7 +924,7 @@ class Connection(object):
                 for handle in log.handlers:
                     log.removeHandler(handle)
         except AttributeError as err:
-            pass
+            _exit()
         except Exception as err:
             raise err
 
@@ -1158,7 +1158,8 @@ class Connection(object):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
-                        Path(remote).parent.stem).as_posix()
+                        Path(remote).stem).relative_to(
+                            Path(remotedir).anchor).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
@@ -1345,5 +1346,4 @@ class Connection(object):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         '''GTFO'''
-        log.error(f'{exc_type}: {exc_traceback}')
         self.close()
