@@ -923,7 +923,7 @@ class Connection(object):
                 # remove lingering handlers if any
                 for handle in log.handlers:
                     log.removeHandler(handle)
-        except AttributeError as err:
+        except AttributeError:
             _exit(0)
         except Exception as err:
             raise err
