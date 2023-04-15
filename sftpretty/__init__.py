@@ -490,11 +490,11 @@ class Connection(object):
 
         tree = {}
         cwd = self._default_path
-        lwd = Path(localdir).absolute().joinpath(cwd.lstrip('/')).as_posix()
+        lwd = Path(localdir).absolute().joinpath(cwd.stem).as_posix()
 
         tree[cwd] = [(cwd, lwd)]
 
-        self.remotetree(tree, cwd, localdir, recurse=True)
+        self.remotetree(tree, cwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
 
         for roots in tree.keys():
@@ -1158,7 +1158,7 @@ class Connection(object):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
-                        Path(remote).stem).as_posix()
+                        Path(remote).parent.as_posix().lstrip('/')).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:

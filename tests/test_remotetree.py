@@ -18,7 +18,7 @@ def test_remotetree(sftpserver):
 
             remote = {
                 '/home/test': [
-                    ('/home/test/pub', f'{localpath}/pub')
+                    ('/home/test/pub', f'{localpath}/test')
                 ],
                 '/home/test/pub': [
                     ('/home/test/pub/foo1',
@@ -50,7 +50,7 @@ def test_remotetree_no_recurse(sftpserver):
 
             remote = {
                 '/home/test': [
-                    ('/home/test/pub', f'{localpath}/pub')
+                    ('/home/test/pub', f'{localpath}/test')
                 ]
             }
 
