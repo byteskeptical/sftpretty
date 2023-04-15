@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
-from os import _exit, environ, SEEK_END, utime
+from os import environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
@@ -924,7 +924,7 @@ class Connection(object):
                 for handle in log.handlers:
                     log.removeHandler(handle)
         except AttributeError:
-            _exit(0)
+            pass
         except Exception as err:
             raise err
 
