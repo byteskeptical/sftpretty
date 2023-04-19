@@ -494,7 +494,7 @@ class Connection(object):
 
         tree[rwd] = [(rwd, lwd)]
 
-        self.remotetree(tree, cwd, lwd, recurse=True)
+        self.remotetree(tree, rwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
 
         for roots in tree.keys():
