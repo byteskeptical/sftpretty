@@ -80,15 +80,13 @@ def localtree(container, localdir, remotedir, recurse=True):
         for localpath in Path(localdir).iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(localpath.relative_to(
-                    localdir.anchor)).as_posix()
+                remote = Path(remotedir).joinpath(localpath.stem).as_posix()
                 if localdir.as_posix() in container.keys():
                     container[localdir.as_posix()].append((local, remote))
                 else:
                     container[localdir.as_posix()] = [(local, remote)]
                 if recurse:
-                    localtree(container, local, Path(remote).parent,
-                              recurse=recurse)
+                    localtree(container, local, remote, recurse=recurse)
     except Exception as err:
         raise err
 

@@ -489,10 +489,10 @@ class Connection(object):
         self.chdir(remotedir)
 
         tree = {}
-        cwd = self._default_path
-        lwd = Path(localdir).absolute().joinpath(cwd.lstrip('/')).as_posix()
+        rwd = self._default_path
+        lwd = Path(localdir).absolute().joinpath(Path(rwd).stem).as_posix()
 
-        tree[cwd] = [(cwd, lwd)]
+        tree[rwd] = [(rwd, lwd)]
 
         self.remotetree(tree, cwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
@@ -730,12 +730,12 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         tree = {}
-        root = Path(localdir).parent.as_posix()
-        rwd = Path(remotedir).joinpath(localdir).as_posix()
+        lwd = Path(localdir).absolute().as_posix()
+        rwd = Path(remotedir).joinpath(Path(lwd).stem).as_posix()
 
-        tree[root] = [(localdir, rwd)]
+        tree[lwd] = [(lwd, rwd)]
 
-        localtree(tree, localdir, remotedir, recurse=True)
+        localtree(tree, lwd, rwd, recurse=True)
         log.debug(f'Local Tree: [{tree}]')
 
         for roots in tree.keys():
@@ -1158,13 +1158,13 @@ class Connection(object):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
-                        Path(remote).parent.as_posix().lstrip('/')).as_posix()
+                        Path(remote).stem).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
                         container[remotedir] = [(remote, local)]
                     if recurse:
-                        self.remotetree(container, remote, localdir,
+                        self.remotetree(container, remote, local,
                                         recurse=recurse)
         except Exception as err:
             raise err
