@@ -18,16 +18,18 @@ def test_localtree(sftpserver):
             localtree(tree, localpath, cwd)
 
             local = {
-                f'{localpath}/{USER}': [
-                    (f'{localpath}/{USER}/pub', cwd + '/pub')
+                f'{localpath}': [
+                    (f'{localpath}/test', cwd)
                 ],
-                f'{localpath}/{USER}/pub': [
-                    (f'{localpath}/{USER}/pub/foo1', cwd + '/pub/foo1'),
-                    (f'{localpath}/{USER}/pub/foo2', cwd + '/pub/foo2')
+                f'{localpath}/test': [
+                    (f'{localpath}/test/pub', cwd + '/pub')
                 ],
-                f'{localpath}/{USER}/pub/foo2': [
-                    (f'{localpath}/{USER}/pub/foo2/bar1',
-                     cwd + '/pub/foo2/bar1')
+                f'{localpath}/test/pub': [
+                    (f'{localpath}/test/pub/foo1', cwd + '/pub/foo1'),
+                    (f'{localpath}/test/pub/foo2', cwd + '/pub/foo2')
+                ],
+                f'{localpath}/test/pub/foo2': [
+                    (f'{localpath}/test/pub/foo2/bar1', cwd + '/pub/foo2/bar1')
                 ]
             }
 
@@ -48,9 +50,10 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
+            lwd = Path(cwd).parent.as_posix()
             tree = {}
 
-            localtree(tree, localpath, cwd, recurse=False)
+            localtree(tree, localpath, lwd, recurse=False)
 
             local = {
                 f'{localpath}/foo2': [
