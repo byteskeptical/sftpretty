@@ -1,7 +1,6 @@
 '''test sftpretty.localtree'''
 
-from common import conn, rmdir, USER, USER_HOME_PARENT, VFS
-from pathlib import Path
+from common import conn, rmdir, USER, VFS
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
@@ -16,22 +15,19 @@ def test_localtree(sftpserver):
             cwd = sftp.pwd
             tree = {}
 
-            localtree(tree, localpath + cwd, Path(localpath).anchor)
+            localtree(tree, localpath, cwd)
 
             local = {
-                f'{localpath}/{USER_HOME_PARENT}/{USER}': [
-                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub',
-                     f'/{USER}/pub')
+                f'{localpath}/{USER}': [
+                    (f'{localpath}/{USER}/pub', cwd + '/pub')
                 ],
-                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub': [
-                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo1',
-                     f'/{USER}/pub/foo1'),
-                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2',
-                     f'/{USER}/pub/foo2')
+                f'{localpath}/{USER}/pub': [
+                    (f'{localpath}/{USER}/pub/foo1', cwd + '/pub/foo1'),
+                    (f'{localpath}/{USER}/pub/foo2', cwd + '/pub/foo2')
                 ],
-                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2': [
-                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
-                     f'/{USER}/pub/foo2/bar1')
+                f'{localpath}/{USER}/pub/foo2': [
+                    (f'{localpath}/{USER}/pub/foo2/bar1',
+                     cwd + '/pub/foo2/bar1')
                 ]
             }
 
@@ -54,13 +50,11 @@ def test_localtree_no_recurse(sftpserver):
             cwd = sftp.pwd
             tree = {}
 
-            localtree(tree, localpath + cwd, Path(localpath).anchor,
-                      recurse=False)
+            localtree(tree, localpath, cwd, recurse=False)
 
             local = {
-                f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2': [
-                    (f'{localpath}/{USER_HOME_PARENT}/{USER}/pub/foo2/bar1',
-                     '/foo2/bar1')
+                f'{localpath}/foo2': [
+                    (f'{localpath}/foo2/bar1', cwd + '/bar1')
                 ]
             }
 

@@ -1,7 +1,6 @@
 '''test sftpretty.remotetree'''
 
 from common import conn, VFS
-from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
 
@@ -18,17 +17,17 @@ def test_remotetree(sftpserver):
 
             remote = {
                 '/home/test': [
-                    ('/home/test/pub', f'{localpath}/test')
+                    ('/home/test/pub', f'{localpath}/pub')
                 ],
                 '/home/test/pub': [
                     ('/home/test/pub/foo1',
-                     f'{localpath}/pub'),
+                     f'{localpath}/pub/foo1'),
                     ('/home/test/pub/foo2',
-                     f'{localpath}/pub')
+                     f'{localpath}/pub/foo2')
                 ],
                 '/home/test/pub/foo2': [
                     ('/home/test/pub/foo2/bar1',
-                     f'{localpath}/foo2')
+                     f'{localpath}/pub/foo2/bar1')
                 ]
             }
 
@@ -50,7 +49,7 @@ def test_remotetree_no_recurse(sftpserver):
 
             remote = {
                 '/home/test': [
-                    ('/home/test/pub', f'{localpath}/test')
+                    ('/home/test/pub', f'{localpath}/pub')
                 ]
             }
 
