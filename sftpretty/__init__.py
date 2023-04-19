@@ -490,7 +490,7 @@ class Connection(object):
 
         tree = {}
         rwd = self._default_path
-        lwd = Path(localdir).absolute().joinpath(Path(rwd).stem).as_posix()
+        lwd = Path(localdir).absolute().as_posix()
 
         tree[rwd] = [(rwd, lwd)]
 
