@@ -31,9 +31,10 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           $authorizedKey = Get-Content -Path id_sftpretty.pub
+          $privateKey = Get-Content -Path id_sftpretty
           New-Item -Force -ItemType Directory -Path $env:UserProfile\.ssh; Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value '$authorizedKey'
           Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value '$authorizedKey'; Icacls ""$env:ProgramData\ssh\administrators_authorized_keys"" /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
-          New-Variable -Name SFTPretty -Value "id_sftpretty"; Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value '$SFTPretty'; New-Variable -Name Key -Value "$env:UserProfile\.ssh\id_sftpretty"
+          Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value '$privateKey'; New-Variable -Name Key -Value "$env:UserProfile\.ssh\id_sftpretty"
           Icacls $Key /c /t /Inheritance:d; Icacls $Key /c /t /Grant ${env:UserName}:F; Icacls $Key /c /t /Remove:g Administrator "Authenticated Users" BUILTIN\Administrators BUILTIN Everyone System Users
           Icacls $Key
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
