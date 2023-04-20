@@ -1,7 +1,6 @@
 '''test sftpretty.localtree'''
 
 from common import conn, rmdir, USER, VFS
-from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
@@ -51,10 +50,9 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            lwd = Path(cwd).parent.as_posix()
             tree = {}
 
-            localtree(tree, localpath, lwd, recurse=False)
+            localtree(tree, localpath, cwd, recurse=False)
 
             local = {
                 f'{localpath}/foo2': [

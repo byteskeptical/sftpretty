@@ -1,7 +1,6 @@
 '''test sftpretty.get_r'''
 
 from common import conn, rmdir, VFS
-from pathlib import Path
 from sftpretty import Connection, hash, localtree
 from tempfile import mkdtemp
 
@@ -17,12 +16,11 @@ def test_get_r(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = Path(remote_cwd).parent.as_posix()
 
-            localtree(local_tree, localpath, local_cwd)
+            localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, local_cwd)
+            localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])
             remotedirs = sorted(remote_tree.keys())
 
@@ -42,12 +40,11 @@ def test_get_r_pwd(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = Path(remote_cwd).parent.as_posix()
 
-            localtree(local_tree, localpath, local_cwd)
+            localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, local_cwd)
+            localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])
             remotedirs = sorted(remote_tree.keys())
 
@@ -68,9 +65,8 @@ def test_get_r_pathed(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = Path(remote_cwd).parent.as_posix()
 
-            localtree(local_tree, localpath, local_cwd)
+            localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
             actual = hash(Path(remote_cwd).joinpath('bar1.txt').as_posix())
@@ -96,12 +92,11 @@ def test_get_r_cdd(sftpserver):
             remote_tree = {}
 
             remote_cwd = sftp.pwd
-            local_cwd = Path(remote_cwd).parent.as_posix()
 
-            localtree(local_tree, localpath, local_cwd)
+            localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
-            localdirs = sorted([localdir.replace(localpath, local_cwd)
+            localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])
             remotedirs = sorted(remote_tree.keys())
 
