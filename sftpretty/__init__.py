@@ -488,10 +488,10 @@ class Connection(object):
         '''
         self.chdir(remotedir)
 
-        tree = {}
-        rwd = self._default_path
         lwd = Path(localdir).absolute().as_posix()
+        rwd = self._default_path
 
+        tree = {}
         tree[rwd] = [(rwd, lwd)]
 
         self.remotetree(tree, rwd, lwd, recurse=True)
@@ -729,10 +729,10 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        tree = {}
         lwd = Path(localdir).absolute().as_posix()
-        rwd = Path(remotedir).joinpath(Path(lwd).stem).as_posix()
+        rwd = self.normalize(remotedir)
 
+        tree = {}
         tree[lwd] = [(lwd, rwd)]
 
         localtree(tree, lwd, rwd, recurse=True)

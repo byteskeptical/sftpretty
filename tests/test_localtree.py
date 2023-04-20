@@ -1,6 +1,6 @@
 '''test sftpretty.localtree'''
 
-from common import conn, rmdir, USER, VFS
+from common import conn, rmdir, VFS
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
@@ -18,18 +18,15 @@ def test_localtree(sftpserver):
             localtree(tree, localpath, cwd)
 
             local = {
-                f'{localpath}': [
-                    (f'{localpath}/test', cwd)
+                f'{localpath}/pub': [
+                    (f'{localpath}/pub', cwd + '/pub')
                 ],
-                f'{localpath}/test': [
-                    (f'{localpath}/test/pub', cwd + '/pub')
+                f'{localpath}/pub': [
+                    (f'{localpath}/pub/foo1', cwd + '/pub/foo1'),
+                    (f'{localpath}/pub/foo2', cwd + '/pub/foo2')
                 ],
-                f'{localpath}/test/pub': [
-                    (f'{localpath}/test/pub/foo1', cwd + '/pub/foo1'),
-                    (f'{localpath}/test/pub/foo2', cwd + '/pub/foo2')
-                ],
-                f'{localpath}/test/pub/foo2': [
-                    (f'{localpath}/test/pub/foo2/bar1', cwd + '/pub/foo2/bar1')
+                f'{localpath}/pub/foo2': [
+                    (f'{localpath}/pub/foo2/bar1', cwd + '/pub/foo2/bar1')
                 ]
             }
 
@@ -55,8 +52,8 @@ def test_localtree_no_recurse(sftpserver):
             localtree(tree, localpath, cwd, recurse=False)
 
             local = {
-                f'{localpath}/foo2': [
-                    (f'{localpath}/foo2/bar1', cwd + '/bar1')
+                f'{localpath}': [
+                    (f'{localpath}/bar1', cwd + '/bar1')
                 ]
             }
 
