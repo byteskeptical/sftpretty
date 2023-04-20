@@ -30,7 +30,6 @@ jobs:
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'windows')
         run: |
-          type $ENV:ProgramData\ssh\sshd_config
           type id_sftpretty.pub > $ENV:UserProfile\.ssh\authorized_keys
           type id_sftpretty.pub > $ENV:ProgramData\ssh\administrators_authorized_keys
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
