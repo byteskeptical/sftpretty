@@ -18,7 +18,7 @@ def test_localtree(sftpserver):
             localtree(tree, localpath, cwd)
 
             local = {
-                f'{localpath}/pub': [
+                f'{localpath}': [
                     (f'{localpath}/pub', cwd + '/pub')
                 ],
                 f'{localpath}/pub': [
