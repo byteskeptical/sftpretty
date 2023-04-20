@@ -90,6 +90,7 @@ def localtree(container, localdir, remotedir, recurse=True):
     except Exception as err:
         raise err
 
+
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     '''Exception type based retry decorator for all your problematic functions
 
