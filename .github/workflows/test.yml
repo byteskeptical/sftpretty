@@ -42,6 +42,7 @@ jobs:
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
+          ssh-keygen -p -P ${{ secrets.PRIVATE_KEY }} -N '' -f $Key
           ssh-add $Key
           if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
               Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
