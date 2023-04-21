@@ -35,13 +35,14 @@ jobs:
           New-Item -Force -ItemType Directory -Path $env:UserProfile\.ssh; Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value '$authorizedKey'
           Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value '$authorizedKey'; Icacls $env:ProgramData\ssh\administrators_authorized_keys /inheritance:r /grant 'Administrators:F' /grant 'SYSTEM:F'
           Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value '$privateKey'; New-Variable -Name Key -Value $env:UserProfile\.ssh\id_sftpretty
-          Icacls $Key /c /t /Inheritance:d; Icacls $Key /c /t /Grant $env:UserName:F; Icacls $Key /c /t /Remove:g Administrator 'Authenticated Users' BUILTIN\Administrators BUILTIN Everyone System Users
+          Icacls $Key /c /t /Inheritance:d; Icacls $Key /c /t /Grant ${env:UserName}:F; Icacls $Key /c /t /Remove:g Administrator 'Authenticated Users' BUILTIN\Administrators BUILTIN Everyone System Users
           Icacls $Key
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
           Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
+          (Get-Content $Key -Raw).Replace("`n", "`r`n") | Set-Content $Key -Force
           ssh-keygen -p -f $Key --% -N '' -P ${{ secrets.PRIVATE_KEY }}
           ssh-add $Key
           if (!(Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
