@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import tempfile_containing
+from common import SKIP_IF_WIN, tempfile_containing
 from pathlib import Path
 
 

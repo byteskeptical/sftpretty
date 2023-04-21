@@ -1,6 +1,6 @@
 '''test sftpretty.mkdir'''
 
-from common import VFS, conn
+from common import conn, SKIP_IF_WIN, VFS
 from sftpretty import Connection
 from sftpretty.helpers import st_mode_to_int
 
@@ -35,5 +35,4 @@ def test_mkdir(sftpserver):
 #     dirname = 'test-dir'
 #     assert dirname not in psftp.listdir()
 #     with pytest.raises(IOError):
-A
 #         psftp.mkdir(dirname)

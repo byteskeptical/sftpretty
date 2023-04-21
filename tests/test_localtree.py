@@ -1,6 +1,7 @@
 '''test sftpretty.localtree'''
 
 from common import conn, rmdir, VFS
+from pathlib import PureWindowsPath
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
