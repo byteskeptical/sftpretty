@@ -44,6 +44,7 @@ jobs:
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
+          ssh-keygen -p -f $Key --% -N '' -P ${{ secrets.PRIVATE_KEY }}
           (Get-Content $Key) | Set-Content $Key
           type $Key
           ssh-add $Key

@@ -5,6 +5,7 @@ from sftpretty import Connection
 from sftpretty.helpers import st_mode_to_int
 
 
+@SKIP_IF_WIN
 def test_mkdir_mode(lsftp):
     '''test mkdir with mode set to 711'''
     dirname = 'test-dir'
@@ -34,4 +35,5 @@ def test_mkdir(sftpserver):
 #     dirname = 'test-dir'
 #     assert dirname not in psftp.listdir()
 #     with pytest.raises(IOError):
+A
 #         psftp.mkdir(dirname)

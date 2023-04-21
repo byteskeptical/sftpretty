@@ -1048,25 +1048,25 @@ class Connection(object):
 
         return lstat
 
-    def mkdir(self, remotedir, mode=777):
+    def mkdir(self, remotedir, mode=700):
         '''Create a directory and set permission mode. On some systems, mode
         is ignored. Where used, the current umask value is first masked out.
 
         :param str remotedir: Remote location to create.
-        :param int mode: *Default: 777* - Octal mode to apply on path.
+        :param int mode: *Default: 700* - Octal mode to apply on path.
 
         :returns: None
         '''
         with self._sftp_channel() as channel:
             channel.mkdir(remotedir, mode=int(str(mode), 8))
 
-    def mkdir_p(self, remotedir, mode=777):
+    def mkdir_p(self, remotedir, mode=700):
         '''Create a directory and any missing parent locations as needed. Set
         permission mode, if created. Silently complete if remotedir already
         exists.
 
         :param str remotedir: Remote location to create.
-        :param int mode: *Default: 777* - Octal mode to apply on created paths.
+        :param int mode: *Default: 700* - Octal mode to apply on created paths.
 
         :returns: None
 

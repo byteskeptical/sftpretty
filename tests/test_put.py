@@ -14,7 +14,7 @@ def test_put_callback(lsftp):
     cback = Mock(return_value=None)
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
+        lsftp.chdir()
         lsftp.put(fname, callback=cback)
         # clean up
         lsftp.remove(base_fname)
@@ -26,7 +26,7 @@ def test_put_confirm(lsftp):
     '''test the confirm feature of put'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
+        lsftp.chdir()
         result = lsftp.put(fname)
         # clean up
         lsftp.remove(base_fname)

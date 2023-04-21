@@ -9,12 +9,14 @@ from sftpretty import CnOpts
 from tempfile import mkstemp
 
 
-PASS = ''
+PASS = 'tEst@!357'
 SKIP_IF_CI = pytest.mark.skipif(environ.get('CI', '') > '', reason='Not Local')
+SKIP_IF_WIN = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'Windows', reason='Fuckin Windows')
 STARS8192 = '*'*8192
 USER = environ.get('USER', environ.get('USERNAME'))
 USER_HOME = Path.home().as_posix()
 USER_HOME_PARENT = Path(USER_HOME).parent.as_posix()
+
 
 LOCAL = {'default_path': USER_HOME, 'host': 'localhost',
          'private_key': 'id_sftpretty', 'private_key_pass': PASS,

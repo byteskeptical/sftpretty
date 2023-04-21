@@ -6,6 +6,7 @@ from common import tempfile_containing
 from pathlib import Path
 
 
+@SKIP_IF_WIN
 def test_chown_uid(lsftp):
     '''test changing just the uid'''
     with tempfile_containing() as fname:
@@ -19,6 +20,7 @@ def test_chown_uid(lsftp):
     assert new_attrs.st_gid == org_attrs.st_gid  # confirm no change to gid
 
 
+@SKIP_IF_WIN
 def test_chown_gid(lsftp):
     '''test changing just the gid'''
     with tempfile_containing() as fname:
@@ -32,6 +34,7 @@ def test_chown_gid(lsftp):
     assert new_attrs.st_uid == org_attrs.st_uid  # confirm no change to uid
 
 
+@SKIP_IF_WIN
 def test_chown_none(lsftp):
     '''call .chown with no gid or uid specified'''
     with tempfile_containing() as fname:
