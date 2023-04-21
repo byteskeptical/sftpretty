@@ -33,9 +33,9 @@ jobs:
           $authorizedKey = Get-Content -Path id_sftpretty.pub
           $privateKey = Get-Content -Path id_sftpretty
           New-Item -Force -ItemType Directory -Path $env:UserProfile\.ssh
-          Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value '$authorizedKey'
-          Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value '$authorizedKey'
-          Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value '$privateKey'
+          Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value $authorizedKey
+          Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value $authorizedKey
+          Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value $privateKey
           New-Variable -Name Key -Value $env:UserProfile\.ssh\id_sftpretty
           Icacls $env:ProgramData\ssh\administrators_authorized_keys /inheritance:r /Grant 'Administrators:F' /Grant 'SYSTEM:F'
           Icacls $Key /c /t /Inheritance:d; Icacls $Key /c /t /Grant ${env:UserName}:F; Icacls $Key /c /t /Remove:g Administrator 'Authenticated Users' BUILTIN\Administrators BUILTIN Everyone System Users
