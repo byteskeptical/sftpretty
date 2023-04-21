@@ -42,8 +42,8 @@ jobs:
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
-          ssh-keygen -p -f $Key --% -N '' -P ${{ secrets.PRIVATE_KEY }}
-          ssh-add $Key
+          ssh-keygen --% -p -f "$env:UserProfile\.ssh\id_sftpretty" -N "" -P ${{ secrets.PRIVATE_KEY }}
+          ssh-add "$env:UserProfile\.ssh\id_sftpretty"
           if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
               Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
               New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
