@@ -9,7 +9,7 @@ from sftpretty import CnOpts
 from tempfile import mkstemp
 
 
-PASS = 'tEst@!357'
+PASS = ''
 SKIP_IF_CI = pytest.mark.skipif(environ.get('CI', '') > '', reason='Not Local')
 STARS8192 = '*'*8192
 USER = environ.get('USER', environ.get('USERNAME'))
