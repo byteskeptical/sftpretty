@@ -16,8 +16,8 @@ def test_chown_uid(lsftp):
         lsftp.chown(base_fname, uid=uid)
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
-    assert new_attrs.st_uid == uid
     assert new_attrs.st_gid == org_attrs.st_gid  # confirm no change to gid
+    assert new_attrs.st_uid == uid
 
 
 @SKIP_IF_WIN
