@@ -1081,8 +1081,9 @@ class Connection(object):
             else:
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
-                if parent and not self.isdir(parent):
-                    self.mkdir_p(parent, mode=mode)
+                if parent != remotedir:
+                    if not self.isdir(parent):
+                        self.mkdir_p(parent, mode=mode)
                 if stem:
                     self.mkdir(remotedir, mode=mode)
         except Exception as err:
