@@ -1080,7 +1080,7 @@ class Connection(object):
                 raise OSError((f'A file with the same name, [{remotedir}], '
                                'already exists.'))
             else:
-                cwd = self.default_path or '/'
+                cwd = self._default_path or '/'
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
                 if parent != remotedir and parent != cwd:

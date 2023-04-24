@@ -15,6 +15,7 @@ def test_chmod_not_exist(sftpserver):
             with pytest.raises(IOError):
                 sftp.chmod('i-do-not-exist.txt', 666)
 
+
 @SKIP_IF_WIN
 def test_chmod_simple(lsftp):
     '''test basic chmod with octal mode represented by an int'''
