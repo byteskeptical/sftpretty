@@ -648,12 +648,12 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        self.mkdir_p(Path(remotedir).joinpath(Path(localdir).stem).as_posix())
-
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
         else:
             localdir = PurePath(localdir)
+
+        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
         paths = [
                  (localpath.as_posix(),
@@ -872,7 +872,7 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            channel.chdir(remotepath)
+            channel.chdir(remotepath.lstrip(PureWindowsPath(remotepath).drive))
             self._default_path = channel.normalize('.')
 
     def chmod(self, remotepath, mode=777):
@@ -1073,16 +1073,19 @@ class Connection(object):
         :raises: OSError
         '''
         try:
-            if self.isdir(remotedir):
-                pass
-            elif self.isfile(remotedir):
-                raise OSError(('A file with the same name as the remotedir, '
-                              f'[{remotedir}], already exists.'))
+            posix = remotedir.lstrip(PureWindowsPath(remotedir).drive)
+            if self.isdir(posix):
+                return
+            elif self.isfile(posix):
+                raise OSError((f'A file with the same name, [{remotedir}], '
+                               'already exists.'))
             else:
+                cwd = self.default_path or '/'
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
-                if parent != remotedir:
-                    if not self.isdir(parent):
+                if parent != remotedir and parent != cwd:
+                    pp = parent.lstrip(PureWindowsPath(parent).drive)
+                    if not self.isdir(pp):
                         self.mkdir_p(parent, mode=mode)
                 if stem:
                     self.mkdir(remotedir, mode=mode)

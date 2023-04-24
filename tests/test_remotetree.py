@@ -1,6 +1,7 @@
 '''test sftpretty.remotetree'''
 
 from common import conn, VFS
+from pathlib import PureWindowsPath
 from sftpretty import Connection
 from tempfile import mkdtemp
 
@@ -10,7 +11,7 @@ def test_remotetree(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            localpath = mkdtemp()
+            localpath = PureWindowsPath(mkdtemp()).as_posix()
             tree = {}
 
             sftp.remotetree(tree, cwd, localpath)
@@ -42,7 +43,7 @@ def test_remotetree_no_recurse(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
-            localpath = mkdtemp()
+            localpath = PureWindowsPath(mkdtemp()).as_posix()
             tree = {}
 
             sftp.remotetree(tree, cwd, localpath, recurse=False)

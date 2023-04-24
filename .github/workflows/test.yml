@@ -47,7 +47,6 @@ jobs:
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
           ssh-keygen -f $Key --% -N "" -p -P ${{ secrets.PRIVATE_KEY }}
-          (Get-Content $Key) | Set-Content $Key
           ssh-add $Key
           if (!(Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
               Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
