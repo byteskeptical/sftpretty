@@ -1,7 +1,7 @@
 '''test sftpretty.localtree'''
 
 from common import conn, rmdir, VFS
-from pathlib import PureWindowsPath
+from pathlib import Path
 from sftpretty import Connection, localtree
 from tempfile import mkdtemp
 
@@ -10,7 +10,7 @@ def test_localtree(sftpserver):
     '''test the localtree function, with recurse'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
@@ -43,7 +43,7 @@ def test_localtree_no_recurse(sftpserver):
     '''test the localtree function, without recursing'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 

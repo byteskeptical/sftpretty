@@ -1,7 +1,7 @@
 '''test sftpretty.get_r'''
 
 from common import conn, rmdir, VFS
-from pathlib import PureWindowsPath
+from pathlib import Path
 from sftpretty import Connection, hash, localtree
 from tempfile import mkdtemp
 
@@ -10,7 +10,7 @@ def test_get_r(sftpserver):
     '''test the get_r for remotepath is pwd '.' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
 
             local_tree = {}
@@ -34,7 +34,7 @@ def test_get_r_pwd(sftpserver):
     '''test the get_r for remotepath is pwd '/pub/foo2' '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('pub/foo2', localpath)
 
             local_tree = {}
@@ -59,7 +59,7 @@ def test_get_r_pathed(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo2')
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('./bar1', localpath)
 
             local_tree = {}
@@ -85,7 +85,7 @@ def test_get_r_cdd(sftpserver):
     '''test the get_r for chdir('pub/foo2')'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            localpath = PureWindowsPath(mkdtemp()).as_posix()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 

@@ -10,7 +10,7 @@ from tempfile import mkdtemp
 
 def test_put_r(lsftp):
     '''test put_r'''
-    localpath = mkdtemp()
+    localpath = Path(mkdtemp()).as_posix()
     remote = Path.home()
     build_dir_struct(localpath)
     local = Path(localpath).joinpath('pub')

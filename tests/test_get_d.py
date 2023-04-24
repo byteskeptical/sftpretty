@@ -11,7 +11,7 @@ def test_get_d(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub')
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_d('.', localpath)
 
             checks = [(['', ], ['make.txt', ]), ]
@@ -29,7 +29,7 @@ def test_get_d_pathed(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub')
-            localpath = mkdtemp()
+            localpath = Path(mkdtemp()).as_posix()
             sftp.get_d('foo1', localpath)
 
             checks = [(['', ], ['foo1.txt', 'image01.jpg']), ]
