@@ -653,7 +653,7 @@ class Connection(object):
         if localdir.startswith(':', 1) or localdir.startswith('\\'):
             localdir = PureWindowsPath(localdir)
         else:
-            localdir = PurePath(localdir)
+            localdir = Path(localdir)
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
