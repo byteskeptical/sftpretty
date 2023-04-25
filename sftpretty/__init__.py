@@ -7,7 +7,7 @@ from os import environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
-from pathlib import Path, PurePath, PureWindowsPath
+from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, hash, localtree, retry
@@ -236,8 +236,10 @@ class Connection(object):
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
-                _channel.chdir(PureWindowsPath(self._default_path).as_posix())
-                log.info(f'Current Working Directory: [{self._default_path}]')
+                drive = PureWindowsPath(self._default_path).drive
+                dwd = self._default_path.lstrip(drive)
+                _channel.chdir(dwd)
+                log.info(f'Current Working Directory: [{dwd}]')
 
             yield _channel
         except Exception as err:
@@ -872,7 +874,7 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            cwd = PureWindowsPath(remotepath).as_posix()
+            cwd = remotepath.lstrip(PureWindowsPath(remotepath).drive)
             channel.chdir(cwd)
             self._default_path = channel.normalize('.')
 
