@@ -236,7 +236,8 @@ class Connection(object):
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
-                cwd = PureWindowsPath(self._default_path).as_posix()
+                drive = PureWindowsPath(self._default_path).drive
+                cwd = self._default_path.replace(drive, '')
                 _channel.chdir(cwd)
                 log.info(f'Current Working Directory: [{cwd}]')
 
@@ -873,7 +874,8 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            cwd = PureWindowsPath(remotepath).as_posix()
+            drive = PureWindowsPath(remotepath).drive
+            cwd = remotepath.replace(drive, '')
             channel.chdir(cwd)
             self._default_path = channel.normalize('.')
 
