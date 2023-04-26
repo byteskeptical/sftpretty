@@ -877,7 +877,8 @@ class Connection(object):
             drive = PureWindowsPath(remotepath).drive
             cwd = remotepath.replace(drive, '')
             channel.chdir(cwd)
-            self._default_path = channel.normalize('.')
+            pwd = channel.normalize('.')
+            self._default_path = pwd.replace('/' + drive or '/', drive)
 
     def chmod(self, remotepath, mode=777):
         '''Set the permission mode of a remotepath, where mode is an octal.
