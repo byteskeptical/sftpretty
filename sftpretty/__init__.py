@@ -237,7 +237,8 @@ class Connection(object):
 
             if self._default_path is not None:
                 drive = PureWindowsPath(self._default_path).drive
-                dwd = self._default_path.replace('/' + drive, drive)
+                dwd = self._default_path.replace('/' + (drive or '/'),
+                                                 drive or '/')
                 _channel.chdir(dwd)
                 log.info(f'Current Working Directory: [{dwd}]')
 
@@ -875,7 +876,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             drive = PureWindowsPath(remotepath).drive
-            cwd = remotepath.replace('/' + drive, drive)
+            cwd = remotepath.replace('/' + (drive or '/'), drive or '/')
             channel.chdir(cwd)
             self._default_path = channel.normalize('.')
 
