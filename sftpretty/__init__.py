@@ -878,7 +878,7 @@ class Connection(object):
             cwd = remotepath.replace(drive, '')
             channel.chdir(cwd)
             pwd = channel.normalize('.')
-            self._default_path = pwd.replace('/' + drive or '/', drive)
+            self._default_path = pwd.replace('/' + drive, drive or '/')
 
     def chmod(self, remotepath, mode=777):
         '''Set the permission mode of a remotepath, where mode is an octal.
