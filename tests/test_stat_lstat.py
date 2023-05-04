@@ -2,7 +2,7 @@
 
 from blddirs import build_dir_struct
 from common import conn, rmdir, VFS
-from pathlib import Path
+from pathlib import Path, WindowsPurePath
 from sftpretty import Connection
 from tempfile import mkdtemp
 
