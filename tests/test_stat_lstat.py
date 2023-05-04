@@ -22,6 +22,7 @@ def test_lstat(lsftp):
     localpath = Path(mkdtemp()).as_posix()
     build_dir_struct(localpath)
     dirname = Path(localpath).joinpath('pub').as_posix()
+    dirname = dirname.lstrip(WindowsPurePath(dirname).drive)
     rslt = lsftp.lstat(dirname)
 
     assert rslt.st_size >= 0
