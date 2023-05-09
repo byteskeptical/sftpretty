@@ -1,6 +1,5 @@
 babel
 docutils
-ecdsa
 jinja2
 paramiko>=1.17.0
 pep8
