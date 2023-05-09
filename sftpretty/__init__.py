@@ -7,7 +7,7 @@ from os import environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, Transport,
                       PasswordRequiredException, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
@@ -1071,13 +1071,13 @@ class Connection(object):
         :raises: OSError
         '''
         try:
+            remotedir = drivedrop(remotedir)
             if self.isdir(remotedir):
                 return
             elif self.isfile(remotedir):
                 raise OSError((f'A file with the same name, [{remotedir}], '
                                'already exists.'))
             else:
-                cwd = self._default_path or '/'
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
                 if parent != remotedir:
