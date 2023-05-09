@@ -653,7 +653,7 @@ class Connection(object):
         else:
             localdir = Path(localdir)
 
-        self.mkdir_p(Path(remote).joinpath(localdir.stem).as_posix())
+        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
         paths = [
                  (localpath.as_posix(),
