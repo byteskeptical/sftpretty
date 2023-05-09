@@ -779,12 +779,15 @@ class Connection(object):
         def _putfo(self, flo, remotepath=None, file_size=None, callback=None,
                    confirm=True):
 
+            if callback is None:
+                callback = partial(_callback, flo, logger=logger)
+
             if file_size is None:
                 file_size = flo.seek(0, SEEK_END)
                 flo.seek(0)
 
-            if callback is None:
-                callback = partial(_callback, flo, logger=logger)
+            if remotepath is None:
+                remotepath = uuid4().hex
 
             with self._sftp_channel() as channel:
                 flo_attributes = channel.putfo(flo, remotepath=remotepath,
