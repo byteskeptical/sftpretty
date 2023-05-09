@@ -2,10 +2,11 @@
 
 import pytest
 
-from common import tempfile_containing
+from common import SKIP_IF_WIN, tempfile_containing
 from pathlib import Path
 
 
+@SKIP_IF_WIN  # uid comes through as 0, lacks support
 def test_chown_uid(lsftp):
     '''test changing just the uid'''
     with tempfile_containing() as fname:
@@ -19,6 +20,7 @@ def test_chown_uid(lsftp):
     assert new_attrs.st_uid == uid
 
 
+@SKIP_IF_WIN  # gid comes through as 0, lacks support
 def test_chown_gid(lsftp):
     '''test changing just the gid'''
     with tempfile_containing() as fname:

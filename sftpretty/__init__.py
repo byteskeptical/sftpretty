@@ -599,13 +599,14 @@ class Connection(object):
                                local_attributes.st_mtime)
 
             with self._sftp_channel() as channel:
+                remotepath = drivedrop(remotepath)
                 remote_attributes = channel.put(localfile,
                                                 remotepath=remotepath,
                                                 callback=callback,
                                                 confirm=confirm)
 
                 if preserve_mtime:
-                    channel.utime(drivedrop(remotepath), local_times)
+                    channel.utime(remotepath, local_times)
                     remote_attributes = channel.stat(remotepath)
 
             return remote_attributes
