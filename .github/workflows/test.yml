@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -17,25 +16,65 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8
-        python -m pip install -r requirements-dev.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=80 --statistics
-    - name: Install sftpretty
-      run: |
-        python -m pip install -e .
-    - name: Test with pytest
-      run: |
-        pytest -l -v --tb=long
+      - name: Clone Repository
+        uses: actions/checkout@v3
+      - name: Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: ${{ matrix.os }} SSH
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          sudo systemsetup -setremotelogin on
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu
+      - name: ${{ matrix.os }} SSH
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          $authorizedKey = Get-Content -Path id_sftpretty.pub
+          $privateKey = Get-Content -Path id_sftpretty
+          New-Item -Force -ItemType Directory -Path $env:UserProfile\.ssh
+          Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value $authorizedKey
+          Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value $authorizedKey
+          Add-Content -Force -Path $env:UserProfile\.ssh\id_sftpretty -Value $privateKey
+          New-Variable -Name Key -Value $env:UserProfile\.ssh\id_sftpretty
+          Icacls $env:ProgramData\ssh\administrators_authorized_keys /inheritance:r /Grant 'Administrators:F' /Grant 'SYSTEM:F'
+          Icacls $Key /c /t /Inheritance:d
+          Icacls $Key /c /t /Grant ${env:UserName}:F
+          Icacls $Key /c /t /Remove:g Administrator 'Authenticated Users' BUILTIN\Administrators BUILTIN Everyone System Users
+          Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+          Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+          Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+          Set-Service -Name sshd -StartupType Automatic -Status Running
+          Set-Service -Name ssh-agent -StartupType Automatic -Status Running
+          ssh-keygen -f $Key --% -N "" -p -P ${{ secrets.PRIVATE_KEY }}
+          ssh-add $Key
+          if (!(Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
+              Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
+              New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+          } else {
+              Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
+          }
+      - name: Authorize Key
+        run: |
+          mkdir -p $HOME/.ssh && chmod 0700 $HOME/.ssh
+          touch $HOME/.ssh/authorized_keys
+          chmod 0600 id_sftpretty
+          cat id_sftpretty.pub >> $HOME/.ssh/authorized_keys
+        shell: bash
+      - name: Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flake8
+          python -m pip install -r requirements-dev.txt
+      - name: Lint Trap
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=14 --max-line-length=80 --statistics
+      - name: SFTPretty
+        run: |
+          python -m pip install -e .
+      - name: Tests
+        run: |
+          pytest -l -v --tb=long

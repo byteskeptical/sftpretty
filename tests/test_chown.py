@@ -2,39 +2,38 @@
 
 import pytest
 
-from common import SKIP_IF_CI, tempfile_containing
+from common import SKIP_IF_WIN, tempfile_containing
 from pathlib import Path
 
 
-@SKIP_IF_CI
+@SKIP_IF_WIN  # uid comes through as 0, lacks support
 def test_chown_uid(lsftp):
     '''test changing just the uid'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
-        uid = org_attrs.st_uid  # - 1
+        uid = org_attrs.st_uid
         lsftp.chown(base_fname, uid=uid)
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
+    assert new_attrs.st_gid == org_attrs.st_gid
     assert new_attrs.st_uid == uid
-    assert new_attrs.st_gid == org_attrs.st_gid  # confirm no change to gid
 
 
-@SKIP_IF_CI
+@SKIP_IF_WIN  # gid comes through as 0, lacks support
 def test_chown_gid(lsftp):
     '''test changing just the gid'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
-        gid = org_attrs.st_gid  # - 1
+        gid = org_attrs.st_gid
         lsftp.chown(base_fname, gid=gid)
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
     assert new_attrs.st_gid == gid
-    assert new_attrs.st_uid == org_attrs.st_uid  # confirm no change to uid
+    assert new_attrs.st_uid == org_attrs.st_uid
 
 
-@SKIP_IF_CI
 def test_chown_none(lsftp):
     '''call .chown with no gid or uid specified'''
     with tempfile_containing() as fname:
@@ -44,10 +43,9 @@ def test_chown_none(lsftp):
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
     assert new_attrs.st_gid == org_attrs.st_gid
-    assert new_attrs.st_uid == org_attrs.st_uid  # confirm no change to uid
+    assert new_attrs.st_uid == org_attrs.st_uid
 
 
-@SKIP_IF_CI
 def test_chown_not_exist(lsftp):
     '''call .chown on a non-existing path'''
     with pytest.raises(IOError):

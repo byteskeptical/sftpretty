@@ -16,6 +16,13 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
         print(message)
 
 
+def drivedrop(filepath):
+    if PureWindowsPath(filepath).drive:
+        filepath = Path('/').joinpath(*Path(filepath).parts[1:]).as_posix()
+
+    return filepath
+
+
 def hash(filename, algorithm=sha3_512(), blocksize=65536):
     '''hash contents of a file, file like object or string
 
@@ -80,17 +87,13 @@ def localtree(container, localdir, remotedir, recurse=True):
         for localpath in Path(localdir).iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(
-                    localpath.relative_to(
-                        localdir.anchor).as_posix()).as_posix()
+                remote = Path(remotedir).joinpath(localpath.stem).as_posix()
                 if localdir.as_posix() in container.keys():
                     container[localdir.as_posix()].append((local, remote))
                 else:
                     container[localdir.as_posix()] = [(local, remote)]
-                container[localdir.as_posix()].sort()
                 if recurse:
-                    localtree(container, local, remotedir,
-                              recurse=recurse)
+                    localtree(container, local, remote, recurse=recurse)
     except Exception as err:
         raise err
 

@@ -14,27 +14,28 @@ def test_localtree(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            directories = {}
+            tree = {}
 
-            localtree(directories, localpath + cwd, Path(localpath).anchor)
+            localtree(tree, localpath, cwd)
 
-            dkeys = [f'{localpath}/home/test',
-                     f'{localpath}/home/test/pub',
-                     f'{localpath}/home/test/pub/foo2']
+            local = {
+                f'{localpath}': [
+                    (f'{localpath}/pub', cwd + '/pub')
+                ],
+                f'{localpath}/pub': [
+                    (f'{localpath}/pub/foo1', cwd + '/pub/foo1'),
+                    (f'{localpath}/pub/foo2', cwd + '/pub/foo2')
+                ],
+                f'{localpath}/pub/foo2': [
+                    (f'{localpath}/pub/foo2/bar1', cwd + '/pub/foo2/bar1')
+                ]
+            }
 
-            dvalues = [[(f'{localpath}/home/test/pub',
-                         f'{localpath}/home/test/pub')],
-                       [(f'{localpath}/home/test/pub/foo1',
-                         f'{localpath}/home/test/pub/foo1'),
-                        (f'{localpath}/home/test/pub/foo2',
-                         f'{localpath}/home/test/pub/foo2')],
-                       [(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
+            for branch in sorted(tree.keys()):
+                assert set(local[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
 
-            assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
-
-    # cleanup local
     rmdir(localpath)
 
 
@@ -47,18 +48,19 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            directories = {}
+            tree = {}
 
-            localtree(directories, localpath + cwd, Path(localpath).anchor,
-                      recurse=False)
+            localtree(tree, localpath, cwd, recurse=False)
 
-            dkeys = [f'{localpath}/home/test/pub/foo2']
+            local = {
+                f'{localpath}': [
+                    (f'{localpath}/bar1', cwd + '/bar1')
+                ]
+            }
 
-            dvalues = [[(f'{localpath}/home/test/pub/foo2/bar1',
-                         f'{localpath}/home/test/pub/foo2/bar1')]]
+            for branch in sorted(tree.keys()):
+                assert set(local[branch]) == set(tree[branch])
+                del tree[branch]
+            assert tree == {}
 
-            assert sorted(directories.keys()) == dkeys
-            assert sorted(directories.values()) == dvalues
-
-    # cleanup local
     rmdir(localpath)

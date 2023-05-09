@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, SKIP_IF_CI, SFTP_LOCAL, VFS
+from common import conn, LOCAL, VFS
 from pathlib import Path
 from sftpretty import (CnOpts, Connection, ConnectionException,
                        SSHException)
@@ -31,11 +31,11 @@ def test_connection_bad_host():
         sftp.listdir()
 
 
-@SKIP_IF_CI
 def test_connection_bad_credentials():
     '''attempt connection to a non-existing server'''
-    copts = SFTP_LOCAL.copy()
+    copts = LOCAL.copy()
     copts['password'] = 'badword'
+    del copts['private_key'], copts['private_key_pass']
     with pytest.raises(SSHException):
         with Connection(**copts) as sftp:
             sftp.listdir()

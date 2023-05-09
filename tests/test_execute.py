@@ -1,9 +1,6 @@
 '''test sftpretty.execute'''
 
 
-from common import SKIP_IF_CI
-
-
 # TODO
 # def test_execute_simple_ro(psftp):
 #     '''test execute simple on a read-only server '''
@@ -11,7 +8,6 @@ from common import SKIP_IF_CI
 #     assert psftp.execute('ls') == results
 
 
-@SKIP_IF_CI
 def test_execute_simple(lsftp):
     '''test execute simple'''
     type_check = type(b'')

@@ -2,13 +2,15 @@
 
 import pytest
 
-from common import SFTP_LOCAL
-from sftpretty import Connection
+from common import LOCAL
+from sftpretty import CnOpts, Connection
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def lsftp(request):
     '''setup a session long connection to the local sftp server'''
-    lsftp = Connection(**SFTP_LOCAL)
+    cnopts = CnOpts(knownhosts=None)
+    LOCAL['cnopts'] = cnopts
+    lsftp = Connection(**LOCAL)
     request.addfinalizer(lsftp.close)
-    return lsftp  # provide the fixture value
+    return lsftp

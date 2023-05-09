@@ -1,7 +1,18 @@
 Change Log
 ==========
 
-1.0.7 (current, released 2023-02-27)
+1.0.8 (current, released 2023-04-20)
+------------------------------------
+    * added drivedrop to bypass _adjust_cwd's lack of Windows drive support
+    * added file_size logic and default remotepath fallback to putfo
+    * moved Connection.compress to CnOpts.compress
+    * reversion in put_d *again*
+    * removed SKIP_IF_CI from all but one test in response to the above
+    * switched to public key auth for all tests !¿macOS?¡
+    * switched from get_fingerprint() using md5 to helpers.hash using sha3_256
+    * test clean-up and major refactor
+
+1.0.7 (released 2023-02-27)
 ------------------------------------
     * fix reversion in put_d
 

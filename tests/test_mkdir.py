@@ -1,14 +1,14 @@
 '''test sftpretty.mkdir'''
 
-from common import VFS, conn, SKIP_IF_CI
-from sftpretty import Connection, st_mode_to_int
+from common import conn, VFS
+from sftpretty import Connection
+from sftpretty.helpers import st_mode_to_int
 
 
-@SKIP_IF_CI
 def test_mkdir_mode(lsftp):
     '''test mkdir with mode set to 711'''
     dirname = 'test-dir'
-    mode = 711
+    mode = 700
     assert dirname not in lsftp.listdir()
     lsftp.mkdir(dirname, mode=mode)
     attrs = lsftp.stat(dirname)

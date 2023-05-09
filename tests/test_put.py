@@ -2,20 +2,19 @@
 
 import pytest
 
-from common import conn, SKIP_IF_CI, tempfile_containing, VFS
+from common import conn, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep
 from unittest.mock import Mock
 
 
-@SKIP_IF_CI
 def test_put_callback(lsftp):
     '''test the callback feature of put'''
     cback = Mock(return_value=None)
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
-        lsftp.chdir('/home/test')
+        lsftp.chdir(Path.home().as_posix())
         lsftp.put(fname, callback=cback)
         # clean up
         lsftp.remove(base_fname)
@@ -23,12 +22,11 @@ def test_put_callback(lsftp):
     assert cback.call_count
 
 
-@SKIP_IF_CI
 def test_put_confirm(lsftp):
     '''test the confirm feature of put'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
-        lsftp.chdir('/home/test')
+        lsftp.chdir(Path.home().as_posix())
         result = lsftp.put(fname)
         # clean up
         lsftp.remove(base_fname)
@@ -40,7 +38,6 @@ def test_put_confirm(lsftp):
     assert result.st_mtime
 
 
-@SKIP_IF_CI
 def test_put(lsftp):
     '''run test on localhost'''
     contents = 'now is the time\nfor all good...'
@@ -77,13 +74,12 @@ def test_put_bad_local(sftpserver):
 #             psftp.put(fname)
 
 
-@SKIP_IF_CI
 def test_put_preserve_mtime(lsftp):
     '''test that m_time is preserved from local to remote, when put'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         base = Path(fname).stat()
-        # with Connection(**SFTP_LOCAL) as sftp:
+        # with Connection(**LOCAL) as sftp:
         result1 = lsftp.put(fname, preserve_mtime=True)
         sleep(2)
         result2 = lsftp.put(fname, preserve_mtime=True)

@@ -3,28 +3,34 @@
 import pytest
 
 from contextlib import contextmanager
-from os import close, getenv
+from os import close, environ
 from pathlib import Path
 from sftpretty import CnOpts
 from tempfile import mkstemp
 
-# pytest-sftpserver plugin information
-SFTP_INTERNAL = {'host': 'localhost', 'username': 'user', 'password': 'pw'}
-# used if ptest-sftpserver plugin does not support what we are testing
-SFTP_LOCAL = {'host': 'localhost', 'username': 'test', 'password': 'test1357'}
 
-# can only reach public, read-only server from CI platform, only test locally
-# if environment variable CI is set  to something to disable local tests
-# the CI env var is set to true by both drone-io and travis
-SKIP_IF_CI = pytest.mark.skipif(getenv('CI', '') > '', reason='Not Local')
+PASS = 'tEst@!357'
+SKIP_IF_CI = pytest.mark.skipif(environ.get('CI', '') > '', reason='Not Local')
+SKIP_IF_WIN = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'Windows',
+                                 reason='NoWinZone')
 STARS8192 = '*'*8192
+USER = environ.get('USER', environ.get('USERNAME'))
+USER_HOME = Path.home().as_posix()
+USER_HOME_PARENT = Path(USER_HOME).parent.as_posix()
+
+
+LOCAL = {'default_path': USER_HOME, 'host': 'localhost',
+         'private_key': 'id_sftpretty', 'private_key_pass': PASS,
+         'username': USER}
 
 
 def conn(sftpsrv):
     '''return a dictionary holding argument info for the sftpretty client'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    return {'host': sftpsrv.host, 'port': sftpsrv.port, 'username': 'user',
-            'password': 'pw', 'default_path': '/home/test', 'cnopts': cnopts}
+    return {'cnopts': cnopts, 'default_path': '/home/test',
+            'host': sftpsrv.host, 'port': sftpsrv.port,
+            'private_key': 'id_sftpretty', 'private_key_pass': PASS,
+            'username': USER}
 
 
 def rmdir(dir):
@@ -43,7 +49,7 @@ def tempfile_containing(contents=STARS8192, suffix=''):
     cleanup when finished'''
 
     fd, temp_path = mkstemp(suffix=suffix)
-    close(fd)     # close file descriptor handle returned by mkstemp
+    close(fd)
 
     with open(temp_path, 'wb') as fh:
         fh.write(contents.encode('utf-8'))
