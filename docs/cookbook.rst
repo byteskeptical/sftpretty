@@ -466,7 +466,7 @@ augment not supplant paramiko.
 
 Remarks
 -------
-We think paramiko is a great python library and it is the backbone of sftpretty.
+Paramiko is a great python library and it is the backbone of sftpretty.
 The methods sftpretty has created are abstractions that serve a programmer's
 productivity by encapsulating many of the higher function use cases of
 interacting with SFTP. Instead of writing your own code to walk directories
