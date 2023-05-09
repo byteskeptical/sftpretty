@@ -49,12 +49,12 @@ def test_putfo_flo(lsftp):
 
 
 def test_putfo_no_remotepath(lsftp):
-    '''test putfo raises TypeError when not specifying a remotepath'''
+    '''test putfo uses uuid fallback when not specifying a remotepath'''
     buf = b'I will not buy this record, it is scratched\nMy hovercraft'\
           b' is full of eels.'
     flo = BytesIO(buf)
-    with pytest.raises(TypeError):
-        lsftp.putfo(flo)
+    rslt = lsftp.putfo(flo)
+    assert rslt.st_size == len(buf)
 
 
 # TODO

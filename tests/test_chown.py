@@ -3,17 +3,16 @@
 import pytest
 
 from common import SKIP_IF_WIN, tempfile_containing
-from os import getgid, getuid
 from pathlib import Path
 
 
+@SKIP_IF_WIN  # uid comes through as 0, lacks support
 def test_chown_uid(lsftp):
     '''test changing just the uid'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
-        org_uid = org_attrs.st_uid
-        uid = getuid()
+        uid = org_attrs.st_uid
         lsftp.chown(base_fname, uid=uid)
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
@@ -21,13 +20,13 @@ def test_chown_uid(lsftp):
     assert new_attrs.st_uid == uid
 
 
+@SKIP_IF_WIN  # gid comes through as 0, lacks support
 def test_chown_gid(lsftp):
     '''test changing just the gid'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
-        org_gid = org_attrs.st_gid
-        gid = getgid()
+        gid = org_attrs.st_gid
         lsftp.chown(base_fname, gid=gid)
         new_attrs = lsftp.stat(base_fname)
         lsftp.remove(base_fname)
