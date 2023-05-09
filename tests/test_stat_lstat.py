@@ -2,7 +2,7 @@
 
 from blddirs import build_dir_struct
 from common import conn, rmdir, VFS
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 from sftpretty import Connection
 from tempfile import mkdtemp
 
@@ -22,7 +22,6 @@ def test_lstat(lsftp):
     localpath = Path(mkdtemp()).as_posix()
     build_dir_struct(localpath)
     dirname = Path(localpath).joinpath('pub').as_posix()
-    dirname = dirname.lstrip(PureWindowsPath(dirname).drive)
     rslt = lsftp.lstat(dirname)
 
     assert rslt.st_size >= 0

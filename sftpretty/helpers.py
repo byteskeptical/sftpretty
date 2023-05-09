@@ -15,6 +15,12 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
     else:
         print(message)
 
+def drivedrop(filepath):
+    if PureWindowsPath(filepath).drive:
+        filepath = Path('/').joinpath(*Path(filepath).parts[1:]).as_posix()
+
+    return filepath
+
 
 def hash(filename, algorithm=sha3_512(), blocksize=65536):
     '''hash contents of a file, file like object or string

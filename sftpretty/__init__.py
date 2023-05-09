@@ -10,7 +10,7 @@ from paramiko import (hostkeys, SFTPClient, Transport,
 from pathlib import Path, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
-from sftpretty.helpers import _callback, hash, localtree, retry
+from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
@@ -236,10 +236,8 @@ class Connection(object):
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
-                drive = PureWindowsPath(self._default_path).drive
-                cwd = self._default_path.replace(drive, '')
-                _channel.chdir(cwd)
-                log.info(f'Current Working Directory: [{cwd}]')
+                _channel.chdir(self._default_path)
+                log.info(f'Current Working Directory: [{self._default_path}]')
 
             yield _channel
         except Exception as err:
@@ -607,7 +605,7 @@ class Connection(object):
                                                 confirm=confirm)
 
                 if preserve_mtime:
-                    channel.utime(remotepath, local_times)
+                    channel.utime(drivedrop(remotepath), local_times)
                     remote_attributes = channel.stat(remotepath)
 
             return remote_attributes
@@ -655,7 +653,7 @@ class Connection(object):
         else:
             localdir = Path(localdir)
 
-        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
+        self.mkdir_p(Path(remote).joinpath(localdir.stem).as_posix())
 
         paths = [
                  (localpath.as_posix(),
@@ -874,24 +872,21 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            drive = PureWindowsPath(remotepath).drive
-            cwd = remotepath.replace(drive, '')
-            channel.chdir(cwd)
-            pwd = channel.normalize('.')
-            self._default_path = pwd.replace('/' + drive, drive or '/')
+            channel.chdir(drivedrop(remotepath))
+            self._default_path = channel.normalize('.')
 
-    def chmod(self, remotepath, mode=777):
+    def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
 
         :param str remotepath: Remote path to modify permission.
-        :param int mode: *Default: 777* - Octal mode to apply on path.
+        :param int mode: *Default: 700* - Octal mode to apply on path.
 
         :returns: None
 
         :raises: IOError, if the file doesn't exist
         '''
         with self._sftp_channel() as channel:
-            channel.chmod(remotepath, mode=int(str(mode), 8))
+            channel.chmod(drivedrop(remotepath), mode=int(str(mode), 8))
 
     def chown(self, remotepath, uid=None, gid=None):
         '''Set uid/gid on remotepath, you may specify either or both.
@@ -905,6 +900,7 @@ class Connection(object):
         :raises: IOError, if user lacks permission or if the file doesn't exist
         '''
         with self._sftp_channel() as channel:
+            remotepath = drivedrop(remotepath)
             if uid is None or gid is None:
                 if uid is None and gid is None:
                     return
@@ -1017,7 +1013,7 @@ class Connection(object):
 
         '''
         with self._sftp_channel() as channel:
-            directory = sorted(channel.listdir(remotepath))
+            directory = sorted(channel.listdir(drivedrop(remotepath)))
 
         return directory
 
@@ -1035,7 +1031,7 @@ class Connection(object):
         :returns: (list of SFTPAttributes) Sorted directory content as objects.
         '''
         with self._sftp_channel() as channel:
-            directory = sorted(channel.listdir_attr(remotepath),
+            directory = sorted(channel.listdir_attr(drivedrop(remotepath)),
                                key=lambda attribute: attribute.filename)
 
         return directory
@@ -1049,7 +1045,7 @@ class Connection(object):
         :returns: (obj) SFTPAttributes object
         '''
         with self._sftp_channel() as channel:
-            lstat = channel.lstat(remotepath)
+            lstat = channel.lstat(drivedrop(remotepath))
 
         return lstat
 
@@ -1063,7 +1059,7 @@ class Connection(object):
         :returns: None
         '''
         with self._sftp_channel() as channel:
-            channel.mkdir(remotedir, mode=int(str(mode), 8))
+            channel.mkdir(drivedrop(remotedir), mode=int(str(mode), 8))
 
     def mkdir_p(self, remotedir, mode=700):
         '''Create a directory and any missing parent locations as needed. Set
@@ -1078,10 +1074,9 @@ class Connection(object):
         :raises: OSError
         '''
         try:
-            posix = remotedir.lstrip(PureWindowsPath(remotedir).drive)
-            if self.isdir(posix):
+            if self.isdir(remotedir):
                 return
-            elif self.isfile(posix):
+            elif self.isfile(remotedir):
                 raise OSError((f'A file with the same name, [{remotedir}], '
                                'already exists.'))
             else:
@@ -1089,8 +1084,7 @@ class Connection(object):
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
                 if parent != remotedir and parent != cwd:
-                    pp = parent.lstrip(PureWindowsPath(parent).drive)
-                    if not self.isdir(pp):
+                    if not self.isdir(parent):
                         self.mkdir_p(parent, mode=mode)
                 if stem:
                     self.mkdir(remotedir, mode=mode)
@@ -1109,11 +1103,11 @@ class Connection(object):
         :raises: IOError, if remotepath can't be resolved
         '''
         with self._sftp_channel() as channel:
-            expanded_path = channel.normalize(remotepath)
+            expanded_path = channel.normalize(drivedrop(remotepath))
 
         return expanded_path
 
-    def open(self, remotefile, mode='r', bufsize=-1):
+    def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.
 
         :param str remotefile: Path of remote file to open.
@@ -1125,7 +1119,8 @@ class Connection(object):
         :raises: IOError, if the file could not be opened.
         '''
         with self._sftp_channel(keepalive=True) as channel:
-            flo = channel.open(remotefile, mode=mode, bufsize=bufsize)
+            remotefile = drivedrop(remotefile)
+            flo = channel.open(remotefile, bufsize=bufsize, mode=mode)
 
         return flo
 
@@ -1137,6 +1132,7 @@ class Connection(object):
         :return: (str) Absolute path to target.
         '''
         with self._sftp_channel() as channel:
+            remotelink = drivedrop(remotelink)
             link_destination = channel.normalize(channel.readlink(remotelink))
 
         return link_destination
@@ -1189,7 +1185,7 @@ class Connection(object):
         :raises: IOError
         '''
         with self._sftp_channel() as channel:
-            channel.remove(remotefile)
+            channel.remove(drivedrop(remotefile))
 
     def rename(self, remotepath, newpath):
         '''Rename a path on the remote host.
@@ -1203,7 +1199,7 @@ class Connection(object):
         :raises: IOError
         '''
         with self._sftp_channel() as channel:
-            channel.posix_rename(remotepath, newpath)
+            channel.posix_rename(drivedrop(remotepath), drivedrop(newpath))
 
     def rmdir(self, remotedir):
         '''Delete remote directory.
@@ -1213,7 +1209,7 @@ class Connection(object):
         :returns: None
         '''
         with self._sftp_channel() as channel:
-            channel.rmdir(remotedir)
+            channel.rmdir(drivedrop(remotedir))
 
     def stat(self, remotepath):
         '''Return information about remote location.
@@ -1223,7 +1219,7 @@ class Connection(object):
         :returns: (obj) SFTPAttributes
         '''
         with self._sftp_channel() as channel:
-            stat = channel.stat(remotepath)
+            stat = channel.stat(drivedrop(remotepath))
 
         return stat
 
@@ -1238,7 +1234,7 @@ class Connection(object):
         :raises: any underlying error, IOError if remote_dest already exists
         '''
         with self._sftp_channel() as channel:
-            channel.symlink(remote_src, remote_dest)
+            channel.symlink(remote_src, drivedrop(remote_dest))
 
     def truncate(self, remotepath, size):
         '''Change the size of the file specified by path. Used to modify the
@@ -1253,6 +1249,7 @@ class Connection(object):
         :raises: IOError, if file does not exist
         '''
         with self._sftp_channel() as channel:
+            remotepath = drivedrop(remotepath)
             channel.truncate(remotepath, size)
             size = channel.stat(remotepath).st_size
 
