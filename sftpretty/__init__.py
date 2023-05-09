@@ -236,7 +236,7 @@ class Connection(object):
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
-                _channel.chdir(self._default_path)
+                _channel.chdir(drivedrop(self._default_path))
                 log.info(f'Current Working Directory: [{self._default_path}]')
 
             yield _channel
@@ -648,10 +648,7 @@ class Connection(object):
         :raises IOError: if remotedir doesn't exist
         :raises OSError: if localdir doesn't exist
         '''
-        if localdir.startswith(':', 1) or localdir.startswith('\\'):
-            localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir)
+        localdir = Path(localdir)
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
@@ -662,7 +659,7 @@ class Connection(object):
                           localdir.parent).as_posix()).as_posix(),
                   callback, confirm, preserve_mtime, exceptions, tries,
                   backoff, delay, logger, silent)
-                 for localpath in Path(localdir).iterdir()
+                 for localpath in localdir.iterdir()
                  if localpath.is_file()
                 ]
 
@@ -998,7 +995,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             try:
-                channel.lstat(remotepath)
+                channel.lstat(drivedrop(remotepath))
             except IOError:
                 return False
 
@@ -1083,7 +1080,7 @@ class Connection(object):
                 cwd = self._default_path or '/'
                 parent = Path(remotedir).parent.as_posix()
                 stem = Path(remotedir).stem
-                if parent != remotedir and parent != cwd:
+                if parent != remotedir:
                     if not self.isdir(parent):
                         self.mkdir_p(parent, mode=mode)
                 if stem:

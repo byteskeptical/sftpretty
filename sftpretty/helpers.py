@@ -15,6 +15,7 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
     else:
         print(message)
 
+
 def drivedrop(filepath):
     if PureWindowsPath(filepath).drive:
         filepath = Path('/').joinpath(*Path(filepath).parts[1:]).as_posix()
