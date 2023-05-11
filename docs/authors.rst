@@ -9,6 +9,6 @@ Acknowledgment
     * PR #15 by RobertCochran
     * PR #12 by erans
     * ftpretty by codebynumbers
-    * paramiko by Robey Pointer
     * pysftp by dundeemt
+    * paramiko by Robey Pointer
     * ssh.py by Zeth

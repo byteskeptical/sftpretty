@@ -2,8 +2,8 @@ sftpretty
 =========
 
 A pretty quick and simple interface to paramiko SFTP. Provides multi-threaded
-routines with progress notifications for reliable, asynchronous transfers. This
-is a Python3 optimized fork of pysftp with additional features & improvements.
+routines with progress notifications for reliable, asynchronous transfers. A
+Python3 optimized fork of pysftp with additional features & improvements.
 
 * Built-in retry decorator
 * Hash function for integrity checking
@@ -12,7 +12,7 @@ is a Python3 optimized fork of pysftp with additional features & improvements.
 * More tests
 * Multi-threaded directory transfers
 * Progress notifications
-* Support for ciphers, compression, digests, kex & key type connection options
+* Support for ciphers, compression, digests, kex & key type options
 * Support for disabled algorithms
 * Support for ED25519 & ECDSA keys
 * Support for private key passwords
@@ -91,7 +91,7 @@ Additional Information
 ----------------------
 * Project: https://github.com/byteskeptical/sftpretty
 * Download: https://pypi.python.org/pypi/sftpretty
-* Documentation: https://sftpretty.rtfd.org
+* Documentation: https://docs.sftpretty.com
 * License: BSD
 
 Requirements
@@ -104,7 +104,6 @@ Tested on Python 3.6, 3.7, 3.8, 3.9, 3.10, 3.11
 
 Contents
 --------
-
 .. toctree::
    :maxdepth: 2
 
@@ -116,7 +115,5 @@ Contents
 
 Indices & Tables
 ================
-
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

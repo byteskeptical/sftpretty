@@ -54,7 +54,7 @@ copyright = u'2020, byteskeptical'
 # built documents.
 #
 # The short X.Y version.
-version = '1.0'
+version = '1.0.9'
 # The full version, including alpha/beta/rc tags.
 release = '1.0.9'
 
@@ -176,7 +176,7 @@ html_static_path = ['_static']
 # html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-# html_show_sphinx = True
+html_show_sphinx = False
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 # html_show_copyright = True
