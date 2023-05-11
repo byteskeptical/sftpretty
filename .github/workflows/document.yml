@@ -1,9 +1,8 @@
 name: Document
 
 on:
-  push:
-    branches: [root]
   workflow_run:
+    branches: [root]
     types: [completed]
     workflows: [Test]
 
