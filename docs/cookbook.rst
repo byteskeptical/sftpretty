@@ -288,8 +288,8 @@ are setting these values as you intended.
 :attr:`sftpretty.Connection.pwd`
 --------------------------------
 Returns the current working directory. It returns the result of
-:meth:`.normalize('.')` but makes your code and intention easier to read.
-Paramiko has a method, :meth:`.getcwd()`, that we expose, but that method
+:meth:`.normalize` but makes your code and intention easier to read.
+Paramiko has a method, :meth:`.getcwd`, that we expose, but that method
 returns ``None`` if :meth:`.chdir` has not been called prior.
 
 .. code-block:: python
@@ -380,7 +380,7 @@ for file confirmation.
 -------------------------------------
 The underlying paramiko method can return either an absolute or a relative path.
 sftpretty forces this to always be an absolute path by laundering the result with
-a `.normalize` before returning.
+a :meth:`.normalize` before returning.
 
 .. code-block:: python
 
@@ -409,7 +409,7 @@ Like :meth:`.exists`, but returns True for a broken symbolic link.
 
 :meth:`sftpretty.Connection.truncate`
 -------------------------------------
-Like the underlying `.truncate` method, by sftpretty returns the file's new
+Like the underlying `.truncate` method, but sftpretty returns the file's new
 size after the operation.
 
 .. code-block:: python
