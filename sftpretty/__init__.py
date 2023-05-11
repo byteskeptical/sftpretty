@@ -21,12 +21,12 @@ class CnOpts(object):
     '''Additional connection options beyond authentication.
 
     :ivar tuple ciphers: *Default: paramiko.Transport.SecurityOptions.ciphers*
-        - Ordered list of preferred ciphers for connection.
+         - Ordered list of preferred ciphers for connection.
     :ivar bool compress: *Default: paramiko.Transport.use_compression* -
         Enable or disable compression.
     :ivar tuple compression:
-        *Default: paramiko.Transport.SecurityOptions.compression
-        * - Ordered tuple of preferred compression algorithms for connection.
+         *Default: paramiko.Transport.SecurityOptions.compression* -
+         Ordered tuple of preferred compression algorithms for connection.
     :ivar tuple digests: *Default: paramiko.Transport.SecurityOptions.digests*
          - Ordered tuple of preferred digests/macs for connection.
     :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
@@ -37,8 +37,8 @@ class CnOpts(object):
     :ivar tuple kex: *Default: paramiko.Transport.SecurityOptions.kex* -
         Ordered tuple of preferred key exchange algorithms for connection.
     :ivar tuple key_types:
-        *Default: paramiko.Transport.SecurityOptions.key_types*
-        - Ordered tuple of preferred public key types for connection.
+         *Default: paramiko.Transport.SecurityOptions.key_types* -
+         Ordered tuple of preferred public key types for connection.
     :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
         hostkeys from.
     :ivar bool|str log: *Default: False* - Log connection details. If set to
@@ -46,8 +46,10 @@ class CnOpts(object):
         existing filepath, logs will be appended.
     :ivar str log_level: *Default: info* - Set logging level for connection.
         Choose between debug, error, or info.
+
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
+
     :raises HostKeysException:
     '''
     def __init__(self, knownhosts=Path(
@@ -91,9 +93,12 @@ class CnOpts(object):
 
     def get_hostkey(self, host):
         '''Return the matching known hostkey to be used for verification or
-        raise an SSHException
-        :param str host:
-            The Hostname or IP of the remote machine.
+        raise an SSHException.
+
+        :param str host: The Hostname or IP of the remote machine.
+
+        :returns: (obj) PKey - Public key(s) associated with host or None.
+
         :raises SSHException:
         '''
         kval = self.hostkeys.lookup(host)
@@ -101,7 +106,7 @@ class CnOpts(object):
         if kval is None:
             raise SSHException(f'No hostkey for host [{host}] found.')
 
-        # Return the private key from the dictionary
+        # Return the public key from the dictionary
         return list(kval.values())[0]
 
 
@@ -110,7 +115,7 @@ class Connection(object):
     given are guessed from the environment.
 
     :param str host: *Required* - Hostname or address of the remote machine.
-    :param None|CnOpts cnopts: *Default: None* - Extended connection options
+    :param CnOpts|None cnopts: *Default: None* - Extended connection options
         set as a CnOpts object.
     :param str|None default_path: *Default: None* - Set the default working
         directory upon connection.
@@ -122,7 +127,9 @@ class Connection(object):
         encrypted private_key.
     :param float|None timeout: *Default: None* - Set channel timeout.
     :param str|None username: *Default: None* - User for remote machine.
+
     :returns: (obj) Connection to the requested host.
+
     :raises ConnectionException:
     :raises CredentialException:
     :raises HostKeysException:
@@ -143,7 +150,7 @@ class Connection(object):
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
-        '''Authenticate to transport. Prefer private key if given'''
+        '''Authenticate transport. Prefer private key over password.'''
         if private_key is not None:
             # Use key path or provided key object
             key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
@@ -211,7 +218,7 @@ class Connection(object):
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
-        the environment. Still nothing? Throw exception.'''
+        the environment. Still nothing? Throw CredentialException.'''
         local_username = environ.get('LOGNAME', None)
 
         if username is not None:
@@ -553,7 +560,7 @@ class Connection(object):
 
         :param str localfile: The local path and filename to copy remotely.
         :param str remotepath: Remote location to save file, else the remote
-            :atttr:`.pwd` and local filename is used.
+            :attr:`.pwd` and local filename is used.
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
@@ -1139,13 +1146,10 @@ class Connection(object):
         return link_destination
 
     def remotetree(self, container, remotedir, localdir, recurse=True):
-        '''recursively descend remote directory mapping the tree to a
-        dictionary container.
+        '''Recursively map remote directory tree to a dictionary container.
 
         :param dict container: Hash table to save remote directory tree.
-            {remotedir:
-                 [(remotedir/sub-directory,
-                   localdir/remotedir/sub-directory)],}
+            {remotedir: [(remotedir/subdir, localdir/remotedir/subdir)]}
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
         :param str localdir: Location used as root of appended remote paths.
