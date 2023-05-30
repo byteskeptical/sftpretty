@@ -27,7 +27,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build
         run: |
-          python -m pip install Sphinx sphinx_rtd_theme
+          python -m pip install paramiko Sphinx sphinx_rtd_theme
           mkdir _static
           make clean
           make html
