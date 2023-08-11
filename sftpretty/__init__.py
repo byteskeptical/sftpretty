@@ -178,7 +178,7 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
-        self._config = None
+        self._config = {}
         if self._cnopts.config is not None:
             self._config = self._cnopts.get_config(host)
         self._default_path = default_path
