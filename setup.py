@@ -18,7 +18,7 @@ DESCRIPTION = "Pretty secure file transfer made easy."
 
 setup(
     name='sftpretty',
-    version='1.0.9',
+    version='1.0.10',
 
     packages=['sftpretty', ],
 

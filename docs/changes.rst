@@ -1,7 +1,11 @@
 Change Log
 ==========
 
-1.0.9 (current, released 2023-05-08)
+1.0.10 (current, released 2023-08-08)
+------------------------------------
+    * added initial support for OpenSSH config-file support
+
+1.0.9 (released 2023-05-08)
 ------------------------------------
     * added drivedrop to bypass _adjust_cwd's lack of Windows drive support
     * added file_size logic and default remotepath fallback to putfo

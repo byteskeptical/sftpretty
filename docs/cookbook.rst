@@ -81,6 +81,8 @@ object. These options are advanced and not applicable to most uses, because of
 this they have been segmented from the Connection parameter list and made
 available via the CnOpts obj/parameter.
 
+Support for OpenSSH-style config objects has been added but requires user activation.  
+
 Host Key checking is enabled by default. It will use ``~/.ssh/known_hosts`` by
 default. If you wish to disable host key checking, **NOT ADVISED**, you will
 need to modify the default CnOpts and set the .hostkeys to None.
