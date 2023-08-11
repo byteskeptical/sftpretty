@@ -235,7 +235,7 @@ class Connection(object):
         '''Set logging location and level for connection'''
         level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
         level = self._config.get('loglevel') or\
-                level_map[self._cnopts.log_level.lower()]
+            level_map[self._cnopts.log_level.lower()]
 
         try:
             if self._cnopts.log:
@@ -334,7 +334,7 @@ class Connection(object):
             log.debug(f'KEX: [{kex}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
-                        self._cnopts.key_types
+                self._cnopts.key_types
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
 
