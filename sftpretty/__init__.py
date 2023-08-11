@@ -4,8 +4,8 @@ from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, SEEK_END, utime
-from paramiko import (config, hostkeys, SFTPClient, Transport,
-                      PasswordRequiredException, SSHException,
+from paramiko import (hostkeys, SFTPClient, Transport,
+                      PasswordRequiredException, SSHConfig, SSHException,
                       DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
@@ -62,7 +62,7 @@ class CnOpts(object):
                         'aes192-cbc', 'aes128-cbc', '3des-cbc')
         self.compress = False
         self.compression = ('none',)
-        self.config = config.SSHConfig()
+        self.config = SSHConfig()
         self.digests = ('hmac-sha2-512', 'hmac-sha2-256',
                         'hmac-sha2-512-etm@openssh.com',
                         'hmac-sha2-256-etm@openssh.com',
