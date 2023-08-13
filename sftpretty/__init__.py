@@ -82,18 +82,18 @@ class CnOpts(object):
 
         if config is not None:
             if Path(config).expanduser().resolve().exists():
-                self.ssh_config.from_path(config)
+                self.ssh_config = self.ssh_config.from_path(config)
             else:
                 try:
-                    self.ssh_config.from_file(config)
+                    self.ssh_config = self.ssh_config.from_file(config)
                 except ConfigParseError:
-                    self.ssh_config.from_text(config)
+                    self.ssh_config = self.ssh_config.from_text(config)
         else:
             _config = Path('~/.ssh/config').expanduser().resolve()
             if _config.exists():
-                self.ssh_config.from_path(_config.as_posix())
+                self.ssh_config = self.ssh_config.from_path(_config.as_posix())
             else:
-                self.ssh_config.from_text('Host *')
+                self.ssh_config = self.ssh_config.from_text('Host *')
 
         if knownhosts is not None:
             try:

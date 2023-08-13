@@ -1,7 +1,5 @@
 '''test sftpretty.putfo'''
 
-import pytest
-
 from io import BytesIO
 from unittest.mock import call, Mock
 
