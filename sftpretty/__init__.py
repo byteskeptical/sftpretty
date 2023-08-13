@@ -81,7 +81,10 @@ class CnOpts(object):
 
         if config is not None:
             try:
-                self.config.parse(Path(config).resolve().as_posix())
+                if isinstance(config, str):
+                    self.config.from_path(Path(config).resolve().as_posix())
+                else:
+                    self.config.from_text(config)
             except FileNotFoundError:
                 raise UserWarning(
                     f'No file found in [{config}]. Check your file path '
