@@ -4,9 +4,9 @@ from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, SEEK_END, utime
-from paramiko import (hostkeys, SFTPClient, Transport,
-                      PasswordRequiredException, SSHConfig, SSHException,
-                      DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+from paramiko import (hostkeys, SFTPClient, SSHConfig, Transport,
+                      ConfigParseError, PasswordRequiredException,
+                      SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
@@ -54,6 +54,7 @@ class CnOpts(object):
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
 
+    :raises ConfigParseError:
     :raises HostKeysException:
     '''
     def __init__(self, config=None, knownhosts=Path(
