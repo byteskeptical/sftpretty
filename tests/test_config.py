@@ -12,7 +12,7 @@ def test_connection_with_config(sftpserver):
     config = Path(f'{USER_HOME}/.ssh/config')
     config.parent.mkdir(exist_ok=True, mode=0o700)
     config.touch(exist_ok=True, mode=0o644)
-    config.write_bytes(bytes(('Host localhost\n'
+    config.write_bytes(bytes(('Host localhost\n\t'
                               f'User {USER}').encode('utf-8')))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
@@ -26,8 +26,8 @@ def test_connection_with_config_alias(sftpserver):
     config = Path(f'{USER_HOME}/.ssh/config')
     config.parent.mkdir(exist_ok=True, mode=0o700)
     config.touch(exist_ok=True, mode=0o644)
-    config.write_bytes(bytes(('Host test\n'
-                              'Hostname localhost\n'
+    config.write_bytes(bytes(('Host test\n\t'
+                              'Hostname localhost\n\t'
                               f'User {USER}').encode('utf-8')))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
@@ -41,8 +41,8 @@ def test_connection_with_config_identity(sftpserver):
     config = Path(f'{USER_HOME}/.ssh/config')
     config.parent.mkdir(exist_ok=True, mode=0o700)
     config.touch(exist_ok=True, mode=0o644)
-    config.write_bytes(bytes(('Host localhost\n'
-                              'IdentityFile id_sftpretty\n'
+    config.write_bytes(bytes(('Host localhost\n\t'
+                              'IdentityFile id_sftpretty\n\t'
                               f'User {USER}').encode('utf-8')))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')

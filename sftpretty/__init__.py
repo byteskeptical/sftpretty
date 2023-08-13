@@ -180,7 +180,7 @@ class Connection(object):
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
-        self._start_transport(self._config.get('host') or host,
+        self._start_transport(self._config.get('hostname') or host,
                               self._config.get('port') or port)
         self._set_username(self._config.get('user') or username)
         self._set_authentication(password, private_key, private_key_pass)
