@@ -81,31 +81,23 @@ class CnOpts(object):
 
         if config is not None:
             try:
-                if isinstance(config, str):
-                    self.config.from_path(Path(config).resolve().as_posix())
-                else:
-                    self.config.from_text(config)
+                _config = Path(config).expanduser()
+                self.config.from_path(_config.resolve().as_posix())
             except FileNotFoundError:
-                raise UserWarning(
-                    f'No file found in [{config}]. Check your file path '
-                    'or keep disabled (cnopts.config = None).'
-                )
-            else:
-                if len(self.hostkeys.items()) == 0:
-                    raise HostKeysException('No host keys found!')
+                self.config.from_text(config)
         else:
             try:
-                config = Path('~/.ssh/config').expanduser().as_posix()
-                self.config.from_path(Path(config).resolve().as_posix())
+                _config = Path('~/.ssh/config').expanduser()
+                self.config.from_path(_config.resolve().as_posix())
             except FileNotFoundError:
-                # no config in the default unix location, windows has none
+                # no config in the default unix location
                 self.config = None
 
         if knownhosts is not None:
             try:
                 self.hostkeys.load(Path(knownhosts).resolve().as_posix())
             except FileNotFoundError:
-                # no known_hosts in the default unix location, windows has none
+                # no known_hosts in the default unix location
                 raise UserWarning(
                     f'No file or host key found in [{knownhosts}]. '
                     'You will need to explicitly load host keys '
