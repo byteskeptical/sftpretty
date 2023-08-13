@@ -1,7 +1,5 @@
 '''test CnOpts.config param'''
 
-import pytest
-
 from common import PASS, USER, USER_HOME, VFS
 from pathlib import Path
 from sftpretty import CnOpts, Connection
@@ -28,11 +26,13 @@ def test_connection_with_config_alias(sftpserver):
     config.touch(exist_ok=True, mode=0o644)
     config.write_bytes(bytes(('Host test\n\t'
                               'Hostname localhost\n\t'
+                              'IdentityFile id_sftpretty\n\t'
                               f'User {USER}').encode('utf-8')))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
-        with Connection('test', cnopts=cnopts, password=PASS) as sftp:
+        with Connection('test', cnopts=cnopts,
+                        private_key_password=PASS) as sftp:
             assert sftp.listdir() == ['pub', 'read.me']
 
 
