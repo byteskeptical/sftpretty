@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, PASS, USER, USER_HOME, VFS
+from common import PASS, USER, USER_HOME, VFS
 from pathlib import Path
 from sftpretty import CnOpts, Connection
 
