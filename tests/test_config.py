@@ -14,7 +14,7 @@ def test_connection_with_config(sftpserver):
     config.parent.mkdir(exist_ok=True, mode=0o700)
     config.touch(exist_ok=True, mode=0o644)
     config.write_bytes((b'host localhost'
-                        bytes(f'  User {USER}'.encode('utf-8')))
+                        bytes(f'  User {USER}'.encode('utf-8'))))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
@@ -29,7 +29,7 @@ def test_connection_with_config_alias(sftpserver):
     config.touch(exist_ok=True, mode=0o644)
     config.write_bytes((b'Host test'
                         b'    Hostname localhost'
-                        bytes(f'    User {USER}'.encode('utf-8')))
+                        bytes(f'    User {USER}'.encode('utf-8'))))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
@@ -44,7 +44,7 @@ def test_connection_with_config_identity(sftpserver):
     config.touch(exist_ok=True, mode=0o644)
     config.write_bytes((b'Host localhost'
                         b'    IdentityFile id_sftpretty'
-                        bytes(f'    User {USER}'.encode('utf-8')))
+                        bytes(f'    User {USER}'.encode('utf-8'))))
     cnopts = CnOpts(config=config.as_posix(),
                     knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
