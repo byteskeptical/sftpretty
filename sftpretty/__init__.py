@@ -62,7 +62,6 @@ class CnOpts(object):
                         'aes192-cbc', 'aes128-cbc', '3des-cbc')
         self.compress = False
         self.compression = ('none',)
-        self.config = SSHConfig()
         self.digests = ('hmac-sha2-512', 'hmac-sha2-256',
                         'hmac-sha2-512-etm@openssh.com',
                         'hmac-sha2-256-etm@openssh.com',
@@ -78,20 +77,22 @@ class CnOpts(object):
                           'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
         self.log = False
         self.log_level = 'info'
+        self.ssh_config = SSHConfig()
 
         if config is not None:
-            try:
-                _config = Path(config).expanduser()
-                self.config.from_path(_config.resolve().as_posix())
-            except FileNotFoundError:
-                self.config.from_text(config)
+            if Path(config).expanduser().resolve().exists():
+                self.ssh_config.from_path(config)
+            else:
+                try:
+                    self.ssh_config.from_file(config)
+                except ConfigParseError:
+                    self.ssh_config.from_text(config)
         else:
-            try:
-                _config = Path('~/.ssh/config').expanduser()
-                self.config.from_path(_config.resolve().as_posix())
-            except FileNotFoundError:
-                # no config in the default unix location
-                self.config = None
+            _config = Path('~/.ssh/config').expanduser().resolve()
+            if _config.exists():
+                self.ssh_config.from_path(_config.as_posix())
+            else:
+                self.ssh_config.from_text('Host *')
 
         if knownhosts is not None:
             try:
@@ -120,8 +121,8 @@ class CnOpts(object):
         :returns: (obj) SSHConfigDict - A dictionary wrapper/subclass for
         per-host configuration structures.
         '''
-        cval = self.config.lookup(host)
-        return cval
+        cval = self.ssh_config.lookup(host)
+        return cval or {}
 
     def get_hostkey(self, host):
         '''Return the matching known hostkey to be used for verification or
@@ -185,8 +186,7 @@ class Connection(object):
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate transport. Prefer private key over password.'''
-        if self._config.get('identityfile'):
-            private_key = self._config['identityfile']
+        private_key = self._config.get('identityfile') or private_key
         if private_key is not None:
             # Use key path or provided key object
             key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
