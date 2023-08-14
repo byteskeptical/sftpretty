@@ -181,7 +181,7 @@ class Connection(object):
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
         self._start_transport(self._config.get('hostname') or host,
-                              self._config.get('port') or port)
+                              int(self._config.get('port')) or port)
         self._set_username(self._config.get('user') or username)
         self._set_authentication(password, private_key, private_key_pass)
 
@@ -313,6 +313,8 @@ class Connection(object):
             # Security Options
             # Set allowed ciphers
             ciphers = self._config.get('ciphers') or self._cnopts.ciphers
+            if type(ciphers) != tuple:
+                ciphers = tuple(ciphers.split(','))
             self._transport.get_security_options().ciphers = ciphers
             log.debug(f'Ciphers: [{ciphers}]')
             # Set compression algorithms
@@ -321,15 +323,21 @@ class Connection(object):
             log.debug(f'Compression: [{compression}]')
             # Set connection digests
             digests = self._config.get('macs') or self._cnopts.digests
+            if type(digests) != tuple:
+                digests = tuple(digests.split(','))
             self._transport.get_security_options().digests = digests
             log.debug(f'MACs: [{digests}]')
             # Set connection kex
             kex = self._config.get('kexalgorithms') or self._cnopts.kex
+            if type(kex) != tuple:
+                kex = tuple(kex.split(','))
             self._transport.get_security_options().kex = kex
             log.debug(f'KEX: [{kex}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
-                self._cnopts.key_types
+                        self._cnopts.key_types
+            if type(key_types) != tuple:
+                key_types = tuple(key_types.split(','))
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
 
