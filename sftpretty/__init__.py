@@ -181,7 +181,7 @@ class Connection(object):
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
         self._start_transport(self._config.get('hostname') or host,
-                              int(self._config.get('port')) or port)
+                              self._config.get('port') or port)
         self._set_username(self._config.get('user') or username)
         self._set_authentication(password, private_key, private_key_pass)
 
@@ -296,7 +296,7 @@ class Connection(object):
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
         try:
-            self._transport = Transport((host, port))
+            self._transport = Transport((host, int(port)))
 
             keepalive = self._config.get('serveraliveinterval') or 60
             self._transport.set_keepalive(keepalive)
