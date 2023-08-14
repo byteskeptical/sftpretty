@@ -13,15 +13,16 @@ def test_connection_with_config(sftpserver):
     config = Path(f'{USER_HOME}/.ssh/config')
     config.parent.mkdir(exist_ok=True, mode=0o700)
     config.touch(exist_ok=True, mode=0o644)
-    config.write_bytes(bytes(('Host 127.0.0.1\n\t'
-                              f'Port {sftpserver.port}\n\t'
-                              f'User {USER}').encode('utf-8')))
-    cnopts = CnOpts(config=config.as_posix(), knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
+        config.write_bytes(bytes(('Host 127.0.0.1\n\t'
+                                  f'Port {sftpserver.port}\n\t'
+                                  f'User {USER}').encode('utf-8')))
+        cnopts = CnOpts(config=config.as_posix(), knownhosts='sftpserver.pub')
         params = conn(sftpserver)
         params['cnopts'] = cnopts
         params['password'] = PASS
         del params['port']
+        del params['private_key']
         del params['private_key_pass']
         del params['username']
         with Connection(**params) as sftp:
