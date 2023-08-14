@@ -5,6 +5,7 @@ from pathlib import Path
 from sftpretty import CnOpts, Connection
 
 
+@SKIP_IF_MAC
 def test_connection_with_config(sftpserver):
     '''connect to a public sftp server using OpenSSH config'''
     config = Path(f'{USER_HOME}/.ssh/config')

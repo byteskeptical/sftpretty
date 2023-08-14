@@ -28,10 +28,17 @@ jobs:
           sudo systemsetup -setremotelogin on
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -users admin -privs -all -restart -agent -menu
       - name: ${{ matrix.os }} SSH
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          (echo ${{ secrets.PASSWORD }}; echo ${{ secrets.PASSWORD }}) | sudo passwd $USER
+      - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'windows')
         run: |
           $authorizedKey = Get-Content -Path id_sftpretty.pub
+          $pass = ConvertTo-SecureString -AsPlainText -Force -String ${{ secrets.PASSWORD }}
           $privateKey = Get-Content -Path id_sftpretty
+          $user = Get-LocalUser -Name (([System.Environment]::UserName))
+          $user | Set-LocalUser -Password $pass
           New-Item -Force -ItemType Directory -Path $env:UserProfile\.ssh
           Add-Content -Force -Path $env:UserProfile\.ssh\authorized_keys -Value $authorizedKey
           Add-Content -Force -Path $env:ProgramData\ssh\administrators_authorized_keys -Value $authorizedKey

@@ -11,6 +11,8 @@ from tempfile import mkstemp
 
 PASS = 'tEst@!357'
 SKIP_IF_CI = pytest.mark.skipif(environ.get('CI', '') > '', reason='Not Local')
+SKIP_IF_MAC = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'macOS',
+                                 reason='WhackMac')
 SKIP_IF_WIN = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'Windows',
                                  reason='NoWinZone')
 STARS8192 = '*'*8192

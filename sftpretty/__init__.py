@@ -187,7 +187,8 @@ class Connection(object):
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate transport. Prefer private key over password.'''
-        private_key = self._config.get('identityfile')[0] or private_key
+        if self._config.get('identityfile'):
+            private_key = self._config['identityfile'][0]
         if private_key is not None:
             # Use key path or provided key object
             key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
