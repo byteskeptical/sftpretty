@@ -1,6 +1,6 @@
 '''test CnOpts.config param'''
 
-from common import PASS, USER, USER_HOME, VFS
+from common import SKIP_IF_MAC, PASS, USER, USER_HOME, VFS
 from pathlib import Path
 from sftpretty import CnOpts, Connection
 
