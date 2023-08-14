@@ -279,7 +279,7 @@ class Connection(object):
             channel = _channel.get_channel()
             channel_name = uuid4().hex
             channel.set_name(channel_name)
-            channel.settimeout(int(self._timeout))
+            channel.settimeout(self._timeout)
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
@@ -341,7 +341,7 @@ class Connection(object):
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
 
-            self._transport.start_client(timeout=int(self._timeout))
+            self._transport.start_client(timeout=self._timeout)
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
@@ -1398,7 +1398,7 @@ class Connection(object):
     @timeout.setter
     def timeout(self, val):
         '''Setter for timeout'''
-        self._timeout = int(val)
+        self._timeout = val
 
     def __del__(self):
         '''Attempt to garbage collect if not explicitly closed.'''
