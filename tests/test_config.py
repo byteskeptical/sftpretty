@@ -18,6 +18,7 @@ def test_connection_with_config(sftpserver):
         with Connection(sftpserver.host, cnopts=cnopts, password=PASS) as sftp:
             rslt = sftp.listdir()
             assert len(rslt) > 1
+    config.unlink()
 
 
 def test_connection_with_config_alias(sftpserver):
@@ -33,9 +34,10 @@ def test_connection_with_config_alias(sftpserver):
     cnopts = CnOpts(config=config.as_posix(), knownhosts='sftpserver.pub')
     with sftpserver.serve_content(VFS):
         with Connection('test', cnopts=cnopts, private_key_pass=PASS) as sftp:
-            local, remote = sftp.active_ciphers()
+            local, remote = sftp.active_ciphers
             assert local in ('aes256-ctr', 'aes192-ctr')
             assert remote in ('aes256-ctr', 'aes192-ctr')
+    config.unlink()
 
 
 def test_connection_with_config_identity(sftpserver):
@@ -52,3 +54,4 @@ def test_connection_with_config_identity(sftpserver):
                         private_key_pass=PASS) as sftp:
             rslt = sftp.listdir()
             assert len(rslt) > 1
+    config.unlink()

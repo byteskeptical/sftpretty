@@ -335,7 +335,7 @@ class Connection(object):
             log.debug(f'KEX: [{kex}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
-                        self._cnopts.key_types
+                self._cnopts.key_types
             if type(key_types) != tuple:
                 key_types = tuple(key_types.split(','))
             self._transport.get_security_options().key_types = key_types
