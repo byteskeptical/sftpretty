@@ -27,8 +27,8 @@ class CnOpts(object):
     :ivar tuple compression:
          *Default: paramiko.Transport.SecurityOptions.compression* -
          Ordered tuple of preferred compression algorithms for connection.
-    :ivar paramiko.config.SSHConfig hostkeys: SSHConfig object used for
-        parsing OpenSSH-style config directives.
+    :ivar paramiko.SSHConfig: SSHConfig object used for parsing and
+         preforming host based lookups on OpenSSH-style config directives.
     :ivar tuple digests: *Default: paramiko.Transport.SecurityOptions.digests*
          - Ordered tuple of preferred digests/macs for connection.
     :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
@@ -229,8 +229,8 @@ class Connection(object):
     def _set_logging(self):
         '''Set logging location and level for connection'''
         level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
-        level = self._config.get('loglevel') or\
-            level_map[self._cnopts.log_level.lower()]
+        level = self._config.get('loglevel') or self._cnopts.log_level
+        level = level_map[level.lower().strip('1,2,3')]
 
         try:
             if self._cnopts.log:
@@ -279,7 +279,7 @@ class Connection(object):
             channel = _channel.get_channel()
             channel_name = uuid4().hex
             channel.set_name(channel_name)
-            channel.settimeout(self._timeout)
+            channel.settimeout(int(self._timeout))
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:
@@ -299,11 +299,11 @@ class Connection(object):
             self._transport = Transport((host, int(port)))
 
             keepalive = self._config.get('serveraliveinterval') or 60
-            self._transport.set_keepalive(keepalive)
+            self._transport.set_keepalive(int(keepalive))
             self._transport.set_log_channel(host)
 
             compress = self._config.get('compression') or self._cnopts.compress
-            self._transport.use_compression(compress=compress)
+            self._transport.use_compression(compress=bool(compress))
 
             # Set disabled algorithms
             disabled_algorithms = self._cnopts.disabled_algorithms
@@ -341,7 +341,7 @@ class Connection(object):
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
 
-            self._transport.start_client(timeout=self._timeout)
+            self._transport.start_client(timeout=int(self._timeout))
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
@@ -1398,7 +1398,7 @@ class Connection(object):
     @timeout.setter
     def timeout(self, val):
         '''Setter for timeout'''
-        self._timeout = val
+        self._timeout = int(val)
 
     def __del__(self):
         '''Attempt to garbage collect if not explicitly closed.'''

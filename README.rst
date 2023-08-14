@@ -66,17 +66,18 @@ Example
         # Recursively download a remote_directory and save it to /tmp locally.
         # Don't confirm files, useful in a scenario where the server removes
         # the remote file immediately after download. Preserve remote mtime on
-        # local copy
+        # local copy.
         sftp.get_r('remote_directory', '/tmp', confirm=False,
                    preserve_mtime=True)
 
 
     # Use OpenSSH format config for public key authentication. Configuration
     # connection values are prioritized when available. Credentials still need
-    # to be provided.
-    cnopts = CnOpts(config='/home/test/.ssh/config', knownhosts='server.pub')
-    with Connection('hostname', cnopts=cnopts,
-                    private_key_pass='secret') as sftp:
+    # to be provided. There may be a significant delta between your ssh program
+    # and support for newer security option algorithms due to lagging support
+    # in paramiko.
+    cnopts = CnOpts(config='~/.ssh/config', knownhosts='server.pub')
+    with Connection('alias', cnopts=cnopts, private_key_pass='secret') as sftp:
         # Rename existing file on remote server
         sftp.rename('/remote/old_name', '/remote/new_name')
 
