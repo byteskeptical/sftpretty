@@ -14,29 +14,26 @@ with open('docs/changes.rst') as h_rst:
     BUF = BUF.replace('$', '``')        # restore existing code markers
 LONG_DESCRIPTION += BUF
 
-DESCRIPTION = "Pretty secure file transfer made easy."
+DESCRIPTION = 'Pretty secure file transfer made easy.'
 
 setup(
-    name='sftpretty',
-    version='1.0.10',
-
-    packages=['sftpretty', ],
-
-    install_requires=['paramiko>=1.17'],
-
     # metadata for upload to PyPI
     author='byteskeptical',
     author_email='40208858+byteskeptical@users.noreply.github.com',
     description=DESCRIPTION,
-    license='BSD',
+    download_url='https://pypi.python.org/pypi/sftpretty',
+    install_requires=['paramiko>=1.17'],
     keywords='ftp scp sftp ssh',
-    url='https://github.com/byteskeptical/sftpretty',
+    license='BSD',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/x-rst',
+    name='sftpretty',
+    packages=['sftpretty',],
     platforms=['any'],
-    download_url='https://pypi.python.org/pypi/sftpretty',
+    url='https://github.com/byteskeptical/sftpretty',
+    version='1.1.0',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
@@ -45,6 +42,6 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: Implementation :: CPython',
-    ],
+        'Programming Language :: Python :: Implementation :: CPython'
+    ]
 )

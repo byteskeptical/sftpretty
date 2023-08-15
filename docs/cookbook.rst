@@ -83,18 +83,20 @@ available via the CnOpts obj/parameter.
 
 Support for OpenSSH-style config objects has been added. The user's default
 home location ``~/.ssh/config`` is always checked unless an alternative path
-is provided. Credentials still need to be passed whether using a password 
-protected public key or traditional password authentication.
+is provided. Credentials still need to be passed whether using a protected
+private key or password authentication.
 
 .. code-block:: python
 
     import sftpretty
 
     cnopts = sftpretty.CnOpts(config='/etc/ssh/ssh_config')
-    with sftpretty.Connection('host', cnopts=cnopts, password='pass'):
+    with sftpretty.Connection('host_alias', cnopts=cnopts, password='pass'):
         # do stuff here
 
-Config options always take precedence over passed parameters if both exist.
+Config options always take precedence over parameters if both exist. Keep in
+mind there will more than likely be a delta between the security option
+algorithms your verion of SSH supports and those supported by paramiko.
 
 AVAILABLE OPENSSH CONFIG OPTIONS:
  

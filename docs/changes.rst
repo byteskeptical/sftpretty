@@ -1,16 +1,16 @@
 Change Log
 ==========
 
-1.0.10 (current, released 2023-08-08)
+1.1.0 (current, released 2023-08-15)
 ------------------------------------
-    * added initial support for OpenSSH config-file support
+    * added initial support for OpenSSH config-file support to CnOpts
 
 1.0.9 (released 2023-05-08)
 ------------------------------------
     * added drivedrop to bypass _adjust_cwd's lack of Windows drive support
     * added file_size logic and default remotepath fallback to putfo
     * moved Connection.compress to CnOpts.compress
-    * reversion in put_d *again*
+    * regression in put_d *again*
     * removed SKIP_IF_CI from all but one test in response to the above
     * switched to public key auth for all tests !¿macOS?¡
     * switched from get_fingerprint() using md5 to helpers.hash using sha3_256
@@ -18,7 +18,7 @@ Change Log
 
 1.0.7 (released 2023-02-27)
 ------------------------------------
-    * fix reversion in put_d
+    * fix regression in put_d
 
 1.0.6 (released 2023-01-15)
 ------------------------------------
