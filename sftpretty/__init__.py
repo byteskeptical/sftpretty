@@ -4,9 +4,9 @@ from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, SEEK_END, utime
-from paramiko import (hostkeys, SFTPClient, Transport,
-                      PasswordRequiredException, SSHException,
-                      DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+from paramiko import (hostkeys, SFTPClient, SSHConfig, Transport,
+                      ConfigParseError, PasswordRequiredException,
+                      SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
@@ -27,6 +27,8 @@ class CnOpts(object):
     :ivar tuple compression:
          *Default: paramiko.Transport.SecurityOptions.compression* -
          Ordered tuple of preferred compression algorithms for connection.
+    :ivar paramiko.SSHConfig: SSHConfig object used for parsing and
+         preforming host based lookups on OpenSSH-style config directives.
     :ivar tuple digests: *Default: paramiko.Transport.SecurityOptions.digests*
          - Ordered tuple of preferred digests/macs for connection.
     :ivar dict disabled_algorithms: *Default: {}* - Mapping type to an
@@ -39,6 +41,8 @@ class CnOpts(object):
     :ivar tuple key_types:
          *Default: paramiko.Transport.SecurityOptions.key_types* -
          Ordered tuple of preferred public key types for connection.
+    :param str config: *Default: ~/.ssh/config* - File path to load
+        config from.
     :param str knownhosts: *Default: ~/.ssh/known_hosts* - File path to load
         hostkeys from.
     :ivar bool|str log: *Default: False* - Log connection details. If set to
@@ -50,9 +54,10 @@ class CnOpts(object):
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
 
+    :raises ConfigParseError:
     :raises HostKeysException:
     '''
-    def __init__(self, knownhosts=Path(
+    def __init__(self, config=None, knownhosts=Path(
                  '~/.ssh/known_hosts').expanduser().as_posix()):
         self.ciphers = ('aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
                         'aes192-cbc', 'aes128-cbc', '3des-cbc')
@@ -73,12 +78,28 @@ class CnOpts(object):
                           'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
         self.log = False
         self.log_level = 'info'
+        self.ssh_config = SSHConfig()
+
+        if config is not None:
+            if Path(config).expanduser().resolve().exists():
+                self.ssh_config = self.ssh_config.from_path(config)
+            else:
+                try:
+                    self.ssh_config = self.ssh_config.from_file(config)
+                except ConfigParseError:
+                    self.ssh_config = self.ssh_config.from_text(config)
+        else:
+            _config = Path('~/.ssh/config').expanduser().resolve()
+            if _config.exists():
+                self.ssh_config = self.ssh_config.from_path(_config.as_posix())
+            else:
+                self.ssh_config = self.ssh_config.from_text('Host *')
 
         if knownhosts is not None:
             try:
                 self.hostkeys.load(Path(knownhosts).resolve().as_posix())
             except FileNotFoundError:
-                # no known_hosts in the default unix location, windows has none
+                # no known_hosts in the default unix location
                 raise UserWarning(
                     f'No file or host key found in [{knownhosts}]. '
                     'You will need to explicitly load host keys '
@@ -90,6 +111,19 @@ class CnOpts(object):
                     raise HostKeysException('No host keys found!')
         else:
             self.hostkeys = None
+
+    def get_config(self, host):
+        '''Return config options for a given host-match.
+
+        :param str host: The host-matching rules of OpenSSH's ssh_config
+        man page are used: For each parameter, the first obtained value will
+        be used.
+
+        :returns: (obj) SSHConfigDict - A dictionary wrapper/subclass for
+        per-host configuration structures.
+        '''
+        cval = self.ssh_config.lookup(host)
+        return cval or {}
 
     def get_hostkey(self, host):
         '''Return the matching known hostkey to be used for verification or
@@ -141,16 +175,20 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cnopts = cnopts or CnOpts()
+        self._config = self._cnopts.get_config(host)
         self._default_path = default_path
         self._set_logging()
-        self._set_username(username)
-        self._timeout = timeout
+        self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
-        self._start_transport(host, port)
+        self._start_transport(self._config.get('hostname') or host,
+                              self._config.get('port') or port)
+        self._set_username(self._config.get('user') or username)
         self._set_authentication(password, private_key, private_key_pass)
 
     def _set_authentication(self, password, private_key, private_key_pass):
         '''Authenticate transport. Prefer private key over password.'''
+        if self._config.get('identityfile'):
+            private_key = self._config['identityfile'][0]
         if private_key is not None:
             # Use key path or provided key object
             key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
@@ -191,6 +229,8 @@ class Connection(object):
     def _set_logging(self):
         '''Set logging location and level for connection'''
         level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
+        level = self._config.get('loglevel') or self._cnopts.log_level
+        level = level_map[level.lower().strip('1,2,3')]
 
         try:
             if self._cnopts.log:
@@ -198,20 +238,20 @@ class Connection(object):
                     # Log to a temporary file.
                     flo, self._cnopts.log = mkstemp('.txt', 'sftpretty-')
                 logfile = FileHandler(self._cnopts.log, encoding='utf8')
-                logfile.setLevel = (level_map[self._cnopts.log_level.lower()])
+                logfile.setLevel = (level)
                 logfile_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
                                                '%(message)s'))
                 logfile.setFormatter(logfile_formatter)
                 getLogger().addHandler(logfile)
             console = StreamHandler()
-            console.setLevel(level_map[self._cnopts.log_level.lower()])
+            console.setLevel(level)
             console_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
                                            '%(message)s'))
             console.setFormatter(console_formatter)
             getLogger().addHandler(console)
             global log
             log = getLogger(__name__)
-            log.setLevel(level_map[self._cnopts.log_level.lower()])
+            log.setLevel(level)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
                                     '[debug, error, info].'))
@@ -256,10 +296,14 @@ class Connection(object):
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
         try:
-            self._transport = Transport((host, port))
-            self._transport.set_keepalive(60)
+            self._transport = Transport((host, int(port)))
+
+            keepalive = self._config.get('serveraliveinterval') or 60
+            self._transport.set_keepalive(int(keepalive))
             self._transport.set_log_channel(host)
-            self._transport.use_compression(compress=self._cnopts.compress)
+
+            compress = self._config.get('compression') or self._cnopts.compress
+            self._transport.use_compression(compress=bool(compress))
 
             # Set disabled algorithms
             disabled_algorithms = self._cnopts.disabled_algorithms
@@ -268,7 +312,9 @@ class Connection(object):
 
             # Security Options
             # Set allowed ciphers
-            ciphers = self._cnopts.ciphers
+            ciphers = self._config.get('ciphers') or self._cnopts.ciphers
+            if type(ciphers) != tuple:
+                ciphers = tuple(ciphers.split(','))
             self._transport.get_security_options().ciphers = ciphers
             log.debug(f'Ciphers: [{ciphers}]')
             # Set compression algorithms
@@ -276,15 +322,22 @@ class Connection(object):
             self._transport.get_security_options().compression = compression
             log.debug(f'Compression: [{compression}]')
             # Set connection digests
-            digests = self._cnopts.digests
+            digests = self._config.get('macs') or self._cnopts.digests
+            if type(digests) != tuple:
+                digests = tuple(digests.split(','))
             self._transport.get_security_options().digests = digests
             log.debug(f'MACs: [{digests}]')
             # Set connection kex
-            kex = self._cnopts.kex
+            kex = self._config.get('kexalgorithms') or self._cnopts.kex
+            if type(kex) != tuple:
+                kex = tuple(kex.split(','))
             self._transport.get_security_options().kex = kex
             log.debug(f'KEX: [{kex}]')
             # Set allowed key types
-            key_types = self._cnopts.key_types
+            key_types = self._config.get('pubkeyacceptedalgorithms') or\
+                self._cnopts.key_types
+            if type(key_types) != tuple:
+                key_types = tuple(key_types.split(','))
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
 

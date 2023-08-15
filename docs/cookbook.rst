@@ -81,6 +81,42 @@ object. These options are advanced and not applicable to most uses, because of
 this they have been segmented from the Connection parameter list and made
 available via the CnOpts obj/parameter.
 
+Support for OpenSSH-style config objects has been added. The user's default
+home location ``~/.ssh/config`` is always checked unless an alternative path
+is provided. Credentials still need to be passed whether using a protected
+private key or password authentication.
+
+.. code-block:: python
+
+    import sftpretty
+
+    cnopts = sftpretty.CnOpts(config='/etc/ssh/ssh_config')
+    with sftpretty.Connection('host_alias', cnopts=cnopts, password='pass'):
+        # do stuff here
+
+Config options always take precedence over parameters if both exist. Keep in
+mind there will more than likely be a delta between the security option
+algorithms your verion of SSH supports and those supported by paramiko.
+
+AVAILABLE OPENSSH CONFIG OPTIONS:
+ 
+  * ``Ciphers`` - Replaces the ciphers parameter in the Connection method.
+  * ``Compression`` - False **Default** no compression, True enables.
+  * ``ConnectTimeout`` - Specifies the timeout (in seconds) used when
+    connecting to the server.
+  * ``Host`` - Primary lookup key for host block in config. Supports aliases.
+  * ``Hostname`` - Actual host/ip to be used in Connection method.
+  * ``IdentityFile`` - Location of the private key to use in Connection method.
+  * ``KexAlgorithms`` - Replaces the kex parameter in the Connection method.
+  * ``LogLevel`` - Replaces the log_level parameter in the Connection method.
+  * ``MACS`` - Replaces the digest parameter in the Connection method.
+  * ``Port`` - Set the port to use in Connection method.
+  * ``PubkeyAcceptedAlgorithms`` - Replaces the key_types parameter in the
+    Connection method.
+  * ``ServerAliveInterval`` - Sets a timeout interval in seconds. After
+    which if no data is received a request for response is sent to server.
+  * ``User`` - Replaces the username parameter in the Connection method.
+
 Host Key checking is enabled by default. It will use ``~/.ssh/known_hosts`` by
 default. If you wish to disable host key checking, **NOT ADVISED**, you will
 need to modify the default CnOpts and set the .hostkeys to None.
@@ -124,23 +160,24 @@ you can use ``~`` tilde notation in your pathing.
 
 AVAILABLE CONNECTION OPTIONS:
 
-  * ``.ciphers`` - replaces the ciphers parameter in the Connection method.
+  * ``.ciphers`` - Replaces the ciphers parameter in the Connection method.
   * ``.compress`` - False **Default** no compression, True enables
     compression.
-  * ``.compression`` - preferred order of compression methods, if enabled, by
+  * ``.compression`` - Preferred order of compression methods, if enabled, by
     the above.
-  * ``.digests`` - replaces the digests parameter in the Connection method.
-  * ``.disabled_algorithms`` - algorithm identifiers to disable in the
+  * ``.config`` - SSHConfig object used for parsing and host-based lookups.
+  * ``.digests`` - Replaces the digests parameter in the Connection method.
+  * ``.disabled_algorithms`` - Algorithm identifiers to disable in the
     Connection method.
-  * ``.kex`` - replaces the kex parameter in the Connection method.
-  * ``.key_types`` - replaces the key types parameter in the Connection method.
+  * ``.kex`` - Replaces the kex parameter in the Connection method.
+  * ``.key_types`` - Replaces the key types parameter in the Connection method.
   * ``.log`` - False **Default** logs to console, True logs to temporary file,
     String sets custom location.
   * ``.log_level`` - Set logger verbosity to either debug, error, or
     info **Default**.
 
 Here is a common scenario, you have your connection information stored in a
-persistence mechanism, like `yamjam <http://yamjam.rtfd.org/>`_ and when you access
+persistence mechanism, like `yamjam <https://yamjam.rtfd.org/>`_ and when you access
 it, it is returned in dictionary form. ``{'host':'myhost', username:'me', ...}``
 Just send the dict into the connection object like so.
 
