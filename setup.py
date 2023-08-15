@@ -28,7 +28,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/x-rst',
     name='sftpretty',
-    packages=['sftpretty',],
+    packages=['sftpretty', ],
     platforms=['any'],
     url='https://github.com/byteskeptical/sftpretty',
     version='1.1.0',
