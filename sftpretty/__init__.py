@@ -424,21 +424,21 @@ class Connection(object):
             with self._sftp_channel() as channel:
                 if resume:
                     if Path(localpath).is_file():
-                        localsize = Path(localpath).stat()
+                        localsize = Path(localpath).stat().st_size
                     else:
                         localsize = 0
-                    remotesize = channel.stat(remotefile) 
-                    if localsize < remotesize:
-                        with open(localpath, 'ab') as localfile,
-                          channel.open(remotefile, 'rb') as remotepath:
+                    remote_attributes = remotesize = channel.stat(remotefile)
+                    if localsize < remotesize.st_size:
+                        with open(localpath, 'ab') as localfile:
+                          with channel.open(remotefile, 'rb') as remotepath:
                             if localsize > 0:
                                 remotepath.seek(localsize)
-                            remotepath.prefetch(remotesize)
+                            if prefetch:
+                                remotepath.prefetch(remotesize.st_size,
+                                                    max_concurrent_prefetch_requests)
                             channel._transfer_with_callback(callback=callback,
-                                file_size=remotesize, reader=remotepath,
+                                file_size=remotesize.st_size, reader=remotepath,
                                 writer=localfile)
-                    if preserve_mtime:
-                        remote_attributes = remotesize
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
@@ -458,8 +458,9 @@ class Connection(object):
 
     def get_d(self, remotedir, localdir, callback=None,
               max_concurrent_prefetch_requests=None, pattern=None,
-              prefetch=True, preserve_mtime=False, exceptions=None, tries=None,
-              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
+              prefetch=True, preserve_mtime=False, resume=False,
+              exceptions=None, tries=None, backoff=2, delay=1,
+              logger=getLogger(__name__), silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
 
         :param str remotedir: The remote directory to copy locally.
@@ -477,6 +478,8 @@ class Connection(object):
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -528,8 +531,8 @@ class Connection(object):
                                        callback=callback,
                                        max_concurrent_prefetch_requests=\
                                        max_concurrent_prefetch_requests,
-                                       prefetch=prefetch,
-                                       preserve_mtime=preserve_mtime,
+                                       prefetch=prefetch, preserve_mtime=\
+                                       preserve_mtime, resume=resume,
                                        exceptions=exceptions, tries=tries,
                                        backoff=backoff, delay=delay,
                                        logger=logger, silent=silent): remote
@@ -552,8 +555,9 @@ class Connection(object):
 
     def get_r(self, remotedir, localdir, callback=None,
               max_concurrent_prefetch_requests=None, pattern=None,
-              prefetch=True, preserve_mtime=False, exceptions=None, tries=None,
-              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
+              prefetch=True, preserve_mtime=False, resume=False,
+              exceptions=None, tries=None, backoff=2, delay=1,
+              logger=getLogger(__name__), silent=False):
         '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: The remote directory to recursively copy.
@@ -571,6 +575,8 @@ class Connection(object):
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -606,8 +612,9 @@ class Connection(object):
                            max_concurrent_prefetch_requests=\
                            max_concurrent_prefetch_requests, pattern=pattern,
                            prefetch=prefetch, preserve_mtime=preserve_mtime,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent)
+                           resume=resume, exceptions=exceptions, tries=tries,
+                           backoff=backoff, delay=delay, logger=logger,
+                           silent=silent)
 
     def getfo(self, remotefile, flo, callback=None,
               max_concurrent_prefetch_requests=None, prefetch=True,
@@ -720,38 +727,43 @@ class Connection(object):
                 remotepath = drivedrop(remotepath)
                 if resume:
                     if channel.isfile(remotepath):
-                        remotesize = channel.stat(remotepath)
+                        remotesize = channel.stat(remotepath).st_size
                     else:
                         remotesize = 0
-                    localsize = Path(localfile).stat()
+                    localsize = Path(localfile).stat().st_size
                     if localsize > remotesize:
-                        with channel.open(remotepath, 'ab') as remotefile,
-                          open(localfile, 'rb') as localpath:
-                            if remotesize > 0:
-                                localpath.seek(remotesize)
-                            localpath.prefetch(localpath)
-                            channel._transfer_with_callback(callback=callback,
-                                file_size=localsize, reader=localpath,
-                                writer=remotefile)
-
-                remote_attributes = channel.put(localfile,
-                                                remotepath=remotepath,
-                                                callback=callback,
-                                                confirm=confirm)
+                        with channel.open(remotepath, 'ab') as remotefile:
+                            remotefile.set_pipelined(True)
+                            with open(localfile, 'rb') as localpath:
+                                if remotesize > 0:
+                                    localpath.seek(remotesize)
+                                remotesize = channel._transfer_with_callback(
+                                    callback=callback,file_size=localsize,
+                                    reader=localpath, writer=remotefile)
+                    if confirm:
+                        attributes = channel.stat(remotepath)
+                        if attributes.st_size != remotesize:
+                            raise IOError(('size mismatch in put! '
+                                           f'{attributes.st_size} != '
+                                           f'{remotesize}'))
+                        
+                else:
+                    attributes = channel.put(localfile, remotepath=remotepath,
+                                             callback=callback, confirm=confirm)
 
                 if preserve_mtime:
                     channel.utime(remotepath, local_times)
-                    remote_attributes = channel.stat(remotepath)
+                    attributes = channel.stat(remotepath)
 
-            return remote_attributes
+            return attributes
 
         return _put(self, localfile, remotepath=remotepath, callback=callback,
                     confirm=confirm, preserve_mtime=preserve_mtime,
                     resume=resume)
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
-              preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=getLogger(__name__), silent=False):
+              preserve_mtime=False, resume=False, exceptions=None, tries=None,
+              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -765,6 +777,8 @@ class Connection(object):
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -804,11 +818,11 @@ class Connection(object):
             with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
-                           pool.submit(self.put, local, remote,
-                                       callback=callback, confirm=confirm,
-                                       preserve_mtime=preserve_mtime,
-                                       exceptions=exceptions, tries=tries,
-                                       backoff=backoff, delay=delay,
+                           pool.submit(self.put, local, remote, callback=\
+                                       callback, confirm=confirm,
+                                       preserve_mtime=preserve_mtime, resume=\
+                                       resume, exceptions=exceptions, tries=\
+                                       tries, backoff=backoff, delay=delay,
                                        logger=logger, silent=silent): local
                            for local, remote, callback, confirm,
                            preserve_mtime, exceptions, tries, backoff, delay,
@@ -828,8 +842,8 @@ class Connection(object):
             logger.info(f'No files found in directory [{localdir}]')
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
-              preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=getLogger(__name__), silent=False):
+              preserve_mtime=False, resume=False, exceptions=None, tries=None,
+              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -843,6 +857,8 @@ class Connection(object):
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -874,7 +890,7 @@ class Connection(object):
         for roots in tree.keys():
             for local, remote in tree[roots]:
                 self.put_d(local, remote, callback=callback, confirm=confirm,
-                           preserve_mtime=preserve_mtime,
+                           preserve_mtime=preserve_mtime, resume=resume,
                            exceptions=exceptions, tries=tries, backoff=backoff,
                            delay=delay, logger=logger, silent=silent)
 
