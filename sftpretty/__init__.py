@@ -435,17 +435,17 @@ class Connection(object):
                                     remotepath.seek(localsize)
                                 if prefetch:
                                     remotepath.prefetch(remotesize.st_size,
-                                        max_concurrent_prefetch_requests)
-                                channel._transfer_with_callback(callback=\
-                                    callback, file_size=remotesize.st_size,
-                                    reader=remotepath, writer=localfile)
+                                            max_concurrent_prefetch_requests)
+                                channel._transfer_with_callback(callback=
+                                        callback, file_size=remotesize.st_size,
+                                        reader=remotepath, writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
 
                     channel.get(remotefile, localpath=localpath,
                                 callback=callback, prefetch=prefetch,
-                                max_concurrent_prefetch_requests=\
+                                max_concurrent_prefetch_requests=
                                 max_concurrent_prefetch_requests)
 
             if preserve_mtime:
@@ -749,8 +749,8 @@ class Connection(object):
 
                 else:
                     attributes = channel.put(localfile, remotepath=remotepath,
-                                             callback=callback, confirm=confirm
-                                            )
+                                             callback=callback, confirm=
+                                             confirm)
 
                 if preserve_mtime:
                     channel.utime(remotepath, local_times)
