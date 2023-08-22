@@ -81,13 +81,14 @@ class CnOpts(object):
         self.ssh_config = SSHConfig()
 
         if config is not None:
-            if Path(config).expanduser().resolve().exists():
-                self.ssh_config = self.ssh_config.from_path(config)
+            _config = Path(config).expanduser().resolve()
+            if Path(_config).exists():
+                self.ssh_config = self.ssh_config.from_path(_config)
             else:
                 try:
-                    self.ssh_config = self.ssh_config.from_file(config)
+                    self.ssh_config = self.ssh_config.from_file(_config)
                 except ConfigParseError:
-                    self.ssh_config = self.ssh_config.from_text(config)
+                    self.ssh_config = self.ssh_config.from_text(_config)
         else:
             _config = Path('~/.ssh/config').expanduser().resolve()
             if _config.exists():
@@ -369,8 +370,9 @@ class Connection(object):
             raise err
 
     def get(self, remotefile, localpath=None, callback=None,
-            preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=getLogger(__name__), silent=False):
+            max_concurrent_prefetch_requests=None, prefetch=True,
+            preserve_mtime=False, resume=False, exceptions=None, tries=None,
+            backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the remote host and the local host.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -383,6 +385,12 @@ class Connection(object):
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param int max_concurrent_prefetch_requests: - The maximum number of
+            concurrent read requests to prefetch.
+        :param bool prefetch: *Default: True* - Controls whether prefetching
+            is performed.
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -404,7 +412,8 @@ class Connection(object):
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
         def _get(self, remotefile, localpath=None, callback=None,
-                 preserve_mtime=False):
+                 max_concurrent_prefetch_requests=None, prefetch=True,
+                 preserve_mtime=False, resume=False):
 
             if localpath is None:
                 localpath = Path(remotefile).name
@@ -413,22 +422,44 @@ class Connection(object):
                 callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
-                if preserve_mtime:
-                    remote_attributes = channel.stat(remotefile)
+                if resume:
+                    if Path(localpath).is_file():
+                        localsize = Path(localpath).stat()
+                    else:
+                        localsize = 0
+                    remotesize = channel.stat(remotefile) 
+                    if localsize < remotesize:
+                        with open(localpath, 'ab') as localfile,
+                          channel.open(remotefile, 'rb') as remotepath:
+                            if localsize > 0:
+                                remotepath.seek(localsize)
+                            remotepath.prefetch(remotesize)
+                            channel._transfer_with_callback(callback=callback,
+                                file_size=remotesize, reader=remotepath,
+                                writer=localfile)
+                    if preserve_mtime:
+                        remote_attributes = remotesize
+                else:
+                    if preserve_mtime:
+                        remote_attributes = channel.stat(remotefile)
 
-                channel.get(remotefile, localpath=localpath,
-                            callback=callback)
+                    channel.get(remotefile, localpath=localpath,
+                                callback=callback, prefetch=prefetch,
+                                max_concurrent_prefetch_requests=\
+                                max_concurrent_prefetch_requests)
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
                                   remote_attributes.st_mtime))
 
         _get(self, remotefile, localpath=localpath, callback=callback,
-             preserve_mtime=preserve_mtime)
+             max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,
+             prefetch=prefetch, preserve_mtime=preserve_mtime, resume=resume)
 
-    def get_d(self, remotedir, localdir, callback=None, pattern=None,
-              preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=getLogger(__name__), silent=False):
+    def get_d(self, remotedir, localdir, callback=None,
+              max_concurrent_prefetch_requests=None, pattern=None,
+              prefetch=True, preserve_mtime=False, exceptions=None, tries=None,
+              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
 
         :param str remotedir: The remote directory to copy locally.
@@ -436,8 +467,12 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
+        :param int max_concurrent_prefetch_requests: - The maximum number of
+            concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to filenames to
             transfer only subset of files in a directory.
+        :param bool prefetch: *Default: True* - Controls whether prefetching
+            is performed.
         :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
@@ -491,6 +526,9 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
+                                       max_concurrent_prefetch_requests=\
+                                       max_concurrent_prefetch_requests,
+                                       prefetch=prefetch,
                                        preserve_mtime=preserve_mtime,
                                        exceptions=exceptions, tries=tries,
                                        backoff=backoff, delay=delay,
@@ -512,9 +550,10 @@ class Connection(object):
         else:
             logger.info(f'No files found in directory [{remotedir}]')
 
-    def get_r(self, remotedir, localdir, callback=None, pattern=None,
-              preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-              delay=1, logger=getLogger(__name__), silent=False):
+    def get_r(self, remotedir, localdir, callback=None,
+              max_concurrent_prefetch_requests=None, pattern=None,
+              prefetch=True, preserve_mtime=False, exceptions=None, tries=None,
+              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Recursively copy remotedir structure to localdir
 
         :param str remotedir: The remote directory to recursively copy.
@@ -522,8 +561,12 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
+        :param int max_concurrent_prefetch_requests: - The maximum number of
+            concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to all filenames
             transfering only the subset of files that match.
+        :param bool prefetch: *Default: True* - Controls whether prefetching
+            is performed.
         :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
@@ -560,13 +603,16 @@ class Connection(object):
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           pattern=pattern, preserve_mtime=preserve_mtime,
+                           max_concurrent_prefetch_requests=\
+                           max_concurrent_prefetch_requests, pattern=pattern,
+                           prefetch=prefetch, preserve_mtime=preserve_mtime,
                            exceptions=exceptions, tries=tries, backoff=backoff,
                            delay=delay, logger=logger, silent=silent)
 
-    def getfo(self, remotefile, flo, callback=None, exceptions=None,
-              tries=None, backoff=2, delay=1, logger=getLogger(__name__),
-              silent=False):
+    def getfo(self, remotefile, flo, callback=None,
+              max_concurrent_prefetch_requests=None, prefetch=True,
+              exceptions=None, tries=None, backoff=2, delay=1,
+              logger=getLogger(__name__), silent=False):
         '''Copy a remote file (remotepath) to a file-like object, flo.
 
         :param str remotefile: The remote path and filename to retrieve.
@@ -574,6 +620,10 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
+        :param int max_concurrent_prefetch_requests: - The maximum number of
+            concurrent read requests to prefetch.
+        :param bool prefetch: *Default: True* - Controls whether prefetching
+            is performed.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -594,21 +644,27 @@ class Connection(object):
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _getfo(self, remotefile, flo, callback=None):
+        def _getfo(self, remotefile, flo, callback=None,
+                   max_concurrent_prefetch_requests=None, prefetch=True):
 
             if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
             with self._sftp_channel() as channel:
-                flo_size = channel.getfo(remotefile, flo, callback=callback)
+                flo_size = channel.getfo(remotefile, flo, callback=callback,
+                                         max_concurrent_prefetch_requests=\
+                                         max_concurrent_prefetch_requests,
+                                         prefetch=prefetch)
 
             return flo_size
 
-        return _getfo(self, remotefile, flo, callback=callback)
+        return _getfo(self, remotefile, flo, callback=callback,
+                      max_concurrent_prefetch_requests=\
+                      max_concurrent_prefetch_requests, prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
-            preserve_mtime=False, exceptions=None, tries=None, backoff=2,
-            delay=1, logger=getLogger(__name__), silent=False):
+            preserve_mtime=False, resume=False, exceptions=None, tries=None,
+            backoff=2, delay=1, logger=getLogger(__name__), silent=False):
         '''Copies a file between the local host and the remote host.
 
         :param str localfile: The local path and filename to copy remotely.
@@ -623,6 +679,8 @@ class Connection(object):
             time(st_mtime) on the remote file match the time on the local.
             (st_atime can differ because stat'ing the localfile can/does update
             it's st_atime)
+        :param bool resume: *Default: False* - Continue a previous transfer
+            based on destination path matching.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -645,7 +703,7 @@ class Connection(object):
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
         def _put(self, localfile, remotepath=None, callback=None,
-                 confirm=True, preserve_mtime=False):
+                 confirm=True, preserve_mtime=False, resume=False):
 
             if remotepath is None:
                 remotepath = Path(localfile).name
@@ -660,6 +718,22 @@ class Connection(object):
 
             with self._sftp_channel() as channel:
                 remotepath = drivedrop(remotepath)
+                if resume:
+                    if channel.isfile(remotepath):
+                        remotesize = channel.stat(remotepath)
+                    else:
+                        remotesize = 0
+                    localsize = Path(localfile).stat()
+                    if localsize > remotesize:
+                        with channel.open(remotepath, 'ab') as remotefile,
+                          open(localfile, 'rb') as localpath:
+                            if remotesize > 0:
+                                localpath.seek(remotesize)
+                            localpath.prefetch(localpath)
+                            channel._transfer_with_callback(callback=callback,
+                                file_size=localsize, reader=localpath,
+                                writer=remotefile)
+
                 remote_attributes = channel.put(localfile,
                                                 remotepath=remotepath,
                                                 callback=callback,
@@ -672,7 +746,8 @@ class Connection(object):
             return remote_attributes
 
         return _put(self, localfile, remotepath=remotepath, callback=callback,
-                    confirm=confirm, preserve_mtime=preserve_mtime)
+                    confirm=confirm, preserve_mtime=preserve_mtime,
+                    resume=resume)
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
               preserve_mtime=False, exceptions=None, tries=None, backoff=2,
@@ -836,8 +911,7 @@ class Connection(object):
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _putfo(self, flo, remotepath=None, file_size=None, callback=None,
-                   confirm=True):
+        def _putfo(self, flo, remotepath=None, file_size=None, callback=None):
 
             if callback is None:
                 callback = partial(_callback, flo, logger=logger)
@@ -850,12 +924,11 @@ class Connection(object):
                 remotepath = uuid4().hex
 
             with self._sftp_channel() as channel:
-                flo_attributes = channel.putfo(flo, remotepath=remotepath,
-                                               file_size=file_size,
-                                               callback=callback,
-                                               confirm=confirm)
+                attributes = channel.putfo(flo, remotepath=remotepath,
+                                           file_size=file_size,
+                                           callback=callback, confirm=confirm)
 
-            return flo_attributes
+            return attributes
 
         return _putfo(self, flo, remotepath=remotepath, file_size=file_size,
                       callback=callback, confirm=confirm)

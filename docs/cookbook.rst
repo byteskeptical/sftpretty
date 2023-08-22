@@ -47,7 +47,7 @@ Want to use a DSA, ECDSA, ED25519, or RSA key pair, that is simple too.
         # ... do sftp operations
         #
 
-If you key is password protected, just add ``private_key_pass`` to the parameter list.
+If your key is password protected, just add ``private_key_pass`` to the parameter list.
 
 .. code-block:: python
 
@@ -71,7 +71,7 @@ How about a ``paramiko.AgentKey``? No problem, just set the private_key equal to
         #
 
 The connection object allows the use of an IP address for the ``host`` and the
-ability to optionally set the ``port``, which defaults to 22, as well.
+ability to optionally set the ``port``, which defaults to 22, otherwise.
 
 
 :meth:`sftpretty.CnOpts`
@@ -81,9 +81,9 @@ object. These options are advanced and not applicable to most uses, because of
 this they have been segmented from the Connection parameter list and made
 available via the CnOpts obj/parameter.
 
-Support for OpenSSH-style config objects has been added. The user's default
-home location ``~/.ssh/config`` is always checked unless an alternative path
-is provided. Credentials still need to be passed whether using a protected
+OpenSSH-style config objects are supported. The user's default home location
+``~/.ssh/config`` is always checked though not required unless an alternative
+path is provided. Credentials still need to be passed whether using a protected
 private key or password authentication.
 
 .. code-block:: python
@@ -96,7 +96,8 @@ private key or password authentication.
 
 Config options always take precedence over parameters if both exist. Keep in
 mind there will more than likely be a delta between the security option
-algorithms your verion of SSH supports and those supported by paramiko.
+algorithms your verion of SSH supports and those supported by our underlying
+paramiko dependency.
 
 AVAILABLE OPENSSH CONFIG OPTIONS:
  
@@ -117,9 +118,10 @@ AVAILABLE OPENSSH CONFIG OPTIONS:
     which if no data is received a request for response is sent to server.
   * ``User`` - Replaces the username parameter in the Connection method.
 
-Host Key checking is enabled by default. It will use ``~/.ssh/known_hosts`` by
-default. If you wish to disable host key checking, **NOT ADVISED**, you will
-need to modify the default CnOpts and set the .hostkeys to None.
+Host Key checking is enabled by default. Loading of ``~/.ssh/known_hosts`` is
+always attempted unless an alternative is passed. If you wish to disable host
+key checking, **NOT ADVISED**, you will need to modify the default CnOpts and
+set the .hostkeys to None.
 
 .. code-block:: python
 
