@@ -430,15 +430,15 @@ class Connection(object):
                     remote_attributes = remotesize = channel.stat(remotefile)
                     if localsize < remotesize.st_size:
                         with open(localpath, 'ab') as localfile:
-                          with channel.open(remotefile, 'rb') as remotepath:
-                            if localsize > 0:
-                                remotepath.seek(localsize)
-                            if prefetch:
-                                remotepath.prefetch(remotesize.st_size,
-                                                    max_concurrent_prefetch_requests)
-                            channel._transfer_with_callback(callback=callback,
-                                file_size=remotesize.st_size, reader=remotepath,
-                                writer=localfile)
+                            with channel.open(remotefile, 'rb') as remotepath:
+                                if localsize > 0:
+                                    remotepath.seek(localsize)
+                                if prefetch:
+                                    remotepath.prefetch(remotesize.st_size,
+                                        max_concurrent_prefetch_requests)
+                                channel._transfer_with_callback(callback=\
+                                    callback, file_size=remotesize.st_size,
+                                    reader=remotepath, writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
@@ -529,9 +529,9 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
-                                       max_concurrent_prefetch_requests=\
+                                       max_concurrent_prefetch_requests=
                                        max_concurrent_prefetch_requests,
-                                       prefetch=prefetch, preserve_mtime=\
+                                       prefetch=prefetch, preserve_mtime=
                                        preserve_mtime, resume=resume,
                                        exceptions=exceptions, tries=tries,
                                        backoff=backoff, delay=delay,
@@ -609,7 +609,7 @@ class Connection(object):
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           max_concurrent_prefetch_requests=\
+                           max_concurrent_prefetch_requests=
                            max_concurrent_prefetch_requests, pattern=pattern,
                            prefetch=prefetch, preserve_mtime=preserve_mtime,
                            resume=resume, exceptions=exceptions, tries=tries,
@@ -659,14 +659,14 @@ class Connection(object):
 
             with self._sftp_channel() as channel:
                 flo_size = channel.getfo(remotefile, flo, callback=callback,
-                                         max_concurrent_prefetch_requests=\
+                                         max_concurrent_prefetch_requests=
                                          max_concurrent_prefetch_requests,
                                          prefetch=prefetch)
 
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
-                      max_concurrent_prefetch_requests=\
+                      max_concurrent_prefetch_requests=
                       max_concurrent_prefetch_requests, prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
@@ -738,7 +738,7 @@ class Connection(object):
                                 if remotesize > 0:
                                     localpath.seek(remotesize)
                                 remotesize = channel._transfer_with_callback(
-                                    callback=callback,file_size=localsize,
+                                    callback=callback, file_size=localsize,
                                     reader=localpath, writer=remotefile)
                     if confirm:
                         attributes = channel.stat(remotepath)
@@ -746,10 +746,11 @@ class Connection(object):
                             raise IOError(('size mismatch in put! '
                                            f'{attributes.st_size} != '
                                            f'{remotesize}'))
-                        
+
                 else:
                     attributes = channel.put(localfile, remotepath=remotepath,
-                                             callback=callback, confirm=confirm)
+                                             callback=callback, confirm=confirm
+                                            )
 
                 if preserve_mtime:
                     channel.utime(remotepath, local_times)
@@ -818,10 +819,10 @@ class Connection(object):
             with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
-                           pool.submit(self.put, local, remote, callback=\
+                           pool.submit(self.put, local, remote, callback=
                                        callback, confirm=confirm,
-                                       preserve_mtime=preserve_mtime, resume=\
-                                       resume, exceptions=exceptions, tries=\
+                                       preserve_mtime=preserve_mtime, resume=
+                                       resume, exceptions=exceptions, tries=
                                        tries, backoff=backoff, delay=delay,
                                        logger=logger, silent=silent): local
                            for local, remote, callback, confirm,
@@ -927,7 +928,8 @@ class Connection(object):
         '''
         @retry(exceptions, tries=tries, backoff=backoff, delay=delay,
                logger=logger, silent=silent)
-        def _putfo(self, flo, remotepath=None, file_size=None, callback=None):
+        def _putfo(self, flo, remotepath=None, file_size=None, callback=None,
+                   confirm=True):
 
             if callback is None:
                 callback = partial(_callback, flo, logger=logger)
