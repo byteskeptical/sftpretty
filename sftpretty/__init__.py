@@ -421,6 +421,8 @@ class Connection(object):
             if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
+            mr = max_concurrent_prefetch_requests
+
             with self._sftp_channel() as channel:
                 if resume:
                     if Path(localpath).is_file():
@@ -434,19 +436,19 @@ class Connection(object):
                                 if localsize > 0:
                                     remotepath.seek(localsize)
                                 if prefetch:
-                                    remotepath.prefetch(remotesize.st_size,
-                                            max_concurrent_prefetch_requests)
-                                channel._transfer_with_callback(callback=
-                                        callback, file_size=remotesize.st_size,
-                                        reader=remotepath, writer=localfile)
+                                    remotepath.prefetch(remotesize.st_size, mr)
+                                channel._transfer_with_callback(
+                                                callback=callback,
+                                                file_size=remotesize.st_size,
+                                                reader=remotepath,
+                                                writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
 
                     channel.get(remotefile, localpath=localpath,
                                 callback=callback, prefetch=prefetch,
-                                max_concurrent_prefetch_requests=
-                                max_concurrent_prefetch_requests)
+                                max_concurrent_prefetch_requests=mr)
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
@@ -504,20 +506,22 @@ class Connection(object):
             Path(localdir).mkdir(exist_ok=True, parents=True)
             logger.info(f'Creating Folder [{localdir}]!')
 
+        mr = max_concurrent_prefetch_requests
+
         if pattern is None:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, preserve_mtime, exceptions, tries, backoff,
-                      delay, logger, silent)
+                      callback, mr, prefetch, preserve_mtime, resume,
+                      exceptions, tries, backoff, delay, logger, silent)
                      for attribute in filelist if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, preserve_mtime, exceptions, tries, backoff,
-                      delay, logger, silent)
+                      callback, mr, prefetch, preserve_mtime, resume,
+                      exceptions, tries, backoff, delay, logger, silent)
                      for attribute in filelist if S_ISREG(attribute.st_mode)
                      if f'{pattern}' in attribute.filename
                     ]
@@ -529,10 +533,9 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
-                                       max_concurrent_prefetch_requests=
-                                       max_concurrent_prefetch_requests,
-                                       prefetch=prefetch, preserve_mtime=
-                                       preserve_mtime, resume=resume,
+                                       max_concurrent_prefetch_requests=mr,
+                                       prefetch=prefetch, resume=resume,
+                                       preserve_mtime=preserve_mtime,
                                        exceptions=exceptions, tries=tries,
                                        backoff=backoff, delay=delay,
                                        logger=logger, silent=silent): remote
@@ -606,15 +609,16 @@ class Connection(object):
         self.remotetree(tree, rwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
 
+        mr = max_concurrent_prefetch_requests
+
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           max_concurrent_prefetch_requests=
-                           max_concurrent_prefetch_requests, pattern=pattern,
-                           prefetch=prefetch, preserve_mtime=preserve_mtime,
-                           resume=resume, exceptions=exceptions, tries=tries,
-                           backoff=backoff, delay=delay, logger=logger,
-                           silent=silent)
+                           max_concurrent_prefetch_requests=mr,
+                           pattern=pattern, prefetch=prefetch,
+                           preserve_mtime=preserve_mtime, resume=resume,
+                           exceptions=exceptions, tries=tries, backoff=backoff,
+                           delay=delay, logger=logger, silent=silent)
 
     def getfo(self, remotefile, flo, callback=None,
               max_concurrent_prefetch_requests=None, prefetch=True,
@@ -657,17 +661,17 @@ class Connection(object):
             if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
+            mr = max_concurrent_prefetch_requests
+
             with self._sftp_channel() as channel:
                 flo_size = channel.getfo(remotefile, flo, callback=callback,
-                                         max_concurrent_prefetch_requests=
-                                         max_concurrent_prefetch_requests,
+                                         max_concurrent_prefetch_requests=mr,
                                          prefetch=prefetch)
 
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
-                      max_concurrent_prefetch_requests=
-                      max_concurrent_prefetch_requests, prefetch=prefetch)
+                      max_concurrent_prefetch_requests=mr, prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, resume=False, exceptions=None, tries=None,
@@ -749,8 +753,8 @@ class Connection(object):
 
                 else:
                     attributes = channel.put(localfile, remotepath=remotepath,
-                                             callback=callback, confirm=
-                                             confirm)
+                                             callback=callback,
+                                             confirm=confirm)
 
                 if preserve_mtime:
                     channel.utime(remotepath, local_times)
@@ -808,7 +812,7 @@ class Connection(object):
                   Path(remotedir).joinpath(
                       localpath.relative_to(
                           localdir.parent).as_posix()).as_posix(),
-                  callback, confirm, preserve_mtime, exceptions, tries,
+                  callback, confirm, preserve_mtime, resume, exceptions, tries,
                   backoff, delay, logger, silent)
                  for localpath in localdir.iterdir()
                  if localpath.is_file()
@@ -819,12 +823,13 @@ class Connection(object):
             with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
-                           pool.submit(self.put, local, remote, callback=
-                                       callback, confirm=confirm,
-                                       preserve_mtime=preserve_mtime, resume=
-                                       resume, exceptions=exceptions, tries=
-                                       tries, backoff=backoff, delay=delay,
-                                       logger=logger, silent=silent): local
+                           pool.submit(self.put, local, remote,
+                                       callback=callback, confirm=confirm,
+                                       preserve_mtime=preserve_mtime,
+                                       resume=resume, exceptions=exceptions,
+                                       tries=tries, backoff=backoff,
+                                       delay=delay, logger=logger,
+                                       silent=silent): local
                            for local, remote, callback, confirm,
                            preserve_mtime, exceptions, tries, backoff, delay,
                            logger, silent in paths
