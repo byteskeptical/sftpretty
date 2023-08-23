@@ -671,7 +671,8 @@ class Connection(object):
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
-                      max_concurrent_prefetch_requests=mr, prefetch=prefetch)
+                      max_concurrent_prefetch_requests
+                      =max_concurrent_prefetch_requests, prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, resume=False, exceptions=None, tries=None,
