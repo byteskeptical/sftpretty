@@ -671,7 +671,7 @@ class Connection(object):
 
         return _getfo(self, remotefile, flo, callback=callback,
                       max_concurrent_prefetch_requests=\
-                      max_concurrent_prefetch_requests # noqa: E502
+                      max_concurrent_prefetch_requests, # noqa: E502
                       prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
