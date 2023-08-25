@@ -447,8 +447,8 @@ class Connection(object):
 
                     channel.get(remotefile, localpath=localpath,
                                 callback=callback, prefetch=prefetch,
-                                max_concurrent_prefetch_requests=\ # noqa: E502
-                                max_concurrent_prefetch_requests)
+                                max_concurrent_prefetch_requests=\
+                                max_concurrent_prefetch_requests) # noqa: E502
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
@@ -533,8 +533,8 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
-                                       max_concurrent_prefetch_requests=\ # noqa: 502
-                                       max_concurrent_prefetch_requests,
+                                       max_concurrent_prefetch_requests=\
+                                       max_concurrent_prefetch_requests, # noqa: E502
                                        prefetch=prefetch, resume=resume,
                                        preserve_mtime=preserve_mtime,
                                        exceptions=exceptions, tries=tries,
@@ -613,8 +613,8 @@ class Connection(object):
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           max_concurrent_prefetch_requests=\ # noqa: 502
-                           max_concurrent_prefetch_requests,
+                           max_concurrent_prefetch_requests=\
+                           max_concurrent_prefetch_requests, # noqa: E502
                            pattern=pattern, prefetch=prefetch,
                            preserve_mtime=preserve_mtime, resume=resume,
                            exceptions=exceptions, tries=tries, backoff=backoff,
@@ -663,15 +663,15 @@ class Connection(object):
 
             with self._sftp_channel() as channel:
                 flo_size = channel.getfo(remotefile, flo, callback=callback,
-                                         max_concurrent_prefetch_requests=\ # noqa: 502
-                                         max_concurrent_prefetch_requests,
+                                         max_concurrent_prefetch_requests=\
+                                         max_concurrent_prefetch_requests, # noqa: E502
                                          prefetch=prefetch)
 
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
-                      max_concurrent_prefetch_requests=\ # noqa: 502
-                      max_concurrent_prefetch_requests
+                      max_concurrent_prefetch_requests=\
+                      max_concurrent_prefetch_requests # noqa: E502
                       prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
