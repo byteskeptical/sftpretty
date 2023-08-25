@@ -540,9 +540,10 @@ class Connection(object):
                                        exceptions=exceptions, tries=tries,
                                        backoff=backoff, delay=delay,
                                        logger=logger, silent=silent): remote
-                           for remote, local, callback, preserve_mtime,
-                           exceptions, tries, backoff, delay, logger, silent in
-                           paths
+                           for remote, local, callback,
+                           max_concurrent_prefetch_requests, prefetch,
+                           preserve_mtime, resume, exceptions, tries, backoff,
+                           delay, logger, silent in paths
                           }
                 for future in as_completed(threads):
                     name = threads[future]
