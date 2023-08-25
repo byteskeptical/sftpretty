@@ -314,7 +314,7 @@ class Connection(object):
             # Security Options
             # Set allowed ciphers
             ciphers = self._config.get('ciphers') or self._cnopts.ciphers
-            if type(ciphers) != tuple:
+            if not isinstance(ciphers, tuple):
                 ciphers = tuple(ciphers.split(','))
             self._transport.get_security_options().ciphers = ciphers
             log.debug(f'Ciphers: [{ciphers}]')
@@ -324,20 +324,20 @@ class Connection(object):
             log.debug(f'Compression: [{compression}]')
             # Set connection digests
             digests = self._config.get('macs') or self._cnopts.digests
-            if type(digests) != tuple:
+            if not isinstance(digests, tuple):
                 digests = tuple(digests.split(','))
             self._transport.get_security_options().digests = digests
             log.debug(f'MACs: [{digests}]')
             # Set connection kex
             kex = self._config.get('kexalgorithms') or self._cnopts.kex
-            if type(kex) != tuple:
+            if not isinstance(kex, tuple):
                 kex = tuple(kex.split(','))
             self._transport.get_security_options().kex = kex
             log.debug(f'KEX: [{kex}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
                 self._cnopts.key_types
-            if type(key_types) != tuple:
+            if not isinstance(key_types, tuple):
                 key_types = tuple(key_types.split(','))
             self._transport.get_security_options().key_types = key_types
             log.debug(f'Public Key Types: [{key_types}]')
@@ -421,8 +421,6 @@ class Connection(object):
             if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
-            mr = max_concurrent_prefetch_requests
-
             with self._sftp_channel() as channel:
                 if resume:
                     if Path(localpath).is_file():
@@ -436,7 +434,8 @@ class Connection(object):
                                 if localsize > 0:
                                     remotepath.seek(localsize)
                                 if prefetch:
-                                    remotepath.prefetch(remotesize.st_size, mr)
+                                    remotepath.prefetch(remotesize.st_size,
+                                                        max_concurrent_prefetch_requests) #noqa: E501
                                 channel._transfer_with_callback(
                                                 callback=callback,
                                                 file_size=remotesize.st_size,
@@ -448,7 +447,8 @@ class Connection(object):
 
                     channel.get(remotefile, localpath=localpath,
                                 callback=callback, prefetch=prefetch,
-                                max_concurrent_prefetch_requests=mr)
+                                max_concurrent_prefetch_requests=\ # noqa: E502
+                                max_concurrent_prefetch_requests)
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
@@ -506,22 +506,22 @@ class Connection(object):
             Path(localdir).mkdir(exist_ok=True, parents=True)
             logger.info(f'Creating Folder [{localdir}]!')
 
-        mr = max_concurrent_prefetch_requests
-
         if pattern is None:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, mr, prefetch, preserve_mtime, resume,
-                      exceptions, tries, backoff, delay, logger, silent)
+                      callback, max_concurrent_prefetch_requests, prefetch,
+                      preserve_mtime, resume, exceptions, tries, backoff,
+                      delay, logger, silent)
                      for attribute in filelist if S_ISREG(attribute.st_mode)
                     ]
         else:
             paths = [
                      (Path(remotedir).joinpath(attribute.filename).as_posix(),
                       Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, mr, prefetch, preserve_mtime, resume,
-                      exceptions, tries, backoff, delay, logger, silent)
+                      callback, max_concurrent_prefetch_requests, prefetch,
+                      preserve_mtime, resume, exceptions, tries, backoff,
+                      delay, logger, silent)
                      for attribute in filelist if S_ISREG(attribute.st_mode)
                      if f'{pattern}' in attribute.filename
                     ]
@@ -533,7 +533,8 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
-                                       max_concurrent_prefetch_requests=mr,
+                                       max_concurrent_prefetch_requests=\ # noqa: 502
+                                       max_concurrent_prefetch_requests,
                                        prefetch=prefetch, resume=resume,
                                        preserve_mtime=preserve_mtime,
                                        exceptions=exceptions, tries=tries,
@@ -609,12 +610,11 @@ class Connection(object):
         self.remotetree(tree, rwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
 
-        mr = max_concurrent_prefetch_requests
-
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           max_concurrent_prefetch_requests=mr,
+                           max_concurrent_prefetch_requests=\ # noqa: 502
+                           max_concurrent_prefetch_requests,
                            pattern=pattern, prefetch=prefetch,
                            preserve_mtime=preserve_mtime, resume=resume,
                            exceptions=exceptions, tries=tries, backoff=backoff,
@@ -661,18 +661,18 @@ class Connection(object):
             if callback is None:
                 callback = partial(_callback, remotefile, logger=logger)
 
-            mr = max_concurrent_prefetch_requests
-
             with self._sftp_channel() as channel:
                 flo_size = channel.getfo(remotefile, flo, callback=callback,
-                                         max_concurrent_prefetch_requests=mr,
+                                         max_concurrent_prefetch_requests=\ # noqa: 502
+                                         max_concurrent_prefetch_requests,
                                          prefetch=prefetch)
 
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
+                      max_concurrent_prefetch_requests=\ # noqa: 502
                       max_concurrent_prefetch_requests
-                      =max_concurrent_prefetch_requests, prefetch=prefetch)
+                      prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
             preserve_mtime=False, resume=False, exceptions=None, tries=None,
