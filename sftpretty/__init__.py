@@ -435,7 +435,7 @@ class Connection(object):
                                     remotepath.seek(localsize)
                                 if prefetch:
                                     remotepath.prefetch(remotesize.st_size,
-                                                        max_concurrent_prefetch_requests) #noqa: E501
+                                                        max_concurrent_prefetch_requests)  # noqa: E501
                                 channel._transfer_with_callback(
                                                 callback=callback,
                                                 file_size=remotesize.st_size,
@@ -447,8 +447,7 @@ class Connection(object):
 
                     channel.get(remotefile, localpath=localpath,
                                 callback=callback, prefetch=prefetch,
-                                max_concurrent_prefetch_requests=\
-                                max_concurrent_prefetch_requests) # noqa: E502
+                                max_concurrent_prefetch_requests=max_concurrent_prefetch_requests)  # noqa: E501
 
             if preserve_mtime:
                 utime(localpath, (remote_attributes.st_atime,
@@ -533,8 +532,7 @@ class Connection(object):
                 threads = {
                            pool.submit(self.get, remote, local,
                                        callback=callback,
-                                       max_concurrent_prefetch_requests=\
-                                       max_concurrent_prefetch_requests, # noqa: E502
+                                       max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,  # noqa: E501
                                        prefetch=prefetch, resume=resume,
                                        preserve_mtime=preserve_mtime,
                                        exceptions=exceptions, tries=tries,
@@ -614,8 +612,7 @@ class Connection(object):
         for roots in tree.keys():
             for remote, local in tree[roots]:
                 self.get_d(remote, local, callback=callback,
-                           max_concurrent_prefetch_requests=\
-                           max_concurrent_prefetch_requests, # noqa: E502
+                           max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,  # noqa: E501
                            pattern=pattern, prefetch=prefetch,
                            preserve_mtime=preserve_mtime, resume=resume,
                            exceptions=exceptions, tries=tries, backoff=backoff,
@@ -664,15 +661,13 @@ class Connection(object):
 
             with self._sftp_channel() as channel:
                 flo_size = channel.getfo(remotefile, flo, callback=callback,
-                                         max_concurrent_prefetch_requests=\
-                                         max_concurrent_prefetch_requests, # noqa: E502
+                                         max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,  # noqa: E501
                                          prefetch=prefetch)
 
             return flo_size
 
         return _getfo(self, remotefile, flo, callback=callback,
-                      max_concurrent_prefetch_requests=\
-                      max_concurrent_prefetch_requests, # noqa: E502
+                      max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,  # noqa: E501
                       prefetch=prefetch)
 
     def put(self, localfile, remotepath=None, callback=None, confirm=True,
@@ -833,8 +828,8 @@ class Connection(object):
                                        delay=delay, logger=logger,
                                        silent=silent): local
                            for local, remote, callback, confirm,
-                           preserve_mtime, exceptions, tries, backoff, delay,
-                           logger, silent in paths
+                           preserve_mtime, resume, exceptions, tries, backoff,
+                           delay, logger, silent in paths
                           }
                 for future in as_completed(threads):
                     name = threads[future]
