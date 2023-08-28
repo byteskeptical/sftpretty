@@ -125,10 +125,10 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
         len(exceptions)
     except TypeError:
         exceptions = (exceptions,)
-    all_exception_types = tuple(set(x if type(x) == type else x.__class__
+    all_exception_types = tuple(set(x if type(x) is type else x.__class__
                                     for x in exceptions))
-    exception_types = tuple(x for x in exceptions if type(x) == type)
-    exception_instances = tuple(x for x in exceptions if type(x) != type)
+    exception_types = tuple(x for x in exceptions if type(x) is type)
+    exception_instances = tuple(x for x in exceptions if type(x) is not type)
 
     def wrapper(f):
         if tries in (None, 0):
@@ -151,7 +151,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                     if (not any(x for x in exception_types
                                 if isinstance(e, x)) and
                         not any(x for x in exception_instances
-                                if type(x) == type(e) and
+                                if type(x) is type(e) and
                                 x.args == e.args)):
                         raise
                     msg = (f'Retry ({mtries:d}/{tries:d}):\n'
