@@ -425,9 +425,12 @@ class Connection(object):
                 if resume:
                     if Path(localpath).is_file():
                         localsize = Path(localpath).stat().st_size
+                        log.info((f'Resuming existing download of {localpath} '
+                                  f'@ {localsize} bytes'))
                     else:
                         localsize = 0
                     remote_attributes = remotesize = channel.stat(remotefile)
+                    log.debug(f'[{remotesize.st_size}]: {remotefile}')
                     if localsize < remotesize.st_size:
                         with open(localpath, 'ab') as localfile:
                             with channel.open(remotefile, 'rb') as remotepath:
@@ -729,9 +732,12 @@ class Connection(object):
                 if resume:
                     if channel.isfile(remotepath):
                         remotesize = channel.stat(remotepath).st_size
+                        log.info((f'Resuming existing upload of {remotepath} '
+                                  f'@ {remotesize} bytes'))
                     else:
                         remotesize = 0
                     localsize = Path(localfile).stat().st_size
+                    log.debug(f'[{localsize}]: {localfile}')
                     if localsize > remotesize:
                         with channel.open(remotepath, 'ab') as remotefile:
                             remotefile.set_pipelined(True)
