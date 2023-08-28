@@ -31,7 +31,7 @@ setup(
     packages=['sftpretty', ],
     platforms=['any'],
     url='https://github.com/byteskeptical/sftpretty',
-    version='1.1.0',
+    version='1.1.1',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: BSD License',

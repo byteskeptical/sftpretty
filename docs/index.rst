@@ -18,6 +18,7 @@ Python3 optimized fork of pysftp with additional features & improvements.
 * Support for ED25519 & ECDSA keys
 * Support for private key passwords
 * Thread-safe connection manager
+* Transfer Resumption
 
 
 Example

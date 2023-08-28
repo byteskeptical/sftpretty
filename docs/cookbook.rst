@@ -193,6 +193,7 @@ Just send the dict into the connection object like so.
         # ... do sftp operations
         #
 
+
 :meth:`sftpretty.Connection.get`
 --------------------------------
 In addition to the normal paramiko call, you can optionally set the
@@ -203,6 +204,14 @@ the modification times on the local copy match those on the server.
 
     # ...
     sftp.get('myfile', preserve_mtime=True)
+
+Now with the ability to resume a previously started download. Based on local
+destination path matching.
+
+.. code-block:: python
+
+    # the download continues right where it left off
+    sftp.get('myfile', resume=True)
 
 
 :meth:`sftpretty.Connection.get_d`
@@ -238,6 +247,14 @@ the modification times on the server copy match those on the local.
     # copy myfile, to the current working directory on the server,
     # preserving modification time
     sftp.put('myfile', preserve_mtime=True)
+
+Now with the ability to resume a prematurely ended upload. Based on remote
+destination path matching.
+
+.. code-block:: python
+
+    # save a bit and a byte, continue existing upload
+    sftp.put('myfile', resume=True)
 
 
 :meth:`sftpretty.Connection.put_d`

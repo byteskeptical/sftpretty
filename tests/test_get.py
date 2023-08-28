@@ -75,6 +75,6 @@ def test_get_resume(sftpserver):
             with tempfile_containing(contents='content of') as fname:
                 localsize = Path(fname).stat().st_size
                 sftp.get('foo1.txt', fname, resume=True)
-            assert open(fname, 'rb').read() == b'content of foo1.txt'
+                assert open(fname, 'rb').read() == b'content of foo1.txt'
             # verify difference between remotesize and partial localsize
             assert 9 == (remotesize - localsize)

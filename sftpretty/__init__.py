@@ -730,8 +730,9 @@ class Connection(object):
             with self._sftp_channel() as channel:
                 remotepath = drivedrop(remotepath)
                 if resume:
-                    if channel.isfile(remotepath):
-                        remotesize = channel.stat(remotepath).st_size
+                    remote = channel.stat(remotepath)
+                    if S_ISREG(remote.st_mode):
+                        remotesize = remote.st_size
                         log.info((f'Resuming existing upload of {remotepath} '
                                   f'@ {remotesize} bytes'))
                     else:

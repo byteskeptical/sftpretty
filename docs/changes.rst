@@ -1,12 +1,18 @@
 Change Log
 ==========
 
-1.1.0 (current, released 2023-08-15)
+1.1.1 (current, released 2023-08-28)
 ------------------------------------
+    * added initial support for resuming existing transfers get() & put()
+    * added max_concurrent_prefetch_requests parameter to get() family
+    * added prefetch parameter to get() family
+
+1.1.0 (released 2023-08-15)
+---------------------------
     * added initial support for OpenSSH config-file support to CnOpts
 
 1.0.9 (released 2023-05-08)
-------------------------------------
+---------------------------
     * added drivedrop to bypass _adjust_cwd's lack of Windows drive support
     * added file_size logic and default remotepath fallback to putfo
     * moved Connection.compress to CnOpts.compress
