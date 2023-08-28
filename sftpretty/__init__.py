@@ -745,12 +745,12 @@ class Connection(object):
                             with open(localfile, 'rb') as localpath:
                                 if remotesize > 0:
                                     localpath.seek(remotesize)
-                                remotesize = channel._transfer_with_callback(
+                                resumesize = channel._transfer_with_callback(
                                     callback=callback, file_size=localsize,
                                     reader=localpath, writer=remotefile)
                     if confirm:
                         attributes = channel.stat(remotepath)
-                        if attributes.st_size != remotesize:
+                        if attributes.st_size != (remotesize + resumesize):
                             raise IOError(('size mismatch in put! '
                                            f'{attributes.st_size} != '
                                            f'{remotesize}'))
