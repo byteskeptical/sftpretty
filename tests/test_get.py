@@ -72,8 +72,11 @@ def test_get_resume(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo1')
             cback = Mock(return_value=None)
+            remotesize = sftp.stat('foo1.txt').st_size
             with tempfile_containing(contents='content of') as fname:
-                result = sftp.get('foo1.txt', fname, callback=cback, resume=True)
+                localsize = Path().stat().st_size
+                sftp.get('foo1.txt', fname, callback=cback, resume=True)
                 assert open(fname, 'rb').read() == b'content of foo1.txt'
-            # verify callback was called
-            assert cback.call_count
+            # verify callback equals difference between remotesize and
+            # partial localsize
+            assert cback.call_count == (remotesize - localsize)
