@@ -462,7 +462,7 @@ class Connection(object):
 
     def get_d(self, remotedir, localdir, callback=None,
               max_concurrent_prefetch_requests=None, pattern=None,
-              prefetch=True, preserve_mtime=False, resume=False,
+              prefetch=True, preserve_mtime=False, resume=False, workers=None,
               exceptions=None, tries=None, backoff=2, delay=1,
               logger=getLogger(__name__), silent=False):
         '''Get the contents of remotedir and write to locadir. Non-recursive.
@@ -484,6 +484,9 @@ class Connection(object):
             it's st_atime)
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
+        :param int workers: *Default: None* - If None, defaults to number of
+            processors multiplied by 5. Set to less than or equal to allowed
+            concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -530,7 +533,8 @@ class Connection(object):
 
         if paths != []:
             thread_prefix = uuid4().hex
-            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+            with ThreadPoolExecutor(max_workers=workers,
+                                    thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.get, remote, local,
@@ -561,7 +565,7 @@ class Connection(object):
 
     def get_r(self, remotedir, localdir, callback=None,
               max_concurrent_prefetch_requests=None, pattern=None,
-              prefetch=True, preserve_mtime=False, resume=False,
+              prefetch=True, preserve_mtime=False, resume=False, workers=None,
               exceptions=None, tries=None, backoff=2, delay=1,
               logger=getLogger(__name__), silent=False):
         '''Recursively copy remotedir structure to localdir
@@ -583,6 +587,9 @@ class Connection(object):
             it's st_atime)
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
+        :param int workers: *Default: None* - If None, defaults to number of
+            processors multiplied by 5. Set to less than or equal to allowed
+            concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -618,8 +625,9 @@ class Connection(object):
                            max_concurrent_prefetch_requests=max_concurrent_prefetch_requests,  # noqa: E501
                            pattern=pattern, prefetch=prefetch,
                            preserve_mtime=preserve_mtime, resume=resume,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent)
+                           workers=workers, exceptions=exceptions, tries=tries,
+                           backoff=backoff, delay=delay, logger=logger,
+                           silent=silent)
 
     def getfo(self, remotefile, flo, callback=None,
               max_concurrent_prefetch_requests=None, prefetch=True,
@@ -771,8 +779,9 @@ class Connection(object):
                     resume=resume)
 
     def put_d(self, localdir, remotedir, callback=None, confirm=True,
-              preserve_mtime=False, resume=False, exceptions=None, tries=None,
-              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
+              preserve_mtime=False, resume=False, workers=None,
+              exceptions=None, tries=None, backoff=2, delay=1,
+              logger=getLogger(__name__), silent=False):
         '''Copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -788,6 +797,9 @@ class Connection(object):
             it's st_atime)
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
+        :param int workers: *Default: None* - If None, defaults to number of
+            processors multiplied by 5. Set to less than or equal to allowed
+            concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -824,7 +836,8 @@ class Connection(object):
 
         if paths != []:
             thread_prefix = uuid4().hex
-            with ThreadPoolExecutor(thread_name_prefix=thread_prefix) as pool:
+            with ThreadPoolExecutor(max_workers=workers,
+                                    thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
                            pool.submit(self.put, local, remote,
@@ -852,8 +865,9 @@ class Connection(object):
             logger.info(f'No files found in directory [{localdir}]')
 
     def put_r(self, localdir, remotedir, callback=None, confirm=True,
-              preserve_mtime=False, resume=False, exceptions=None, tries=None,
-              backoff=2, delay=1, logger=getLogger(__name__), silent=False):
+              preserve_mtime=False, resume=False, workers=None,
+              exceptions=None, tries=None, backoff=2, delay=1,
+              logger=getLogger(__name__), silent=False):
         '''Recursively copies a local directory's contents to a remotepath
 
         :param str localdir: The local directory to copy remotely.
@@ -869,6 +883,9 @@ class Connection(object):
             it's st_atime)
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
+        :param int workers: *Default: None* - If None, defaults to number of
+            processors multiplied by 5. Set to less than or equal to allowed
+            concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
             or (ValueError, IOError(errno.ECOMM))
@@ -901,8 +918,9 @@ class Connection(object):
             for local, remote in tree[roots]:
                 self.put_d(local, remote, callback=callback, confirm=confirm,
                            preserve_mtime=preserve_mtime, resume=resume,
-                           exceptions=exceptions, tries=tries, backoff=backoff,
-                           delay=delay, logger=logger, silent=silent)
+                           workers=workers, exceptions=exceptions, tries=tries,
+                           backoff=backoff, delay=delay, logger=logger,
+                           silent=silent)
 
     def putfo(self, flo, remotepath=None, file_size=None, callback=None,
               confirm=True, exceptions=None, tries=None, backoff=2,

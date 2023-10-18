@@ -1,7 +1,11 @@
 Change Log
 ==========
 
-1.1.1 (current, released 2023-08-28)
+1.1.2 (current, released 2023-10-18)
+------------------------------------
+    * added support for setting max_workers on ThreadPool functions
+
+1.1.1 (released 2023-08-28)
 ------------------------------------
     * added initial support for resuming existing transfers get() & put()
     * added max_concurrent_prefetch_requests parameter to get() family
