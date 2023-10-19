@@ -485,7 +485,7 @@ class Connection(object):
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
         :param int workers: *Default: None* - If None, defaults to number of
-            processors multiplied by 5. Set to less than or equal to allowed
+            processors plus 4. Set to less than or equal to allowed
             concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
@@ -588,7 +588,7 @@ class Connection(object):
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
         :param int workers: *Default: None* - If None, defaults to number of
-            processors multiplied by 5. Set to less than or equal to allowed
+            processors plus 4. Set to less than or equal to allowed
             concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
@@ -798,7 +798,7 @@ class Connection(object):
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
         :param int workers: *Default: None* - If None, defaults to number of
-            processors multiplied by 5. Set to less than or equal to allowed
+            processors plus 4. Set to less than or equal to allowed
             concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
@@ -884,7 +884,7 @@ class Connection(object):
         :param bool resume: *Default: False* - Continue a previous transfer
             based on destination path matching.
         :param int workers: *Default: None* - If None, defaults to number of
-            processors multiplied by 5. Set to less than or equal to allowed
+            processors plus 4. Set to less than or equal to allowed
             concurrent connections on server.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
             exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)

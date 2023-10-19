@@ -272,7 +272,7 @@ local directory to a remote one via SFTP.
 :meth:`sftpretty.Connection.put_r`
 ----------------------------------
 This method copies all files *and* directories from a local path to a remote
-path.  It creates directories, and happily succeeds even if the target
+path. It creates directories, and happily succeeds even if the target
 directories already exist.
 
 .. code-block:: python
@@ -388,7 +388,7 @@ SFTPAttribute.filename, instead of paramiko's arbitrary order.
 :meth:`sftpretty.Connection.mkdir`
 ----------------------------------
 Just like :meth:`.chmod`, the mode is an integer representation of the octal
-number to use.  Just like the unix cmd, `chmod` you use 744 not 0744 or 0o744.
+number to use. Just like the unix cmd, `chmod` you use 744 not 0744 or 0o744.
 
 .. code-block:: python
 

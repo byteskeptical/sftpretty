@@ -61,6 +61,12 @@ Example
                                SSHException), tries=6)
 
 
+   # Use public key authentication
+    with Connection('hostname', private_key='~/.ssh/id_ed25519') as sftp:
+        # Resume the download of a bigfile and save it to /mnt locally.
+        sftp.get('bigfile', '/mnt', preserve_mtime=True, resume=True)
+
+
     # Use public key authentication with optional private key password
     with Connection('hostname', private_key='~/.ssh/id_ed25519',
                     private_key_pass='secret') as sftp:
