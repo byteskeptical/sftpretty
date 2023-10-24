@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-1.1.2 (current, released 2023-10-18)
+1.1.2 (current, released 2023-10-24)
 ------------------------------------
     * added support for setting max_workers on ThreadPool functions
 

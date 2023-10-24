@@ -73,7 +73,7 @@ Example
         # Recursively download a remote_directory and save it to /tmp locally.
         # Don't confirm files, useful in a scenario where the server removes
         # the remote file immediately after download. Preserve remote mtime on
-        # local copy. Limit the concurrent connections to the server.
+        # local copy. Limit the thread pool connections to the server.
         sftp.get_r('remote_directory', '/tmp', confirm=False,
                    preserve_mtime=True, workers=6)
 

@@ -217,23 +217,27 @@ destination path matching.
 :meth:`sftpretty.Connection.get_d`
 ----------------------------------
 This sftpretty method is an abstraction above :meth:`.get` that allows you to
-copy all the files in a remote directory to a local path.
+copy all the files in a remote directory to a local path. This is a
+multi-threaded function that can quickly surpass the remote server's concurrent
+connection threshold for directories with many files. The workers attribute is
+provided to allow for a more granular level of control of the thread pool only.
 
 .. code-block:: python
 
     # copy all files under public to a local path, preserving modification time
-    sftp.get_d('public', 'local-backup', preserve_mtime=True)
+    sftp.get_d('public', 'local-backup', preserve_mtime=True, workers=4)
 
 
 :meth:`sftpretty.Connection.get_r`
 ----------------------------------
 This sftpretty method is an abstraction that recursively copies files *and*
-directories from the remote to a local path.
+directories from the remote to a local path. Advice about managing concurrent
+connections from above still applies.
 
 .. code-block:: python
 
     # copy all files *and* directories under public to a local path
-    sftp.get_r('public', 'local-backup', preserve_mtime=True)
+    sftp.get_r('public', 'local-backup', preserve_mtime=True, workers=16)
 
 
 :meth:`sftpretty.Connection.put`
@@ -260,26 +264,30 @@ destination path matching.
 :meth:`sftpretty.Connection.put_d`
 ----------------------------------
 The opposite of :meth:`.get_d`, put_d allows you to copy the contents of a
-local directory to a remote one via SFTP.
+local directory to a remote one via SFTP. This is multi-threaded function that
+can quickly surpass the remote server's concurrent connection threshold. The
+workers attribute is provided to allow for a more granular level of control of
+the thread pool only.
 
 .. code-block:: python
 
     # copy files from images, to remote static/images directory,
     # preserving modification times on files
-    sftp.put_d('images', 'static/images', preserve_mtime=True)
+    sftp.put_d('images', 'static/images', preserve_mtime=True, workers=6)
 
 
 :meth:`sftpretty.Connection.put_r`
 ----------------------------------
 This method copies all files *and* directories from a local path to a remote
 path. It creates directories, and happily succeeds even if the target
-directories already exist.
+directories already exist. Advice about managing concurrent connections from
+above still applies.
 
 .. code-block:: python
 
     # recursively copy files + directories from local static, to remote static,
     # preserving modification times on directories and files
-    sftp.put_r('static', 'static', preserve_mtime=True)
+    sftp.put_r('static', 'static', preserve_mtime=True, workers=12)
 
 
 :meth:`sftpretty.Connection.cd`
