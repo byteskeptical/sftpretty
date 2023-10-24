@@ -20,6 +20,7 @@ Code
         a. Setup CI testing for your Fork. Currently testing is done on Github Actions but feel free to use the testing framework of your choosing.
         b. Testing features that concern chmod, chown on Windows is NOT supported. Testing compression has to be ran against a local compatible sshd and not the plugin as it does NOT support this test.
         c. You will need to setup an ssh daemon on your local machine and create a user: copy the contents of id_sftpretty.pub to the newly created user's authorized_keys file -- Tests that can only be run locally are skipped using the @skip_if_ci decorator so they don't fail when the test suite is run on the CI server.
+
     #. Ensure that your name is added to the end of the :doc:`authors` file using the format Name <email@domain.com> (url), where the (url) portion is optional.
     #. Submit a Pull Request to the project.
 

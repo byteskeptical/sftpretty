@@ -60,15 +60,22 @@ Example
                    exceptions=(NoValidConnectionsError, socket.timeout,
                                SSHException), tries=6)
 
+
+    # Use public key authentication
+    with Connection('hostname', private_key='~/.ssh/id_ed25519') as sftp:
+        # Resume the download of a bigfile and save it to /mnt locally.
+        sftp.get('bigfile', '/mnt', preserve_mtime=True, resume=True)
+
+
     # Use public key authentication with optional private key password
     with Connection('hostname', private_key='~/.ssh/id_ed25519',
                     private_key_pass='secret') as sftp:
         # Recursively download a remote_directory and save it to /tmp locally.
         # Don't confirm files, useful in a scenario where the server removes
         # the remote file immediately after download. Preserve remote mtime on
-        # local copy.
+        # local copy. Limit the thread pool connections to the server.
         sftp.get_r('remote_directory', '/tmp', confirm=False,
-                   preserve_mtime=True)
+                   preserve_mtime=True, workers=6)
 
 
     # Use OpenSSH format config for public key authentication. Configuration
