@@ -1,12 +1,17 @@
 Change Log
 ==========
 
-1.1.2 (current, released 2023-10-24)
+1.1.3 (current, released 2023-12-11)
 ------------------------------------
+    * adding merge between ssh security options and paramiko compatibility
+    * changing default logger behavior from hooking into __main__
+
+1.1.2 (released 2023-10-24)
+---------------------------
     * added support for setting max_workers on ThreadPool functions
 
 1.1.1 (released 2023-08-28)
-------------------------------------
+---------------------------
     * added initial support for resuming existing transfers get() & put()
     * added max_concurrent_prefetch_requests parameter to get() family
     * added prefetch parameter to get() family
