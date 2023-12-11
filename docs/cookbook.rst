@@ -121,12 +121,22 @@ AVAILABLE OPENSSH CONFIG OPTIONS:
 Host Key checking is enabled by default. Loading of ``~/.ssh/known_hosts`` is
 always attempted unless an alternative is passed. If you wish to disable host
 key checking, **NOT ADVISED**, you will need to modify the default CnOpts and
-set the .hostkeys to None.
+set the knownhosts to None if no such file exists. You can still modify an
+existing CnOpts by setting cnopts.hostkeys to None if a default known_hosts
+exists or an alternative file was passed when CnOpts was created.
 
 .. code-block:: python
 
     import sftpretty
 
+    # No known_hosts exists in default location, common on Windows environments
+    # Avoid UserWarning by passing knownhosts as None
+    cnopts = sftpretty.CnOpts(knownhosts=None)
+    with sftpretty.Connection('host', username='me', password='pass', cnopts=cnopts):
+        # do stuff here
+
+    # If the connection options object was already successfully loaded
+    # Setting CnOpts.hostkeys to None before Connection is created is enough
     cnopts = sftpretty.CnOpts()
     cnopts.hostkeys = None
     with sftpretty.Connection('host', username='me', password='pass', cnopts=cnopts):

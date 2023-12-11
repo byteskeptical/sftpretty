@@ -26,7 +26,7 @@ def test_log_cnopts_log_level(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**copts) as sftp:
             sftp.listdir()
-            log = getLogger('sftpretty')
+            log = getLogger('SFTPretty')
             assert log.level == 40
 
 

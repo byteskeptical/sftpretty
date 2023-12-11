@@ -105,7 +105,7 @@ class CnOpts(object):
                     f'No file or host key found in [{knownhosts}]. '
                     'You will need to explicitly load host keys '
                     '(cnopts.hostkeys.load(filename)) or disable host '
-                    'key verification (cnopts.hostkeys = None).'
+                    'key verification (CnOpts(knownhosts=None)).'
                 )
             else:
                 if len(self.hostkeys.items()) == 0:
@@ -251,7 +251,7 @@ class Connection(object):
             console.setFormatter(console_formatter)
             getLogger().addHandler(console)
             global log
-            log = getLogger(__name__)
+            log = getLogger('SFTPretty')
             log.setLevel(level)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
@@ -314,9 +314,11 @@ class Connection(object):
             # Security Options
             # Set allowed ciphers
             ciphers = self._config.get('ciphers') or self._cnopts.ciphers
+            _ciphers = self._transport.get_security_options().ciphers
             if not isinstance(ciphers, tuple):
                 ciphers = tuple(ciphers.split(','))
-            self._transport.get_security_options().ciphers = ciphers
+            self._transport.get_security_options().ciphers = tuple(
+                cipher for cipher in ciphers if cipher in _ciphers)
             log.debug(f'Ciphers: [{ciphers}]')
             # Set compression algorithms
             compression = self._cnopts.compression
@@ -324,22 +326,28 @@ class Connection(object):
             log.debug(f'Compression: [{compression}]')
             # Set connection digests
             digests = self._config.get('macs') or self._cnopts.digests
+            _digests = self._transport.get_security_options().digests
             if not isinstance(digests, tuple):
                 digests = tuple(digests.split(','))
-            self._transport.get_security_options().digests = digests
+            self._transport.get_security_options().digests = tuple(
+                digest for digest in digests if digest in _digests)
             log.debug(f'MACs: [{digests}]')
             # Set connection kex
-            kex = self._config.get('kexalgorithms') or self._cnopts.kex
-            if not isinstance(kex, tuple):
-                kex = tuple(kex.split(','))
-            self._transport.get_security_options().kex = kex
-            log.debug(f'KEX: [{kex}]')
+            kexs = self._config.get('kexalgorithms') or self._cnopts.kex
+            _kex = self._transport.get_security_options().kex
+            if not isinstance(kexs, tuple):
+                kexs = tuple(kexs.split(','))
+            self._transport.get_security_options().kex = tuple(
+                kex for kex in kexs if kex in _kex)
+            log.debug(f'KEX: [{kexs}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
                 self._cnopts.key_types
+            _key_types = self._transport.get_security_options().key_types
             if not isinstance(key_types, tuple):
                 key_types = tuple(key_types.split(','))
-            self._transport.get_security_options().key_types = key_types
+            self._transport.get_security_options().key_types = tuple(
+                key_type for key_type in key_types if key_type in _key_types)
             log.debug(f'Public Key Types: [{key_types}]')
 
             self._transport.start_client(timeout=self._timeout)
