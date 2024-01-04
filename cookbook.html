@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; sftpretty 1.1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=00f267c6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="sftpretty.html" />
+    <link rel="prev" title="sftpretty" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sftpretty
+          </a>
+              <div class="version">
+                1.1.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-cnopts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.CnOpts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-get-d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get_d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-get-r"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get_r()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-put-d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put_d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-put-r"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put_r()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-cd"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.cd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-chmod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.chmod()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-chown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.chown()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sftpretty.Connection.pwd</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-listdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.listdir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-listdir-attr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.listdir_attr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-mkdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.mkdir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-mkdir-p"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.mkdir_p()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-isdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.isdir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-isfile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.isfile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-readlink"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.readlink()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-exists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.exists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-lexists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.lexists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.truncate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-remotetree"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.remotetree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-connection-sftp-client"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sftpretty.Connection.sftp_client</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-localtree"><code class="xref py py-func docutils literal notranslate"><span class="pre">sftpretty.localtree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty-st-mode-to-int"><code class="xref py py-func docutils literal notranslate"><span class="pre">sftpretty.st_mode_to_int()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sftpretty.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sftpretty</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cookbook.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
+<p>While in many ways, sftpretty is just a thin wrapper over paramiko’s SFTPClient,
+there are a number of ways that we make it more productive and easier to
+accomplish common, higher-level tasks. The following snippets show where we
+add value to this great module. See the <a class="reference internal" href="sftpretty.html"><span class="doc">API</span></a> docs for a complete
+listing.</p>
+<section id="sftpretty-connection">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection" title="sftpretty.Connection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection()</span></code></a><a class="headerlink" href="#sftpretty-connection" title="Link to this heading">¶</a></h2>
+<p>The Connection object is the base of sftpretty. It supports connections via
+username and password.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="n">sftp</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;secret&#39;</span><span class="p">)</span>
+<span class="c1">#</span>
+<span class="c1"># ... do sftp operations</span>
+<span class="c1">#</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>    <span class="c1"># close your connection to hostname</span>
+</pre></div>
+</div>
+<p>The Connection object is also context aware so you can use it with a <code class="docutils literal notranslate"><span class="pre">with</span></code>
+statement.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;secret&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ... do sftp operations</span>
+    <span class="c1">#</span>
+<span class="c1"># connection closed automatically at the end of the with-block</span>
+</pre></div>
+</div>
+<p>Want to use a DSA, ECDSA, ED25519, or RSA key pair, that is simple too.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">private_key</span><span class="o">=</span><span class="s1">&#39;/path/to/keyfile&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ... do sftp operations</span>
+    <span class="c1">#</span>
+</pre></div>
+</div>
+<p>If your key is password protected, just add <code class="docutils literal notranslate"><span class="pre">private_key_pass</span></code> to the parameter list.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">private_key</span><span class="o">=</span><span class="s1">&#39;/path/to/keyfile&#39;</span><span class="p">,</span>
+                           <span class="n">private_key_pass</span><span class="o">=</span><span class="s1">&#39;keyfile pass&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ... do sftp operations</span>
+    <span class="c1">#</span>
+</pre></div>
+</div>
+<p>How about a <code class="docutils literal notranslate"><span class="pre">paramiko.AgentKey</span></code>? No problem, just set the private_key equal to it.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">private_key</span><span class="o">=</span><span class="n">my_agentkey</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ... do sftp operations</span>
+    <span class="c1">#</span>
+</pre></div>
+</div>
+<p>The connection object allows the use of an IP address for the <code class="docutils literal notranslate"><span class="pre">host</span></code> and the
+ability to optionally set the <code class="docutils literal notranslate"><span class="pre">port</span></code>, which defaults to 22, otherwise.</p>
+</section>
+<section id="sftpretty-cnopts">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.CnOpts" title="sftpretty.CnOpts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.CnOpts()</span></code></a><a class="headerlink" href="#sftpretty-cnopts" title="Link to this heading">¶</a></h2>
+<p>You can specify additional connection options using the sftpretty.CnOpts
+object. These options are advanced and not applicable to most uses, because of
+this they have been segmented from the Connection parameter list and made
+available via the CnOpts obj/parameter.</p>
+<p>OpenSSH-style config objects are supported. The user’s default home location
+<code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> is always checked though not required unless an alternative
+path is provided. Credentials still need to be passed whether using a protected
+private key or password authentication.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="n">cnopts</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">CnOpts</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/etc/ssh/ssh_config&#39;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;host_alias&#39;</span><span class="p">,</span> <span class="n">cnopts</span><span class="o">=</span><span class="n">cnopts</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">):</span>
+    <span class="c1"># do stuff here</span>
+</pre></div>
+</div>
+<p>Config options always take precedence over parameters if both exist. Keep in
+mind there will more than likely be a delta between the security option
+algorithms your verion of SSH supports and those supported by our underlying
+paramiko dependency.</p>
+<p>AVAILABLE OPENSSH CONFIG OPTIONS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ciphers</span></code> - Replaces the ciphers parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Compression</span></code> - False <strong>Default</strong> no compression, True enables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ConnectTimeout</span></code> - Specifies the timeout (in seconds) used when
+connecting to the server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Host</span></code> - Primary lookup key for host block in config. Supports aliases.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Hostname</span></code> - Actual host/ip to be used in Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IdentityFile</span></code> - Location of the private key to use in Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KexAlgorithms</span></code> - Replaces the kex parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LogLevel</span></code> - Replaces the log_level parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MACS</span></code> - Replaces the digest parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Port</span></code> - Set the port to use in Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PubkeyAcceptedAlgorithms</span></code> - Replaces the key_types parameter in the
+Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ServerAliveInterval</span></code> - Sets a timeout interval in seconds. After
+which if no data is received a request for response is sent to server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">User</span></code> - Replaces the username parameter in the Connection method.</p></li>
+</ul>
+</div></blockquote>
+<p>Host Key checking is enabled by default. Loading of <code class="docutils literal notranslate"><span class="pre">~/.ssh/known_hosts</span></code> is
+always attempted unless an alternative is passed. If you wish to disable host
+key checking, <strong>NOT ADVISED</strong>, you will need to modify the default CnOpts and
+set the knownhosts to None if no such file exists. You can still modify an
+existing CnOpts by setting cnopts.hostkeys to None if a default known_hosts
+exists or an alternative file was passed when CnOpts was created.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="c1"># No known_hosts exists in default location, common on Windows environments</span>
+<span class="c1"># Avoid UserWarning by passing knownhosts as None</span>
+<span class="n">cnopts</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">CnOpts</span><span class="p">(</span><span class="n">knownhosts</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">cnopts</span><span class="o">=</span><span class="n">cnopts</span><span class="p">):</span>
+    <span class="c1"># do stuff here</span>
+
+<span class="c1"># If the connection options object was already successfully loaded</span>
+<span class="c1"># Setting CnOpts.hostkeys to None before Connection is created is enough</span>
+<span class="n">cnopts</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">CnOpts</span><span class="p">()</span>
+<span class="n">cnopts</span><span class="o">.</span><span class="n">hostkeys</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">cnopts</span><span class="o">=</span><span class="n">cnopts</span><span class="p">):</span>
+    <span class="c1"># do stuff here</span>
+</pre></div>
+</div>
+<p>To use a completely different known_hosts file, you can override CnOpts looking
+for <code class="docutils literal notranslate"><span class="pre">~/.ssh/known_hosts</span></code> by specifying the file when instantiating.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="n">cnopts</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">CnOpts</span><span class="p">(</span><span class="n">knownhosts</span><span class="o">=</span><span class="s1">&#39;path/to/your/knownhosts&#39;</span><span class="p">)</span>
+<span class="n">cnopts</span><span class="o">.</span><span class="n">hostkeys</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">cnopts</span><span class="o">=</span><span class="n">cnopts</span><span class="p">):</span>
+    <span class="c1"># do stuff here</span>
+</pre></div>
+</div>
+<p>If you wish to use <code class="docutils literal notranslate"><span class="pre">~/.ssh/known_hosts</span></code> but add additional known host keys
+you can merge with update additional known_host format files by using .load
+method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="n">cnopts</span> <span class="o">=</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">CnOpts</span><span class="p">()</span>
+<span class="n">cnopts</span><span class="o">.</span><span class="n">hostkeys</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;path/to/your/extra_knownhosts&#39;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">cnopts</span><span class="o">=</span><span class="n">cnopts</span><span class="p">):</span>
+    <span class="c1"># do stuff here</span>
+</pre></div>
+</div>
+<p>For both the knownhost parameter and the load argument, sftpretty expands user, so
+you can use <code class="docutils literal notranslate"><span class="pre">~</span></code> tilde notation in your pathing.</p>
+<p>AVAILABLE CONNECTION OPTIONS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.ciphers</span></code> - Replaces the ciphers parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.compress</span></code> - False <strong>Default</strong> no compression, True enables
+compression.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.compression</span></code> - Preferred order of compression methods, if enabled, by
+the above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.config</span></code> - SSHConfig object used for parsing and host-based lookups.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.digests</span></code> - Replaces the digests parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.disabled_algorithms</span></code> - Algorithm identifiers to disable in the
+Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.kex</span></code> - Replaces the kex parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.key_types</span></code> - Replaces the key types parameter in the Connection method.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.log</span></code> - False <strong>Default</strong> logs to console, True logs to temporary file,
+String sets custom location.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.log_level</span></code> - Set logger verbosity to either debug, error, or
+info <strong>Default</strong>.</p></li>
+</ul>
+</div></blockquote>
+<p>Here is a common scenario, you have your connection information stored in a
+persistence mechanism, like <a class="reference external" href="https://yamjam.rtfd.org/">yamjam</a> and when you access
+it, it is returned in dictionary form. <code class="docutils literal notranslate"><span class="pre">{'host':'myhost',</span> <span class="pre">username:'me',</span> <span class="pre">...}</span></code>
+Just send the dict into the connection object like so.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="n">cinfo</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;host&#39;</span><span class="p">:</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">:</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span><span class="s1">&#39;secret&#39;</span><span class="p">,</span> <span class="s1">&#39;port&#39;</span><span class="p">:</span><span class="mi">2222</span><span class="p">}</span>
+<span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="o">**</span><span class="n">cinfo</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="c1"># ... do sftp operations</span>
+    <span class="c1">#</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-get">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.get" title="sftpretty.Connection.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get()</span></code></a><a class="headerlink" href="#sftpretty-connection-get" title="Link to this heading">¶</a></h2>
+<p>In addition to the normal paramiko call, you can optionally set the
+<code class="docutils literal notranslate"><span class="pre">preserve_mtime</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">True</span></code> and the operation will make sure that
+the modification times on the local copy match those on the server.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ...</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;myfile&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now with the ability to resume a previously started download. Based on local
+destination path matching.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the download continues right where it left off</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;myfile&#39;</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-get-d">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.get_d" title="sftpretty.Connection.get_d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get_d()</span></code></a><a class="headerlink" href="#sftpretty-connection-get-d" title="Link to this heading">¶</a></h2>
+<p>This sftpretty method is an abstraction above <a class="reference internal" href="sftpretty.html#sftpretty.Connection.get" title="sftpretty.Connection.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> that allows you to
+copy all the files in a remote directory to a local path. This is a
+multi-threaded function that can quickly surpass the remote server’s concurrent
+connection threshold for directories with many files. The workers attribute is
+provided to allow for a more granular level of control of the thread pool only.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy all files under public to a local path, preserving modification time</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">get_d</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="s1">&#39;local-backup&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-get-r">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.get_r" title="sftpretty.Connection.get_r"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.get_r()</span></code></a><a class="headerlink" href="#sftpretty-connection-get-r" title="Link to this heading">¶</a></h2>
+<p>This sftpretty method is an abstraction that recursively copies files <em>and</em>
+directories from the remote to a local path. Advice about managing concurrent
+connections from above still applies.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy all files *and* directories under public to a local path</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">get_r</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">,</span> <span class="s1">&#39;local-backup&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-put">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.put" title="sftpretty.Connection.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put()</span></code></a><a class="headerlink" href="#sftpretty-connection-put" title="Link to this heading">¶</a></h2>
+<p>In addition to the normal paramiko call, you can optionally set the
+<code class="docutils literal notranslate"><span class="pre">preserve_mtime</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">True</span></code> and the operation will make sure that
+the modification times on the server copy match those on the local.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy myfile, to the current working directory on the server,</span>
+<span class="c1"># preserving modification time</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s1">&#39;myfile&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now with the ability to resume a prematurely ended upload. Based on remote
+destination path matching.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># save a bit and a byte, continue existing upload</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s1">&#39;myfile&#39;</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-put-d">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.put_d" title="sftpretty.Connection.put_d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put_d()</span></code></a><a class="headerlink" href="#sftpretty-connection-put-d" title="Link to this heading">¶</a></h2>
+<p>The opposite of <a class="reference internal" href="sftpretty.html#sftpretty.Connection.get_d" title="sftpretty.Connection.get_d"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_d()</span></code></a>, put_d allows you to copy the contents of a
+local directory to a remote one via SFTP. This is multi-threaded function that
+can quickly surpass the remote server’s concurrent connection threshold. The
+workers attribute is provided to allow for a more granular level of control of
+the thread pool only.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># copy files from images, to remote static/images directory,</span>
+<span class="c1"># preserving modification times on files</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">put_d</span><span class="p">(</span><span class="s1">&#39;images&#39;</span><span class="p">,</span> <span class="s1">&#39;static/images&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-put-r">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.put_r" title="sftpretty.Connection.put_r"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.put_r()</span></code></a><a class="headerlink" href="#sftpretty-connection-put-r" title="Link to this heading">¶</a></h2>
+<p>This method copies all files <em>and</em> directories from a local path to a remote
+path. It creates directories, and happily succeeds even if the target
+directories already exist. Advice about managing concurrent connections from
+above still applies.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># recursively copy files + directories from local static, to remote static,</span>
+<span class="c1"># preserving modification times on directories and files</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">put_r</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="n">preserve_mtime</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-cd">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.cd" title="sftpretty.Connection.cd"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.cd()</span></code></a><a class="headerlink" href="#sftpretty-connection-cd" title="Link to this heading">¶</a></h2>
+<p>This method is a with-context capable version of <a class="reference internal" href="sftpretty.html#sftpretty.Connection.chdir" title="sftpretty.Connection.chdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chdir()</span></code></a>. Restoring the
+original directory when the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement goes out of scope. It can be
+called with a remote directory to temporarily change to.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">sftp</span><span class="o">.</span><span class="n">cd</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">):</span>     <span class="c1"># now in ./static</span>
+    <span class="n">sftp</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;here&#39;</span><span class="p">)</span>      <span class="c1"># now in ./static/here</span>
+    <span class="n">sftp</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;there&#39;</span><span class="p">)</span>     <span class="c1"># now in ./static/here/there</span>
+<span class="c1"># now back to the original current working directory</span>
+</pre></div>
+</div>
+<p>Or it can be called without a remote directory to just act as a bookmark you
+want to return to later.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">sftp</span><span class="o">.</span><span class="n">cd</span><span class="p">():</span>             <span class="c1"># still in .</span>
+    <span class="n">sftp</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">)</span>    <span class="c1"># now in ./static</span>
+    <span class="n">sftp</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;here&#39;</span><span class="p">)</span>      <span class="c1"># now in ./static/here</span>
+<span class="c1"># now back to the original current working directory</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-chmod">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.chmod" title="sftpretty.Connection.chmod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.chmod()</span></code></a><a class="headerlink" href="#sftpretty-connection-chmod" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="sftpretty.html#sftpretty.Connection.chmod" title="sftpretty.Connection.chmod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chmod()</span></code></a> is a wrapper around paramiko’s except for the fact it will
+takes an integer representation of the octal mode. No leading 0 or 0o
+wanted. We know it’s suppose to be an octal, but who really remembers that?</p>
+<p>This way it is just like a command line <code class="docutils literal notranslate"><span class="pre">chmod</span> <span class="pre">644</span> <span class="pre">readme.txt</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="n">group</span> <span class="n">other</span>
+<span class="n">rwx</span>  <span class="n">rwx</span>   <span class="n">rwx</span>
+<span class="mi">421</span>  <span class="mi">421</span>   <span class="mi">421</span>
+
+<span class="n">user</span>  <span class="o">-</span> <span class="n">read</span><span class="o">/</span><span class="n">write</span> <span class="o">=</span> <span class="mi">4</span><span class="o">+</span><span class="mi">2</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">group</span> <span class="o">-</span> <span class="n">read</span>       <span class="o">=</span> <span class="mi">4</span>   <span class="o">=</span> <span class="mi">4</span>
+<span class="n">other</span> <span class="o">-</span> <span class="n">read</span>       <span class="o">=</span> <span class="mi">4</span>   <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sftp</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="s1">&#39;readme.txt&#39;</span><span class="p">,</span> <span class="mi">644</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-chown">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.chown" title="sftpretty.Connection.chown"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.chown()</span></code></a><a class="headerlink" href="#sftpretty-connection-chown" title="Link to this heading">¶</a></h2>
+<p>Allows you to specify just, gid, uid or both. If either gid or uid is None
+<em>default</em>, then sftpretty does a stat to get the current ids and uses that to
+fill in the missing parameter because the underlying paramiko method requires
+that you explicitly set both.</p>
+<p><strong>NOTE</strong> uid and gid are integers and relative to each system. Just because you
+are uid 102 on your local system, a uid of 102 on the remote system most likely
+won’t be your login. You will need to do some homework to make sure that you
+are setting these values as you intended.</p>
+</section>
+<section id="sftpretty-connection-pwd">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sftpretty.Connection.pwd</span></code></a><a class="headerlink" href="#sftpretty-connection-pwd" title="Link to this heading">¶</a></h2>
+<p>Returns the current working directory. It returns the result of
+<a class="reference internal" href="sftpretty.html#sftpretty.Connection.normalize" title="sftpretty.Connection.normalize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normalize()</span></code></a> but makes your code and intention easier to read.
+Paramiko has a method, <a class="reference internal" href="sftpretty.html#sftpretty.Connection.getcwd" title="sftpretty.Connection.getcwd"><code class="xref py py-meth docutils literal notranslate"><span class="pre">getcwd()</span></code></a>, that we expose, but that method
+returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if <a class="reference internal" href="sftpretty.html#sftpretty.Connection.chdir" title="sftpretty.Connection.chdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chdir()</span></code></a> has not been called prior.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">sftp</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+<span class="kc">None</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">pwd</span>
+<span class="sa">u</span><span class="s1">&#39;/home/test&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-listdir">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.listdir" title="sftpretty.Connection.listdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.listdir()</span></code></a><a class="headerlink" href="#sftpretty-connection-listdir" title="Link to this heading">¶</a></h2>
+<p>The difference here is that sftpretty’s version returns a sorted list, by
+filename, instead of paramiko’s arbitrary order.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">listdir</span><span class="p">()</span>
+<span class="p">[</span><span class="sa">u</span><span class="s1">&#39;pub&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;readme.sym&#39;</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;readme.txt&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-listdir-attr">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.listdir_attr" title="sftpretty.Connection.listdir_attr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.listdir_attr()</span></code></a><a class="headerlink" href="#sftpretty-connection-listdir-attr" title="Link to this heading">¶</a></h2>
+<p>The difference here is that sftpretty’s version returns a sorted list, by
+SFTPAttribute.filename, instead of paramiko’s arbitrary order.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">sftp</span><span class="o">.</span><span class="n">listdir_attr</span><span class="p">():</span>
+<span class="o">...</span>     <span class="nb">print</span> <span class="n">attr</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">attr</span>
+<span class="o">...</span>
+<span class="n">pub</span>        <span class="n">dr</span><span class="o">-</span><span class="n">xrwxr</span><span class="o">-</span><span class="n">x</span>   <span class="mi">1</span> <span class="mi">501</span>      <span class="mi">502</span>             <span class="mi">5</span> <span class="mi">19</span> <span class="n">May</span> <span class="mi">23</span><span class="p">:</span><span class="mi">22</span> <span class="n">pub</span>
+<span class="n">readme</span><span class="o">.</span><span class="n">sym</span> <span class="n">lrwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span>   <span class="mi">1</span> <span class="mi">501</span>      <span class="mi">502</span>            <span class="mi">10</span> <span class="mi">21</span> <span class="n">May</span> <span class="mi">23</span><span class="p">:</span><span class="mi">29</span> <span class="n">readme</span><span class="o">.</span><span class="n">sym</span>
+<span class="n">readme</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span>   <span class="mi">1</span> <span class="mi">501</span>      <span class="mi">502</span>          <span class="mi">8192</span> <span class="mi">26</span> <span class="n">May</span> <span class="mi">23</span><span class="p">:</span><span class="mi">32</span> <span class="n">readme</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-mkdir">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.mkdir" title="sftpretty.Connection.mkdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.mkdir()</span></code></a><a class="headerlink" href="#sftpretty-connection-mkdir" title="Link to this heading">¶</a></h2>
+<p>Just like <a class="reference internal" href="sftpretty.html#sftpretty.Connection.chmod" title="sftpretty.Connection.chmod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chmod()</span></code></a>, the mode is an integer representation of the octal
+number to use. Just like the unix cmd, <cite>chmod</cite> you use 744 not 0744 or 0o744.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;show&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">644</span><span class="p">)</span>  <span class="c1"># user r/w, group and other read-only</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-mkdir-p">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.mkdir_p" title="sftpretty.Connection.mkdir_p"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.mkdir_p()</span></code></a><a class="headerlink" href="#sftpretty-connection-mkdir-p" title="Link to this heading">¶</a></h2>
+<p>A common scenario where you need to create all directories in a path as
+needed, setting their mode, if created. Mode argument works just like
+<a class="reference internal" href="sftpretty.html#sftpretty.Connection.chmod" title="sftpretty.Connection.chmod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chmod()</span></code></a>, that is an integer representation of the mode you want.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">sftp</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="s1">&#39;pub/show/off&#39;</span><span class="p">)</span>  <span class="c1"># will make all non-existing directories</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-isdir">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.isdir" title="sftpretty.Connection.isdir"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.isdir()</span></code></a><a class="headerlink" href="#sftpretty-connection-isdir" title="Link to this heading">¶</a></h2>
+<p>A distillation of stat module attributes returning a simple True/False
+for directory confirmation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s1">&#39;pub&#39;</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-isfile">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.isfile" title="sftpretty.Connection.isfile"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.isfile()</span></code></a><a class="headerlink" href="#sftpretty-connection-isfile" title="Link to this heading">¶</a></h2>
+<p>A distillation of stat module attributes returning a simple True/False
+for file confirmation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;pub&#39;</span><span class="p">)</span>
+<span class="kc">False</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-readlink">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.readlink" title="sftpretty.Connection.readlink"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.readlink()</span></code></a><a class="headerlink" href="#sftpretty-connection-readlink" title="Link to this heading">¶</a></h2>
+<p>The underlying paramiko method can return either an absolute or a relative path.
+sftpretty forces this to always be an absolute path by laundering the result with
+a <a class="reference internal" href="sftpretty.html#sftpretty.Connection.normalize" title="sftpretty.Connection.normalize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normalize()</span></code></a> before returning.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="s1">&#39;readme.sym&#39;</span><span class="p">)</span>
+<span class="sa">u</span><span class="s1">&#39;/home/test/readme.txt&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-exists">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.exists" title="sftpretty.Connection.exists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.exists()</span></code></a><a class="headerlink" href="#sftpretty-connection-exists" title="Link to this heading">¶</a></h2>
+<p>Returns True if a remote object exists.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;readme.txt&#39;</span><span class="p">)</span>   <span class="c1"># a file</span>
+<span class="kc">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;pub&#39;</span><span class="p">)</span>          <span class="c1"># a dir</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-lexists">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.lexists" title="sftpretty.Connection.lexists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.lexists()</span></code></a><a class="headerlink" href="#sftpretty-connection-lexists" title="Link to this heading">¶</a></h2>
+<p>Like <a class="reference internal" href="sftpretty.html#sftpretty.Connection.exists" title="sftpretty.Connection.exists"><code class="xref py py-meth docutils literal notranslate"><span class="pre">exists()</span></code></a>, but returns True for a broken symbolic link.</p>
+</section>
+<section id="sftpretty-connection-truncate">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.truncate" title="sftpretty.Connection.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.truncate()</span></code></a><a class="headerlink" href="#sftpretty-connection-truncate" title="Link to this heading">¶</a></h2>
+<p>Like the underlying <cite>.truncate</cite> method, but sftpretty returns the file’s new
+size after the operation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftp</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="s1">&#39;readme.txt&#39;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">)</span>
+<span class="mi">4096</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-remotetree">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.remotetree" title="sftpretty.Connection.remotetree"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.remotetree()</span></code></a><a class="headerlink" href="#sftpretty-connection-remotetree" title="Link to this heading">¶</a></h2>
+<p>A powerful method that can recursively <em>default</em> walk a <strong>remote</strong> directory
+structure and store the tree as a dictionary in <code class="docutils literal notranslate"><span class="pre">{directory:</span> <span class="pre">[(subdir,</span>
+<span class="pre">localdir/subdir),]}</span></code> form. Used in <a class="reference internal" href="sftpretty.html#sftpretty.Connection.get_r" title="sftpretty.Connection.get_r"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_r()</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;secret&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sftp</span><span class="p">:</span>
+        <span class="n">directories</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">sftp</span><span class="o">.</span><span class="n">remotetree</span><span class="p">(</span><span class="n">directories</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">directories</span>
+<span class="p">{</span><span class="s1">&#39;/&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;/archives&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/archives&#39;</span><span class="p">),</span>
+       <span class="p">(</span><span class="s1">&#39;/incoming&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming&#39;</span><span class="p">),</span>
+       <span class="p">(</span><span class="s1">&#39;/outgoing&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/outgoing&#39;</span><span class="p">)</span>
+      <span class="p">],</span>
+ <span class="s1">&#39;/incoming&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;/incoming/amrs&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming/amrs&#39;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;/incoming/ffopc&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming/ffopc&#39;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;/incoming/gpb&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming/gpb&#39;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;/incoming/mgmp&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming/mgmp&#39;</span><span class="p">),</span>
+               <span class="p">(</span><span class="s1">&#39;/incoming/temp&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/incoming/temp&#39;</span><span class="p">)</span>
+              <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-connection-sftp-client">
+<h2><a class="reference internal" href="sftpretty.html#sftpretty.Connection.sftp_client" title="sftpretty.Connection.sftp_client"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sftpretty.Connection.sftp_client</span></code></a><a class="headerlink" href="#sftpretty-connection-sftp-client" title="Link to this heading">¶</a></h2>
+<p>Don’t like how we have modified a paramiko method? Use this attribute to get
+at the original version. Our goal is to augment not supplant paramiko.</p>
+</section>
+<section id="sftpretty-localtree">
+<h2><code class="xref py py-func docutils literal notranslate"><span class="pre">sftpretty.localtree()</span></code><a class="headerlink" href="#sftpretty-localtree" title="Link to this heading">¶</a></h2>
+<p>Similar to <a class="reference internal" href="sftpretty.html#sftpretty.Connection.remotetree" title="sftpretty.Connection.remotetree"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sftpretty.Connection.remotetree()</span></code></a> except that it walks a
+<strong>local</strong> directory structure. It has the same output format and likewise
+stores the resulting tree in a dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sftpretty</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">directories</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sftpretty</span><span class="o">.</span><span class="n">localtree</span><span class="p">(</span><span class="n">directories</span><span class="p">,</span> <span class="s1">&#39;/home/user/downloads&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">directories</span>
+<span class="p">{</span><span class="s1">&#39;/home/user/downloads&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;/home/user/downloads/percona&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/downloads/percona&#39;</span><span class="p">),</span>
+                          <span class="p">(</span><span class="s1">&#39;/home/user/downloads/wallstreet&#39;</span><span class="p">,</span> <span class="s1">&#39;/tmp/downloads/wallstreet&#39;</span><span class="p">)</span>
+                         <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="sftpretty-st-mode-to-int">
+<h2><code class="xref py py-func docutils literal notranslate"><span class="pre">sftpretty.st_mode_to_int()</span></code><a class="headerlink" href="#sftpretty-st-mode-to-int" title="Link to this heading">¶</a></h2>
+<p>Converts an octal mode result back to an integer representation. The information
+returned in SFTPAttribute object <code class="docutils literal notranslate"><span class="pre">.stat(*fname*).st_mode</span></code> contains extra
+things you probably don’t care about, in a form that has been converted from
+octal to int so you won’t recognize it at first. This function clips the extra
+bits and hands you the file mode in a way you’ll recognize.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">attr</span> <span class="o">=</span> <span class="n">sftp</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="s1">&#39;readme.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">attr</span><span class="o">.</span><span class="n">st_mode</span>
+<span class="go">33188</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sftpretty</span><span class="o">.</span><span class="n">st_mode_to_int</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
+<span class="go">644</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="sftpretty" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sftpretty.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

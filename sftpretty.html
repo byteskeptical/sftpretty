@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; sftpretty 1.1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=00f267c6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Change Log" href="changes.html" />
+    <link rel="prev" title="Getting Started" href="cookbook.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sftpretty
+          </a>
+              <div class="version">
+                1.1.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cookbook.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty.CnOpts"><code class="docutils literal notranslate"><span class="pre">CnOpts</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.CnOpts.get_config"><code class="docutils literal notranslate"><span class="pre">CnOpts.get_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.CnOpts.get_hostkey"><code class="docutils literal notranslate"><span class="pre">CnOpts.get_hostkey()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpretty.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.active_ciphers"><code class="docutils literal notranslate"><span class="pre">Connection.active_ciphers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.active_compression"><code class="docutils literal notranslate"><span class="pre">Connection.active_compression</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.cd"><code class="docutils literal notranslate"><span class="pre">Connection.cd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.chdir"><code class="docutils literal notranslate"><span class="pre">Connection.chdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.chmod"><code class="docutils literal notranslate"><span class="pre">Connection.chmod()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.chown"><code class="docutils literal notranslate"><span class="pre">Connection.chown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.close"><code class="docutils literal notranslate"><span class="pre">Connection.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.execute"><code class="docutils literal notranslate"><span class="pre">Connection.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.exists"><code class="docutils literal notranslate"><span class="pre">Connection.exists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.get"><code class="docutils literal notranslate"><span class="pre">Connection.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.get_d"><code class="docutils literal notranslate"><span class="pre">Connection.get_d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.get_r"><code class="docutils literal notranslate"><span class="pre">Connection.get_r()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.getcwd"><code class="docutils literal notranslate"><span class="pre">Connection.getcwd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.getfo"><code class="docutils literal notranslate"><span class="pre">Connection.getfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.isdir"><code class="docutils literal notranslate"><span class="pre">Connection.isdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.isfile"><code class="docutils literal notranslate"><span class="pre">Connection.isfile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.lexists"><code class="docutils literal notranslate"><span class="pre">Connection.lexists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.listdir"><code class="docutils literal notranslate"><span class="pre">Connection.listdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.listdir_attr"><code class="docutils literal notranslate"><span class="pre">Connection.listdir_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.logfile"><code class="docutils literal notranslate"><span class="pre">Connection.logfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.lstat"><code class="docutils literal notranslate"><span class="pre">Connection.lstat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.mkdir"><code class="docutils literal notranslate"><span class="pre">Connection.mkdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.mkdir_p"><code class="docutils literal notranslate"><span class="pre">Connection.mkdir_p()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.normalize"><code class="docutils literal notranslate"><span class="pre">Connection.normalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.open"><code class="docutils literal notranslate"><span class="pre">Connection.open()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.put"><code class="docutils literal notranslate"><span class="pre">Connection.put()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.put_d"><code class="docutils literal notranslate"><span class="pre">Connection.put_d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.put_r"><code class="docutils literal notranslate"><span class="pre">Connection.put_r()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.putfo"><code class="docutils literal notranslate"><span class="pre">Connection.putfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.pwd"><code class="docutils literal notranslate"><span class="pre">Connection.pwd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.readlink"><code class="docutils literal notranslate"><span class="pre">Connection.readlink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.remote_server_key"><code class="docutils literal notranslate"><span class="pre">Connection.remote_server_key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.remotetree"><code class="docutils literal notranslate"><span class="pre">Connection.remotetree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.remove"><code class="docutils literal notranslate"><span class="pre">Connection.remove()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.rename"><code class="docutils literal notranslate"><span class="pre">Connection.rename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.rmdir"><code class="docutils literal notranslate"><span class="pre">Connection.rmdir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.security_options"><code class="docutils literal notranslate"><span class="pre">Connection.security_options</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.sftp_client"><code class="docutils literal notranslate"><span class="pre">Connection.sftp_client</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.stat"><code class="docutils literal notranslate"><span class="pre">Connection.stat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.symlink"><code class="docutils literal notranslate"><span class="pre">Connection.symlink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.timeout"><code class="docutils literal notranslate"><span class="pre">Connection.timeout</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sftpretty.Connection.truncate"><code class="docutils literal notranslate"><span class="pre">Connection.truncate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#securityoptions">SecurityOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpattributes">SFTPAttributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sftpfile">SFTPFile</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sftpretty</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sftpretty.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-sftpretty">
+<span id="api"></span><h1>API<a class="headerlink" href="#module-sftpretty" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sftpretty.CnOpts">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sftpretty.</span></span><span class="sig-name descname"><span class="pre">CnOpts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knownhosts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/runner/.ssh/known_hosts'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.CnOpts" title="Link to this definition">¶</a></dt>
+<dd><p>Additional connection options beyond authentication.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ciphers</strong> (<em>tuple</em>) – <em>Default: paramiko.Transport.SecurityOptions.ciphers</em>
+- Ordered list of preferred ciphers for connection.</p></li>
+<li><p><strong>compress</strong> (<em>bool</em>) – <em>Default: paramiko.Transport.use_compression</em> -
+Enable or disable compression.</p></li>
+<li><p><strong>compression</strong> (<em>tuple</em>) – <em>Default: paramiko.Transport.SecurityOptions.compression</em> -
+Ordered tuple of preferred compression algorithms for connection.</p></li>
+<li><p><strong>paramiko.SSHConfig</strong> – SSHConfig object used for parsing and
+preforming host based lookups on OpenSSH-style config directives.</p></li>
+<li><p><strong>digests</strong> (<em>tuple</em>) – <em>Default: paramiko.Transport.SecurityOptions.digests</em>
+- Ordered tuple of preferred digests/macs for connection.</p></li>
+<li><p><strong>disabled_algorithms</strong> (<em>dict</em>) – <em>Default: {}</em> - Mapping type to an
+iterable of algorithm identifiers, which will be disabled for the
+lifetime of the transport. Keys should match class builtin attribute.</p></li>
+<li><p><strong>hostkeys</strong> (<em>paramiko.hostkeys.HostKeys</em>) – HostKeys object used for
+host key verifcation.</p></li>
+<li><p><strong>kex</strong> (<em>tuple</em>) – <em>Default: paramiko.Transport.SecurityOptions.kex</em> -
+Ordered tuple of preferred key exchange algorithms for connection.</p></li>
+<li><p><strong>key_types</strong> (<em>tuple</em>) – <em>Default: paramiko.Transport.SecurityOptions.key_types</em> -
+Ordered tuple of preferred public key types for connection.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>|</em><em>str</em>) – <em>Default: False</em> - Log connection details. If set to
+True, creates a temporary file used to capture logs. If set to an
+existing filepath, logs will be appended.</p></li>
+<li><p><strong>log_level</strong> (<em>str</em>) – <em>Default: info</em> - Set logging level for connection.
+Choose between debug, error, or info.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>config</strong> (<em>str</em>) – <em>Default: ~/.ssh/config</em> - File path to load
+config from.</p></li>
+<li><p><strong>knownhosts</strong> (<em>str</em>) – <em>Default: ~/.ssh/known_hosts</em> - File path to load
+hostkeys from.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(obj) CnOpts - Connection options object, used for passing
+extended options to a Connection object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ConfigParseError</strong> – </p></li>
+<li><p><strong>HostKeysException</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.CnOpts.get_config">
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.CnOpts.get_config" title="Link to this definition">¶</a></dt>
+<dd><p>Return config options for a given host-match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>host</strong> (<em>str</em>) – The host-matching rules of OpenSSH’s ssh_config</p>
+</dd>
+</dl>
+<p>man page are used: For each parameter, the first obtained value will
+be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(obj) SSHConfigDict - A dictionary wrapper/subclass for</p>
+</dd>
+</dl>
+<p>per-host configuration structures.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.CnOpts.get_hostkey">
+<span class="sig-name descname"><span class="pre">get_hostkey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.CnOpts.get_hostkey" title="Link to this definition">¶</a></dt>
+<dd><p>Return the matching known hostkey to be used for verification or
+raise an SSHException.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>host</strong> (<em>str</em>) – The Hostname or IP of the remote machine.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) PKey - Public key(s) associated with host or None.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>SSHException</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sftpretty.Connection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sftpretty.</span></span><span class="sig-name descname"><span class="pre">Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cnopts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">private_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">private_key_pass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection" title="Link to this definition">¶</a></dt>
+<dd><p>Connects and logs into the specified hostname. Arguments that are not
+given are guessed from the environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<em>str</em>) – <em>Required</em> - Hostname or address of the remote machine.</p></li>
+<li><p><strong>cnopts</strong> (<a class="reference internal" href="#sftpretty.CnOpts" title="sftpretty.CnOpts"><em>CnOpts</em></a><em>|</em><em>None</em>) – <em>Default: None</em> - Extended connection options
+set as a CnOpts object.</p></li>
+<li><p><strong>default_path</strong> (<em>str</em><em>|</em><em>None</em>) – <em>Default: None</em> - Set the default working
+directory upon connection.</p></li>
+<li><p><strong>password</strong> (<em>str</em><em>|</em><em>None</em>) – <em>Default: None</em> - Credential for remote machine.</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – <em>Default: 22</em> - SFTP server port of the remote machine.</p></li>
+<li><p><strong>private_key</strong> (<em>str</em><em>|</em><em>obj</em><em>|</em><em>None</em>) – <em>Default: None</em> - Path to private key
+file(str) or paramiko.AgentKey object</p></li>
+<li><p><strong>private_key_pass</strong> (<em>str</em><em>|</em><em>None</em>) – <em>Default: None</em> - Password to use on
+encrypted private_key.</p></li>
+<li><p><strong>timeout</strong> (<em>float</em><em>|</em><em>None</em>) – <em>Default: None</em> - Set channel timeout.</p></li>
+<li><p><strong>username</strong> (<em>str</em><em>|</em><em>None</em>) – <em>Default: None</em> - User for remote machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) Connection to the requested host.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ConnectionException</strong> – </p></li>
+<li><p><strong>CredentialException</strong> – </p></li>
+<li><p><strong>HostKeysException</strong> – </p></li>
+<li><p><strong>LoggingException</strong> – </p></li>
+<li><p><strong>PasswordRequiredException</strong> – </p></li>
+<li><p><strong>SSHException</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.active_ciphers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active_ciphers</span></span><a class="headerlink" href="#sftpretty.Connection.active_ciphers" title="Link to this definition">¶</a></dt>
+<dd><p>Get tuple of currently used local and remote ciphers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(tuple of  str) currently used ciphers (local_cipher,
+remote_cipher)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.active_compression">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active_compression</span></span><a class="headerlink" href="#sftpretty.Connection.active_compression" title="Link to this definition">¶</a></dt>
+<dd><p>Get tuple of local and remote compression status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(tuple of str) Compression status.
+(local_compression, remote_compression)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.cd">
+<span class="sig-name descname"><span class="pre">cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.cd" title="Link to this definition">¶</a></dt>
+<dd><p>Context manager that can change to a optionally specified remote
+directory and restores the old pwd on exit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em><em>|</em><em>None</em>) – <em>Default: None</em> - Remote path to maintain
+as the current working directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if remote path doesn’t exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.chdir">
+<span class="sig-name descname"><span class="pre">chdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.chdir" title="Link to this definition">¶</a></dt>
+<dd><p>Change the current working directory on the remote</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote path to set as current working directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if path does not exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.chmod">
+<span class="sig-name descname"><span class="pre">chmod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.chmod" title="Link to this definition">¶</a></dt>
+<dd><p>Set the permission mode of a remotepath, where mode is an octal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotepath</strong> (<em>str</em>) – Remote path to modify permission.</p></li>
+<li><p><strong>mode</strong> (<em>int</em>) – <em>Default: 700</em> - Octal mode to apply on path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if the file doesn’t exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.chown">
+<span class="sig-name descname"><span class="pre">chown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.chown" title="Link to this definition">¶</a></dt>
+<dd><p>Set uid/gid on remotepath, you may specify either or both.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotepath</strong> (<em>str</em>) – Remote path to modify ownership.</p></li>
+<li><p><strong>uid</strong> (<em>int</em>) – User id to set as owner of remote path.</p></li>
+<li><p><strong>gid</strong> (<em>int</em>) – Group id to set on the remote path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if user lacks permission or if the file doesn’t exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.close" title="Link to this definition">¶</a></dt>
+<dd><p>Terminate transport connection and clean up the bits.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.execute" title="Link to this definition">¶</a></dt>
+<dd><p>Execute the given commands on a remote machine.  The command is
+executed without regard to the remote <a class="reference internal" href="#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pwd</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>str</em>) – Command to execute.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list of str) Results of the command.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any exception raised by command will be passed through.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.exists">
+<span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.exists" title="Link to this definition">¶</a></dt>
+<dd><p>Test whether a remotepath exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to verify existance of.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool) True, if remotepath exists, else False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localpath=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_concurrent_prefetch_requests=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefetch=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.get" title="Link to this definition">¶</a></dt>
+<dd><p>Copies a file between the remote host and the local host.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotefile</strong> (<em>str</em>) – The remote path and filename to retrieve.</p></li>
+<li><p><strong>localpath</strong> (<em>str</em>) – The local path to save download.
+If None, file is copied to local current working directory.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int)</span></code>) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Sync the modification
+time(st_mtime) on the local file to match the time on the remote.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>max_concurrent_prefetch_requests</strong> (<em>int</em>) – <ul>
+<li><p>The maximum number of</p></li>
+</ul>
+<p>concurrent read requests to prefetch.</p>
+</p></li>
+<li><p><strong>prefetch</strong> (<em>bool</em>) – <em>Default: True</em> - Controls whether prefetching
+is performed.</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.get_d">
+<span class="sig-name descname"><span class="pre">get_d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_concurrent_prefetch_requests=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefetch=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.get_d" title="Link to this definition">¶</a></dt>
+<dd><p>Get the contents of remotedir and write to locadir. Non-recursive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotedir</strong> (<em>str</em>) – The remote directory to copy locally.</p></li>
+<li><p><strong>localdir</strong> (<em>str</em>) – The local path to save download.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>max_concurrent_prefetch_requests</strong> (<em>int</em>) – <ul>
+<li><p>The maximum number of</p></li>
+</ul>
+<p>concurrent read requests to prefetch.</p>
+</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – <em>Default: None</em> - Filter applied to filenames to
+transfer only subset of files in a directory.</p></li>
+<li><p><strong>prefetch</strong> (<em>bool</em>) – <em>Default: True</em> - Controls whether prefetching
+is performed.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Sync the modification
+time(st_mtime) on the local file to match the time on the remote.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>workers</strong> (<em>int</em>) – <em>Default: None</em> - If None, defaults to number of
+processors plus 4. Set to less than or equal to allowed
+concurrent connections on server.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any exception raised by operations will be passed through.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.get_r">
+<span class="sig-name descname"><span class="pre">get_r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_concurrent_prefetch_requests=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefetch=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.get_r" title="Link to this definition">¶</a></dt>
+<dd><p>Recursively copy remotedir structure to localdir</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotedir</strong> (<em>str</em>) – The remote directory to recursively copy.</p></li>
+<li><p><strong>localdir</strong> (<em>str</em>) – The local path to save recursive download.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>max_concurrent_prefetch_requests</strong> (<em>int</em>) – <ul>
+<li><p>The maximum number of</p></li>
+</ul>
+<p>concurrent read requests to prefetch.</p>
+</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – <em>Default: None</em> - Filter applied to all filenames
+transfering only the subset of files that match.</p></li>
+<li><p><strong>prefetch</strong> (<em>bool</em>) – <em>Default: True</em> - Controls whether prefetching
+is performed.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Sync the modification
+time(st_mtime) on the local file to match the time on the remote.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>workers</strong> (<em>int</em>) – <em>Default: None</em> - If None, defaults to number of
+processors plus 4. Set to less than or equal to allowed
+concurrent connections on server.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any exception raised by operations will be passed through.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.getcwd">
+<span class="sig-name descname"><span class="pre">getcwd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.getcwd" title="Link to this definition">¶</a></dt>
+<dd><p>Return the current working directory on the remote.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(str) Remote current working directory. None, if not set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.getfo">
+<span class="sig-name descname"><span class="pre">getfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_concurrent_prefetch_requests=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefetch=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.getfo" title="Link to this definition">¶</a></dt>
+<dd><p>Copy a remote file (remotepath) to a file-like object, flo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotefile</strong> (<em>str</em>) – The remote path and filename to retrieve.</p></li>
+<li><p><strong>flo</strong> – Open file like object ready to write.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>max_concurrent_prefetch_requests</strong> (<em>int</em>) – <ul>
+<li><p>The maximum number of</p></li>
+</ul>
+<p>concurrent read requests to prefetch.</p>
+</p></li>
+<li><p><strong>prefetch</strong> (<em>bool</em>) – <em>Default: True</em> - Controls whether prefetching
+is performed.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(int) The number of bytes written to the opened file object</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any exception raised by operations will be passed through.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.isdir">
+<span class="sig-name descname"><span class="pre">isdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.isdir" title="Link to this definition">¶</a></dt>
+<dd><p>Determine if remotepath is a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to test.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.isfile">
+<span class="sig-name descname"><span class="pre">isfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.isfile" title="Link to this definition">¶</a></dt>
+<dd><p>Determine if remotepath is a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to test.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.lexists">
+<span class="sig-name descname"><span class="pre">lexists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.lexists" title="Link to this definition">¶</a></dt>
+<dd><p>Determine whether remotepath exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to test.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(bool), True, if lexists, else False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.listdir">
+<span class="sig-name descname"><span class="pre">listdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.listdir" title="Link to this definition">¶</a></dt>
+<dd><p>Return a sorted list of a directory’s contents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to search.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list of str) Sorted directory content.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.listdir_attr">
+<span class="sig-name descname"><span class="pre">listdir_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.listdir_attr" title="Link to this definition">¶</a></dt>
+<dd><p>Return a non-sorted list of SFTPAttribute objects for the remote
+directory contents. Will not include the special entries ‘.’ and ‘..’.</p>
+<p>The returned SFTPAttributes objects will each have an additional field:
+longname, which may contain a formatted string of the file’s
+attributes, in unix format. The content of this string will depend on
+the SFTP server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to search.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list of SFTPAttributes) Sorted directory content as objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.logfile">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logfile</span></span><a class="headerlink" href="#sftpretty.Connection.logfile" title="Link to this definition">¶</a></dt>
+<dd><p>Return logging setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(str) logfile or (bool) False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.lstat">
+<span class="sig-name descname"><span class="pre">lstat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.lstat" title="Link to this definition">¶</a></dt>
+<dd><p>Return information about remote location without following symbolic
+links. Otherwise, the same as .stat().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to stat.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) SFTPAttributes object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.mkdir">
+<span class="sig-name descname"><span class="pre">mkdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.mkdir" title="Link to this definition">¶</a></dt>
+<dd><p>Create a directory and set permission mode. On some systems, mode
+is ignored. Where used, the current umask value is first masked out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotedir</strong> (<em>str</em>) – Remote location to create.</p></li>
+<li><p><strong>mode</strong> (<em>int</em>) – <em>Default: 700</em> - Octal mode to apply on path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.mkdir_p">
+<span class="sig-name descname"><span class="pre">mkdir_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.mkdir_p" title="Link to this definition">¶</a></dt>
+<dd><p>Create a directory and any missing parent locations as needed. Set
+permission mode, if created. Silently complete if remotedir already
+exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotedir</strong> (<em>str</em>) – Remote location to create.</p></li>
+<li><p><strong>mode</strong> (<em>int</em>) – <em>Default: 700</em> - Octal mode to apply on created paths.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>OSError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.normalize" title="Link to this definition">¶</a></dt>
+<dd><p>Return the fully expanded path of a given location. This can be used
+to resolve symlinks or determine what the server believes to be the
+<a class="reference internal" href="#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pwd</span></code></a>, by passing ‘.’ as remotepath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to be normalized.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(str) Normalized path.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if remotepath can’t be resolved</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.open">
+<span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.open" title="Link to this definition">¶</a></dt>
+<dd><p>Open a file on the remote server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotefile</strong> (<em>str</em>) – Path of remote file to open.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – <em>Default: read-only</em> - File access mode.</p></li>
+<li><p><strong>bufsize</strong> (<em>int</em>) – <em>Default: -1</em> - Buffering in bytes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) SFTPFile, a file-like object handler.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if the file could not be opened.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">localfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remotepath=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirm=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.put" title="Link to this definition">¶</a></dt>
+<dd><p>Copies a file between the local host and the remote host.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>localfile</strong> (<em>str</em>) – The local path and filename to copy remotely.</p></li>
+<li><p><strong>remotepath</strong> (<em>str</em>) – Remote location to save file, else the remote
+<a class="reference internal" href="#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pwd</span></code></a> and local filename is used.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>confirm</strong> (<em>bool</em>) – <em>Default: True</em> - Whether to do a stat() on the
+file afterwards to the file size.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Make the modification
+time(st_mtime) on the remote file match the time on the local.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) SFTPAttributes containing details about the given file.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>IOError</strong> – if remotepath doesn’t exist</p></li>
+<li><p><strong>OSError</strong> – if localfile doesn’t exist</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.put_d">
+<span class="sig-name descname"><span class="pre">put_d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">localdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirm=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.put_d" title="Link to this definition">¶</a></dt>
+<dd><p>Copies a local directory’s contents to a remotepath</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>localdir</strong> (<em>str</em>) – The local directory to copy remotely.</p></li>
+<li><p><strong>remotedir</strong> (<em>str</em>) – The remote location to save directory.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>confirm</strong> (<em>bool</em>) – <em>Default: True</em> - Whether to do a stat() on the
+file afterwards to confirm the file size.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Make the modification
+time(st_mtime) on the remote file match the time on the local.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>workers</strong> (<em>int</em>) – <em>Default: None</em> - If None, defaults to number of
+processors plus 4. Set to less than or equal to allowed
+concurrent connections on server.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>IOError</strong> – if remotedir doesn’t exist</p></li>
+<li><p><strong>OSError</strong> – if localdir doesn’t exist</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.put_r">
+<span class="sig-name descname"><span class="pre">put_r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">localdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirm=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_mtime=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.put_r" title="Link to this definition">¶</a></dt>
+<dd><p>Recursively copies a local directory’s contents to a remotepath</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>localdir</strong> (<em>str</em>) – The local directory to copy remotely.</p></li>
+<li><p><strong>remotedir</strong> (<em>str</em>) – The remote location to save directory.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>confirm</strong> (<em>bool</em>) – <em>Default: True</em> - Whether to do a stat() on the
+file afterwards to confirm the file size.</p></li>
+<li><p><strong>preserve_mtime</strong> (<em>bool</em>) – <em>Default: False</em> - Make the modification
+time(st_mtime) on the remote file match the time on the local.
+(st_atime can differ because stat’ing the localfile can/does update
+it’s st_atime)</p></li>
+<li><p><strong>resume</strong> (<em>bool</em>) – <em>Default: False</em> - Continue a previous transfer
+based on destination path matching.</p></li>
+<li><p><strong>workers</strong> (<em>int</em>) – <em>Default: None</em> - If None, defaults to number of
+processors plus 4. Set to less than or equal to allowed
+concurrent connections on server.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – <em>Default: None</em> - Times to try (not retry) before
+giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>IOError</strong> – if remotedir doesn’t exist</p></li>
+<li><p><strong>OSError</strong> – if localdir doesn’t exist</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.putfo">
+<span class="sig-name descname"><span class="pre">putfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remotepath=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirm=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptions=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tries=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backoff=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">sftpretty</span> <span class="pre">(WARNING)&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.putfo" title="Link to this definition">¶</a></dt>
+<dd><p>Copies the contents of a file like object to remotepath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>flo</strong> – File-like object that supports .read()</p></li>
+<li><p><strong>remotepath</strong> (<em>str</em>) – The remote location to save contents of object.</p></li>
+<li><p><strong>file_size</strong> (<em>int</em>) – The size of flo, if not given, calculated
+preventing division by zero in default callback function.</p></li>
+<li><p><strong>callback</strong> (<em>callable</em>) – Optional callback function (form: <code class="docutils literal notranslate"><span class="pre">func(</span>
+<span class="pre">int,</span> <span class="pre">int</span></code>)) that accepts the bytes transferred so far and the
+total bytes to be transferred.</p></li>
+<li><p><strong>confirm</strong> (<em>bool</em>) – <em>Default: True</em> - Whether to do a stat() on the
+file afterwards to confirm the file size.</p></li>
+<li><p><strong>exceptions</strong> (<em>Exception</em>) – Exception(s) to check. May be a tuple of
+exceptions to check. IOError or IOError(errno.ECOMM) or (IOError,)
+or (ValueError, IOError(errno.ECOMM))</p></li>
+<li><p><strong>tries</strong> (<em>int</em>) – Times to try (not retry) before giving up.</p></li>
+<li><p><strong>backoff</strong> (<em>int</em>) – <em>Default: 2</em> - Backoff multiplier. Default will
+double the delay each retry.</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – <em>Default: 1</em> - Initial delay between retries in
+seconds.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – <em>Default: Logger(__name__)</em> -
+Logger to use.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em>) – <em>Default: False</em> - If set then no logging will
+be attempted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) SFTPAttributes containing details about the given file.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypeError, if remotepath not specified, any underlying error</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.pwd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pwd</span></span><a class="headerlink" href="#sftpretty.Connection.pwd" title="Link to this definition">¶</a></dt>
+<dd><p>Return the current working directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(str) Current working directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.readlink">
+<span class="sig-name descname"><span class="pre">readlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotelink</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.readlink" title="Link to this definition">¶</a></dt>
+<dd><p>Return the target of a symlink as an absolute path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotelink</strong> (<em>str</em>) – Remote location of the symlink.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(str) Absolute path to target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.remote_server_key">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remote_server_key</span></span><a class="headerlink" href="#sftpretty.Connection.remote_server_key" title="Link to this definition">¶</a></dt>
+<dd><p>Return the remote server’s key</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.remotetree">
+<span class="sig-name descname"><span class="pre">remotetree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recurse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.remotetree" title="Link to this definition">¶</a></dt>
+<dd><p>Recursively map remote directory tree to a dictionary container.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>container</strong> (<em>dict</em>) – Hash table to save remote directory tree.
+{remotedir: [(remotedir/subdir, localdir/remotedir/subdir)]}</p></li>
+<li><p><strong>remotedir</strong> (<em>str</em>) – Remote location to descend, use ‘.’ to start at
+<a class="reference internal" href="#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pwd</span></code></a>.</p></li>
+<li><p><strong>localdir</strong> (<em>str</em>) – Location used as root of appended remote paths.</p></li>
+<li><p><strong>recurse</strong> (<em>bool</em>) – <em>Default: True</em> - To recurse or not to recurse
+that is the question.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exception</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotefile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.remove" title="Link to this definition">¶</a></dt>
+<dd><p>Delete the remote file. May include a path, if no path, then
+<a class="reference internal" href="#sftpretty.Connection.pwd" title="sftpretty.Connection.pwd"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pwd</span></code></a> is used. This method only works on files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotefile</strong> (<em>str</em>) – Remote file to delete.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.rename">
+<span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.rename" title="Link to this definition">¶</a></dt>
+<dd><p>Rename a path on the remote host.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotepath</strong> (<em>str</em>) – Remote path to rename.</p></li>
+<li><p><strong>newpath</strong> (<em>str</em>) – New name for remote path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.rmdir">
+<span class="sig-name descname"><span class="pre">rmdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotedir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.rmdir" title="Link to this definition">¶</a></dt>
+<dd><p>Delete remote directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotedir</strong> (<em>str</em>) – Remote directory to delete.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.security_options">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">security_options</span></span><a class="headerlink" href="#sftpretty.Connection.security_options" title="Link to this definition">¶</a></dt>
+<dd><p>Return the transport security options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(obj) Security preferences for the underlying transport.
+These are tuples of acceptable <cite>.ciphers</cite>, <cite>.digests</cite>, <cite>.key_types</cite>
+and key exchange algorithms <cite>.kex</cite>, listed in order of preference.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.sftp_client">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sftp_client</span></span><a class="headerlink" href="#sftpretty.Connection.sftp_client" title="Link to this definition">¶</a></dt>
+<dd><p>Provide access to the underlying SFTPClient object. Client is not
+handled by context manager. Connection is closed with underlying
+transport if not done explicitly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) Active SFTPClient object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.stat">
+<span class="sig-name descname"><span class="pre">stat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.stat" title="Link to this definition">¶</a></dt>
+<dd><p>Return information about remote location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>remotepath</strong> (<em>str</em>) – Remote location to stat.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(obj) SFTPAttributes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.symlink">
+<span class="sig-name descname"><span class="pre">symlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remote_src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_dest</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.symlink" title="Link to this definition">¶</a></dt>
+<dd><p>Create a symlink for a remote file on the server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remote_src</strong> (<em>str</em>) – path of original file</p></li>
+<li><p><strong>remote_dest</strong> (<em>str</em>) – path of the created symlink</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any underlying error, IOError if remote_dest already exists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="sftpretty.Connection.timeout">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#sftpretty.Connection.timeout" title="Link to this definition">¶</a></dt>
+<dd><p>Get or set the underlying socket timeout for pending IO operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(float|None) Seconds to wait for pending read/write operation
+before raising socket.timeout, or None for no timeout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sftpretty.Connection.truncate">
+<span class="sig-name descname"><span class="pre">truncate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remotepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sftpretty.Connection.truncate" title="Link to this definition">¶</a></dt>
+<dd><p>Change the size of the file specified by path. Used to modify the
+size of the file, just like the truncate method on Python file objects.
+The new file size is confirmed and returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remotepath</strong> (<em>str</em>) – remote file path to modify</p></li>
+<li><p><strong>size</strong> (<em>int</em><em>|</em><em>long</em>) – the new file size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(int) new size of file</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IOError, if file does not exist</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="securityoptions">
+<h2>SecurityOptions<a class="headerlink" href="#securityoptions" title="Link to this heading">¶</a></h2>
+<p>A simple object returned with available security preferences.</p>
+<p>See <a class="reference external" href="https://docs.paramiko.org/en/latest/api/transport.html?highlight=ciphers#paramiko.transport.SecurityOptions">Security Options</a> for details.</p>
+</section>
+<section id="sftpattributes">
+<h2>SFTPAttributes<a class="headerlink" href="#sftpattributes" title="Link to this heading">¶</a></h2>
+<p>Representation of the attributes of a file or proxied file.</p>
+<p>See <a class="reference external" href="https://docs.paramiko.org/en/latest/api/sftp.html?highlight=sftpattributes#paramiko.sftp_attr.SFTPAttributes">SFTPAttributes</a> for details.</p>
+</section>
+<section id="sftpfile">
+<h2>SFTPFile<a class="headerlink" href="#sftpfile" title="Link to this heading">¶</a></h2>
+<p>Proxy object for a file on the remote server.</p>
+<p>See <a class="reference external" href="https://docs.paramiko.org/en/latest/api/sftp.html?highlight=paramiko.sftp_file.sftpfile#paramiko.sftp_file.SFTPFile">SFTPFile</a> for details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cookbook.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changes.html" class="btn btn-neutral float-right" title="Change Log" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

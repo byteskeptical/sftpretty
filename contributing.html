@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing &mdash; sftpretty 1.1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=00f267c6"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Authors" href="authors.html" />
+    <link rel="prev" title="Change Log" href="changes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sftpretty
+          </a>
+              <div class="version">
+                1.1.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cookbook.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sftpretty.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Change Log</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports">Bug Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code">Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#docs">Docs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#issue-priorities">Issue Priorities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sftpretty</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h1>
+<p>You can contribute to the project in a number of ways. Code is always good, bugs are interesting but tests make your famous!</p>
+<p>Bug reports or feature enhancements that include a test are given preferential treatment. So instead of voting for an issue, write a test.</p>
+<section id="bug-reports">
+<h2>Bug Reports<a class="headerlink" href="#bug-reports" title="Link to this heading">¶</a></h2>
+<p>If you encounter a bug or some surprising behavior, please file an issue on our <a class="reference external" href="https://github.com/byteskeptical/sftpretty/issues">tracker</a>.</p>
+</section>
+<section id="code">
+<h2>Code<a class="headerlink" href="#code" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ol class="arabic">
+<li><p>Fork the repository <a class="reference external" href="https://github.com/byteskeptical/sftpretty">sftpretty</a></p></li>
+<li><p>Install supporting software packages and sftpretty in –editable mode</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Make a virtualenv, clone the repos, install the deps from pip install -r requirements-dev.txt</p></li>
+<li><p>Install sftpretty in editable mode, pip install -e .</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Write any new tests needed and ensure existing tests continue to pass without modification.</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Setup CI testing for your Fork. Currently testing is done on Github Actions but feel free to use the testing framework of your choosing.</p></li>
+<li><p>Testing features that concern chmod, chown on Windows is NOT supported. Testing compression has to be ran against a local compatible sshd and not the plugin as it does NOT support this test.</p></li>
+<li><p>You will need to setup an ssh daemon on your local machine and create a user: copy the contents of id_sftpretty.pub to the newly created user’s authorized_keys file – Tests that can only be run locally are skipped using the &#64;skip_if_ci decorator so they don’t fail when the test suite is run on the CI server.</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Ensure that your name is added to the end of the <a class="reference internal" href="authors.html"><span class="doc">Authors</span></a> file using the format Name &lt;<a class="reference external" href="mailto:email&#37;&#52;&#48;domain&#46;com">email<span>&#64;</span>domain<span>&#46;</span>com</a>&gt; (url), where the (url) portion is optional.</p></li>
+<li><p>Submit a Pull Request to the project.</p></li>
+</ol>
+</div></blockquote>
+</section>
+<section id="docs">
+<h2>Docs<a class="headerlink" href="#docs" title="Link to this heading">¶</a></h2>
+<p>Using Sphinx to build the docs. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code> is your friend, see docstrings for details on params, etc.</p>
+</section>
+<section id="issue-priorities">
+<h2>Issue Priorities<a class="headerlink" href="#issue-priorities" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>This section lists the priority that will be assigned to an issue:</dt><dd><ol class="arabic simple">
+<li><p>Developer Issues</p></li>
+<li><p>Issues that have a pull request with a test(s) displaying the issue and code change(s) that satisfies the test suite</p></li>
+<li><p>Issues that have a pull request with a test(s) displaying the issue</p></li>
+<li><p>Naked pull requests - a code change request with no accompaning test</p></li>
+<li><p>An issue without a pull request with a test displaying the issue</p></li>
+<li><p>Badly documented issue with no code or test - sftpretty is not an end-user tool, it is a developer tool and it is expected that issues will be submitted like a developer and not an end-user. Issues in the realm of “the internet is broken” will be marked as invalid with a comment pointing the submitter to this section.</p></li>
+</ol>
+</dd>
+</dl>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>Tests specific to an issue should be put in the tests/ directory and the module should be named test_issue_xx.py The tests within that module should be named test_issue_xx or test_issue_xx_YYYYYY if more than one test. Pull requests should not modify existing tests (exceptions apply). See tests/test_issue_xx.py for a template and further explanation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="changes.html" class="btn btn-neutral float-left" title="Change Log" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="authors.html" class="btn btn-neutral float-right" title="Authors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
