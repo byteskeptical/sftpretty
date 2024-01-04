@@ -5,6 +5,7 @@ Contributors of code, tests and documentation to the project who have agreed to 
 
 Acknowledgment
 --------------
+    * PR #46 by ofiliojo
     * PR #19 by coreyhartley
     * PR #15 by RobertCochran
     * PR #12 by erans
