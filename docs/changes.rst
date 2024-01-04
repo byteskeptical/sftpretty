@@ -1,8 +1,12 @@
 Change Log
 ==========
 
-1.1.3 (current, released 2023-12-11)
-------------------------------------
+1.1.4 (current, released 2024-1-04)
+-----------------------------------
+    * missed the console logger in previous behavior change
+
+1.1.3 (released 2023-12-11)
+---------------------------
     * adding merge between ssh security options and paramiko compatibility
     * changing default logger behavior from hooking into __main__
 

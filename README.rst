@@ -78,7 +78,7 @@ Example
                    preserve_mtime=True, workers=6)
 
 
-    # Use OpenSSH format config for public key authentication. Configuration
+    # Use OpenSSH config for public key authentication. Configuration
     # connection values are prioritized when available. Credentials still need
     # to be provided. There may be a significant delta between your ssh program
     # and support for newer security option algorithms due to lagging support

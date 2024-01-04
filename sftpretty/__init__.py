@@ -234,6 +234,8 @@ class Connection(object):
         level = level_map[level.lower().strip('1,2,3')]
 
         try:
+            global log
+            log = getLogger('SFTPretty')
             if self._cnopts.log:
                 if isinstance(self._cnopts.log, bool):
                     # Log to a temporary file.
@@ -243,15 +245,13 @@ class Connection(object):
                 logfile_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
                                                '%(message)s'))
                 logfile.setFormatter(logfile_formatter)
-                getLogger().addHandler(logfile)
+                log.addHandler(logfile)
             console = StreamHandler()
             console.setLevel(level)
             console_formatter = Formatter(('[%(asctime)s] %(levelname)s - '
                                            '%(message)s'))
             console.setFormatter(console_formatter)
-            getLogger().addHandler(console)
-            global log
-            log = getLogger('SFTPretty')
+            log.addHandler(console)
             log.setLevel(level)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
