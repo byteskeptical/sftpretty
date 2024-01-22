@@ -1,7 +1,7 @@
 from collections import deque
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from functools import wraps
-from hashlib import new, sha3_512
+from hashlib import sha3_512
 from multiprocessing import Manager
 from pathlib import Path, PureWindowsPath
 from stat import S_IMODE
@@ -52,7 +52,7 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
     try:
         with open(content, 'rb') as _stream:
             _hashstream(_stream)
-    except FileNotFoundError:
+    except (FileNotFoundError, TypeError):
         try:
             content.seek(0)
         except AttributeError:
@@ -62,6 +62,7 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
                 buffer.update(content)
 
     return buffer.hexdigest()
+
 
 def localpool(localdir, remotedir):
     '''Sub-directory mapping local directory to iterable.
@@ -94,6 +95,7 @@ def localpool(localdir, remotedir):
         return localdir, [], err
 
     return localdir, _mapping, None
+
 
 def localtree(localdir, remotedir, recurse=True):
     '''recursively map local directory using sub-directories as keys.
@@ -141,6 +143,7 @@ def localtree(localdir, remotedir, recurse=True):
                                 if _file not in done}
 
         return dict(container)
+
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     '''Exception type based retry decorator for all your problematic functions
