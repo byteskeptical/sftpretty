@@ -42,17 +42,17 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
 
     '''
     buffer = new(algorithm.name)
-    if isinstance(filename, str):
+    if isinstance(content, str):
         try:
-            with open(filename, 'rb') as filestream:
+            with open(content, 'rb') as filestream:
                 for chunk in iter(lambda: filestream.read(blocksize), b''):
                     buffer.update(chunk)
         except FileNotFoundError:
-            buffer.update(bytes(filename.encode('utf-8')))
-    elif isinstance(filename, BytesIO):
+            buffer.update(bytes(content.encode('utf-8')))
+    elif isinstance(content, BytesIO):
         for chunk in iter(lambda: filestream.read1(blocksize), b''):
             buffer.update(chunk)
-    elif isinstance(filename, IOBase):
+    elif isinstance(content, IOBase):
         for chunk in iter(lambda: filestream.read(blocksize), b''):
             buffer.update(chunk)
 
