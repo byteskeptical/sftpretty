@@ -24,10 +24,10 @@ def drivedrop(filepath):
     return filepath
 
 
-def hash(filename, algorithm=sha3_512(), blocksize=65536):
+def hash(content, algorithm=sha3_512(), blocksize=65536):
     '''hash contents of a file, file like object or string
 
-    :param bytesIO,IObase,str filename:
+    :param bytesIO,IObase,str content:
         path to file, file object, or string to process
     :param hashlib.hash algorithm:
         hash object to use as digest algorithm
@@ -44,8 +44,8 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
 
     buffer = algorithm.copy()
 
-    def _hashstream(file_stream):
-        for chunk in iter(lambda: file_stream.read(blocksize), b''):
+    def _hashstream(data):
+        for chunk in iter(lambda: data.read(blocksize), b''):
             buffer.update(chunk)
 
     try:
