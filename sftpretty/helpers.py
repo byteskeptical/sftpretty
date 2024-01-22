@@ -113,7 +113,7 @@ def localtree(localdir, remotedir, recurse=True):
         container = manager.dict()
         with ProcessPoolExecutor() as executor:
             _pool = {
-                executor.submit(localmap, localdir, remotedir): localdir
+                executor.submit(_localmap, localdir, remotedir): localdir
             }
 
             while _pool:
@@ -130,7 +130,7 @@ def localtree(localdir, remotedir, recurse=True):
                     if recurse:
                         for _local, _remote in _mappings:
                             if _local not in container.keys():
-                                future = executor.submit(localmap,
+                                future = executor.submit(_localmap,
                                                          _local, _remote)
                                 _pool[future] = _local
 
