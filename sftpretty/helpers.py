@@ -121,10 +121,10 @@ def localtree(localdir, remotedir, recurse=True):
                 for future in done:
                     localdir, _mappings, err = future.result()
                     if err:
-                        print(f"Error processing directory {localdir}: {err}")
+                        print(f'Error processing directory {localdir}: {err}')
                         continue
 
-                    container[localdir] = _mappings
+                    container[localdir.as_posix()] = _mappings
 
                     if recurse:
                         for _local, _remote in _mappings:
@@ -133,9 +133,11 @@ def localtree(localdir, remotedir, recurse=True):
                                                          _local, _remote)
                                 _pool[future] = _local
 
-                _pool = {_file: localdir
-                                for _file, localdir in _pool.items()
-                                if _file not in done}
+                _pool = {
+                    _file: localdir
+                    for _file, localdir in _pool.items()
+                    if _file not in done
+                }
 
         return dict(container)
 

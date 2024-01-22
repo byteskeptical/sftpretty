@@ -12,9 +12,8 @@ def test_remotetree(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             localpath = Path(mkdtemp()).as_posix()
-            tree = {}
 
-            sftp.remotetree(tree, cwd, localpath)
+            tree = sftp.remotetree(cwd, localpath)
 
             remote = {
                 '/home/test': [
@@ -44,9 +43,8 @@ def test_remotetree_no_recurse(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             localpath = Path(mkdtemp()).as_posix()
-            tree = {}
 
-            sftp.remotetree(tree, cwd, localpath, recurse=False)
+            tree = sftp.remotetree(cwd, localpath, recurse=False)
 
             remote = {
                 '/home/test': [

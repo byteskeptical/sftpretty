@@ -13,12 +13,10 @@ def test_get_r(sftpserver):
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('.', localpath)
 
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, remote_cwd)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            remote_tree = sftp.remotetree(remote_cwd, localpath)
 
             localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])
@@ -36,12 +34,10 @@ def test_get_r_pwd(sftpserver):
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('pub/foo2', localpath)
 
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, remote_cwd)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            remote_tree = sftp.remotetree(remote_cwd, localpath)
 
             localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])
@@ -60,12 +56,10 @@ def test_get_r_pathed(sftpserver):
             localpath = Path(mkdtemp()).as_posix()
             sftp.get_r('./bar1', localpath)
 
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, remote_cwd)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            remote_tree = sftp.remotetree(remote_cwd, localpath)
 
             actual = hash(remote_cwd + '/bar1.txt')
             expected = ('a69f73cca23a9ac5c8b567dc185a756e97c982164fe258'
@@ -86,12 +80,10 @@ def test_get_r_cdd(sftpserver):
             sftp.chdir('pub/foo2')
             sftp.get_r('.', localpath)
 
-            remote_tree = {}
-
             remote_cwd = sftp.pwd
 
             local_tree = localtree(localpath, remote_cwd)
-            sftp.remotetree(remote_tree, remote_cwd, localpath)
+            remote_tree = sftp.remotetree(remote_cwd, localpath)
 
             localdirs = sorted([localdir.replace(localpath, remote_cwd)
                                 for localdir in local_tree.keys()])

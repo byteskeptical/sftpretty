@@ -1,8 +1,11 @@
-from concurrent.futures import as_completed, ThreadPoolExecutor
+from collections import deque
+from concurrent.futures import (as_completed, FIRST_COMPLETED,
+                                ThreadPoolExecutor, wait)
 from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
+from multiprocessing import Manager
 from os import environ, SEEK_END, utime
 from paramiko import (hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
@@ -621,10 +624,7 @@ class Connection(object):
         lwd = Path(localdir).absolute().as_posix()
         rwd = self._default_path
 
-        tree = {}
-        tree[rwd] = [(rwd, lwd)]
-
-        self.remotetree(tree, rwd, lwd, recurse=True)
+        tree = self.remotetree(rwd, lwd, recurse=True)
         log.debug(f'Remote Tree: [{tree}]')
 
         for roots in tree.keys():
@@ -1324,11 +1324,28 @@ class Connection(object):
 
         return link_destination
 
-    def remotetree(self, container, remotedir, localdir, recurse=True):
+    def _remotepool(self, container, remotedir, localdir, recurse):
+        try:
+            localdir = Path(localdir).expanduser().as_posix()
+            remotedir = self.normalize(remotedir)
+
+            container[remotedir] = container.get(remotedir, deque())
+
+            for attribute in self.listdir_attr(remotedir):
+                if S_ISDIR(attribute.st_mode):
+                    remote = Path(remotedir).joinpath(
+                                  attribute.filename).as_posix()
+                    local = Path(localdir).joinpath(
+                                 Path(attribute.filename).stem).as_posix()
+                    container[remotedir].appendleft((remote, local))
+        except Exception as err:
+            log.error((f'Exception while processing directory {remotedir}: '
+                       f'{err}'))
+            raise
+
+    def remotetree(self, remotedir, localdir, recurse=True):
         '''Recursively map remote directory tree to a dictionary container.
 
-        :param dict container: Hash table to save remote directory tree.
-            {remotedir: [(remotedir/subdir, localdir/remotedir/subdir)]}
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
         :param str localdir: Location used as root of appended remote paths.
@@ -1339,24 +1356,35 @@ class Connection(object):
 
         :raises: Exception
         '''
-        try:
-            localdir = Path(localdir).expanduser().as_posix()
-            remotedir = self.normalize(remotedir)
-            for attribute in self.listdir_attr(remotedir):
-                if S_ISDIR(attribute.st_mode):
-                    remote = Path(remotedir).joinpath(
-                        attribute.filename).as_posix()
-                    local = Path(localdir).joinpath(
-                        Path(remote).stem).as_posix()
-                    if remotedir in container.keys():
-                        container[remotedir].append((remote, local))
-                    else:
-                        container[remotedir] = [(remote, local)]
+        with Manager() as manager:
+            container = manager.dict()
+            with ThreadPoolExecutor() as executor:
+                _pool = {
+                    executor.submit(self.remotepool, container,
+                                    remotedir, localdir, recurse): remotedir
+                }
+
+                while _pool:
+                    done, _ = wait(_pool, return_when=FIRST_COMPLETED)
+
+                    for future in done:
+                        try:
+                            future.result()
+                        except Exception as err:
+                            remote = _pool[future]
+                            log.error(('Exception while processing directory '
+                                      f'{remote}: {err}'))
+                        del _pool[future]
+                    
                     if recurse:
-                        self.remotetree(container, remote, local,
-                                        recurse=recurse)
-        except Exception as err:
-            raise err
+                        for _remote, _local in list(container.items()):
+                            for remote, local in _local:
+                                if remote not in _pool.values():
+                                    future = executor.submit(self._remotepool,
+                                                             container, remote,
+                                                             local, recurse)
+                                    _pool[future] = remote
+            return dict(container)
 
     def remove(self, remotefile):
         '''Delete the remote file. May include a path, if no path, then
