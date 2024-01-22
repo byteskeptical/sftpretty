@@ -1,6 +1,7 @@
+from collections import deque
 from functools import wraps
 from hashlib import new, sha3_512
-from io import BytesIO, IOBase
+from multiprocessing import FIRST_COMPLETED, Manager, ProcessPoolExecutor, wait
 from pathlib import Path, PureWindowsPath
 from stat import S_IMODE
 from time import sleep
@@ -38,39 +39,71 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
     :raises: Exception
 
     '''
-    buffer = new(algorithm.name)
-    if isinstance(filename, str):
+    if algorithm is None:
+        algorithm = sha3_512()
+
+    buffer = algorithm.copy()
+
+    def _hashstream(file_stream):
+        for chunk in iter(lambda: file_stream.read(blocksize), b''):
+            buffer.update(chunk)
+
+    try:
+        with open(content, 'rb') as _stream:
+            _hashstream(_stream)
+    except (TypeError, FileNotFoundError):
         try:
-            with open(filename, 'rb') as filestream:
-                for chunk in iter(lambda: filestream.read(blocksize), b''):
-                    buffer.update(chunk)
-        except FileNotFoundError:
-            buffer.update(bytes(filename.encode('utf-8')))
-    elif isinstance(filename, BytesIO):
-        for chunk in iter(lambda: filestream.read1(blocksize), b''):
-            buffer.update(chunk)
-    elif isinstance(filename, IOBase):
-        for chunk in iter(lambda: filestream.read(blocksize), b''):
-            buffer.update(chunk)
+            content.seek(0)
+        except AttributeError:
+            if isinstance(content, str):
+                buffer.update(content.encode('utf-8')
+            else:
+                content
+        else:
+            _hashstream(content)
 
-    return algorithm.hexdigest()
+    return buffer.hexdigest()
 
+def localpool(localdir, remotedir):
+    '''Sub-directory mapping local directory to iterable.
 
-def localtree(container, localdir, remotedir, recurse=True):
-    '''recursively descend local directory mapping the tree to a
-    dictionary container.
-
-    :param dict container: dictionary object to save directory tree
-            {localdir:
-                 [(localdir/sub-directory,
-                   remotedir/localdir/sub-directory)],}
-        {localdir: [(content path, remotedir/content path)],}
     :param str localdir:
         root of local directory to descend, use '.' to start at
         :attr:`.pwd`
     :param str remotedir:
-        root of remote directory to append localdir too
-        path
+        root of remote directory to append localdir
+
+    :returns: tuple: (localdir, _mapping, Exception or None)
+
+    :raises: None
+
+    '''
+    _mapping = deque()
+
+    try:
+        if localdir.startswith(':', 1) or localdir.startswith('\\'):
+            localdir = PureWindowsPath(localdir)
+        else:
+            localdir = Path(localdir).expanduser().resolve()
+
+        for localpath in Path(localdir).iterdir():
+            if localpath.is_dir():
+                local = localpath.as_posix()
+                remote = Path(remotedir).joinpath(localpath.name).as_posix()
+                _mapping.appendleft((local, remote))
+    except Exception as err:
+        return localdir, [], err
+
+    return localdir, _mapping, None
+
+def localtree(localdir, remotedir, recurse=True):
+    '''recursively map local directory using sub-directories as keys.
+
+    :param str localdir:
+        root of local directory to descend, use '.' to start at
+        :attr:`.pwd`
+    :param str remotedir:
+        root of remote directory to append localdir
     :param bool recurse: *Default: True*. To recurse or not to recurse
         that is the question
 
@@ -79,24 +112,36 @@ def localtree(container, localdir, remotedir, recurse=True):
     :raises: Exception
 
     '''
-    try:
-        if localdir.startswith(':', 1) or localdir.startswith('\\'):
-            localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir).expanduser().absolute()
-        for localpath in Path(localdir).iterdir():
-            if localpath.is_dir():
-                local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(localpath.stem).as_posix()
-                if localdir.as_posix() in container.keys():
-                    container[localdir.as_posix()].append((local, remote))
-                else:
-                    container[localdir.as_posix()] = [(local, remote)]
-                if recurse:
-                    localtree(container, local, remote, recurse=recurse)
-    except Exception as err:
-        raise err
+    with Manager() as manager:
+        container = manager.dict()
+        with ProcessPoolExecutor() as executor:
+            _pool = {
+                executor.submit(localpool, localdir, remotedir): localdir
+            }
 
+            while _pool:
+                done, _ = wait(_pool, return_when=FIRST_COMPLETED)
+
+                for future in done:
+                    localdir, _mappings, err = future.result()
+                    if err:
+                        print(f"Error processing directory {localdir}: {err}")
+                        continue
+
+                    container[localdir] = _mappings
+
+                    if recurse:
+                        for _local, _remote in _mappings:
+                            if _local not in container.keys():
+                                future = executor.submit(localpool,
+                                                         _local, _remote)
+                                _pool[future] = _local
+
+                _pool = {_file: localdir
+                                for _file, localdir in _pool.items()
+                                if _file not in done}
+
+        return dict(container)
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     '''Exception type based retry decorator for all your problematic functions
