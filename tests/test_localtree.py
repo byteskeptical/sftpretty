@@ -14,9 +14,8 @@ def test_localtree(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            tree = {}
 
-            localtree(tree, localpath, cwd)
+            tree = localtree(localpath, cwd)
 
             local = {
                 f'{localpath}': [
@@ -48,9 +47,8 @@ def test_localtree_no_recurse(sftpserver):
             sftp.get_r('.', localpath)
 
             cwd = sftp.pwd
-            tree = {}
 
-            localtree(tree, localpath, cwd, recurse=False)
+            tree = localtree(localpath, cwd, recurse=False)
 
             local = {
                 f'{localpath}': [
