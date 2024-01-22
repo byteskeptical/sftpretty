@@ -1,7 +1,8 @@
 from collections import deque
+from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from functools import wraps
 from hashlib import new, sha3_512
-from multiprocessing import FIRST_COMPLETED, Manager, ProcessPoolExecutor, wait
+from multiprocessing import Manager
 from pathlib import Path, PureWindowsPath
 from stat import S_IMODE
 from time import sleep
