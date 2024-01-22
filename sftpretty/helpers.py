@@ -42,27 +42,29 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
     '''
     if algorithm is None:
         algorithm = sha3_512()
+    else:
+        algorithm = algorithm.copy()
 
-    buffer = algorithm.copy()
+    def chunks(stream):
+        for chunk in iter(lambda: stream.read(blocksize), b''):
+            algorithm.update(chunk)
 
-    def _hashstream(data):
-        for chunk in iter(lambda: data.read(blocksize), b''):
-            buffer.update(chunk)
-
-    try:
-        with open(content, 'rb') as _stream:
-            _hashstream(_stream)
-    except (FileNotFoundError, TypeError):
+    if hasattr(content, 'read'):
         try:
             content.seek(0)
         except AttributeError:
+            pass
+        chunks(content)
+    else:
+        try:
+            with open(content, 'rb') as file:
+                chunks(file)
+        except (FileNotFoundError, TypeError, ValueError):
             if isinstance(content, str):
-                buffer.update(content.encode('utf-8'))
-            else:
-                buffer.update(content)
+                content = content.encode('utf-8')
+            algorithm.update(content)
 
-    return buffer.hexdigest()
-
+    return algorithm.hexdigest()
 
 def localpool(localdir, remotedir):
     '''Sub-directory mapping local directory to iterable.
