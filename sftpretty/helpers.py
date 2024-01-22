@@ -1,7 +1,8 @@
 from collections import deque
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from functools import wraps
-from hashlib import sha3_512
+from hashlib import new, sha3_512
+from io import BytesIO, IOBase
 from multiprocessing import Manager
 from pathlib import Path, PureWindowsPath
 from stat import S_IMODE
@@ -40,31 +41,23 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
     :raises: Exception
 
     '''
-    if algorithm is None:
-        algorithm = sha3_512()
-    else:
-        algorithm = algorithm.copy()
-
-    def chunks(stream):
-        for chunk in iter(lambda: stream.read(blocksize), b''):
-            algorithm.update(chunk)
-
-    if hasattr(content, 'read'):
+    buffer = new(algorithm.name)
+    if isinstance(filename, str):
         try:
-            content.seek(0)
-        except AttributeError:
-            pass
-        chunks(content)
-    else:
-        try:
-            with open(content, 'rb') as file:
-                chunks(file)
-        except (FileNotFoundError, TypeError, ValueError):
-            if isinstance(content, str):
-                content = content.encode('utf-8')
-            algorithm.update(content)
+            with open(filename, 'rb') as filestream:
+                for chunk in iter(lambda: filestream.read(blocksize), b''):
+                    buffer.update(chunk)
+        except FileNotFoundError:
+            buffer.update(bytes(filename.encode('utf-8')))
+    elif isinstance(filename, BytesIO):
+        for chunk in iter(lambda: filestream.read1(blocksize), b''):
+            buffer.update(chunk)
+    elif isinstance(filename, IOBase):
+        for chunk in iter(lambda: filestream.read(blocksize), b''):
+            buffer.update(chunk)
 
     return algorithm.hexdigest()
+
 
 def localpool(localdir, remotedir):
     '''Sub-directory mapping local directory to iterable.
