@@ -19,7 +19,41 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
         print(message)
 
 
+def _localmap(localdir, remotedir):
+    '''Sub-directory mapping local directory to iterable.
+
+    :param str localdir:
+        root of local directory to descend, use '.' to start at
+        :attr:`.pwd`
+    :param str remotedir:
+        root of remote directory to append localdir
+
+    :returns: tuple: (localdir, _mapping, Exception or None)
+
+    :raises: None
+
+    '''
+    _mapping = deque()
+
+    try:
+        if localdir.startswith(':', 1) or localdir.startswith('\\'):
+            localdir = PureWindowsPath(localdir)
+        else:
+            localdir = Path(localdir).expanduser().resolve()
+
+        for localpath in Path(localdir).iterdir():
+            if localpath.is_dir():
+                local = localpath.as_posix()
+                remote = Path(remotedir).joinpath(localpath.name).as_posix()
+                _mapping.appendleft((local, remote))
+    except Exception as err:
+        return localdir, [], err
+
+    return localdir, _mapping, None
+
+
 def drivedrop(filepath):
+    '''Shim to standardize filepaths across windows & unix locations'''
     if PureWindowsPath(filepath).drive:
         filepath = Path('/').joinpath(*Path(filepath).parts[1:]).as_posix()
 
@@ -59,39 +93,6 @@ def hash(content, algorithm=sha3_512(), blocksize=65536):
     return algorithm.hexdigest()
 
 
-def localpool(localdir, remotedir):
-    '''Sub-directory mapping local directory to iterable.
-
-    :param str localdir:
-        root of local directory to descend, use '.' to start at
-        :attr:`.pwd`
-    :param str remotedir:
-        root of remote directory to append localdir
-
-    :returns: tuple: (localdir, _mapping, Exception or None)
-
-    :raises: None
-
-    '''
-    _mapping = deque()
-
-    try:
-        if localdir.startswith(':', 1) or localdir.startswith('\\'):
-            localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir).expanduser().resolve()
-
-        for localpath in Path(localdir).iterdir():
-            if localpath.is_dir():
-                local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(localpath.name).as_posix()
-                _mapping.appendleft((local, remote))
-    except Exception as err:
-        return localdir, [], err
-
-    return localdir, _mapping, None
-
-
 def localtree(localdir, remotedir, recurse=True):
     '''recursively map local directory using sub-directories as keys.
 
@@ -103,7 +104,7 @@ def localtree(localdir, remotedir, recurse=True):
     :param bool recurse: *Default: True*. To recurse or not to recurse
         that is the question
 
-    :returns: None
+    :returns: dict container
 
     :raises: Exception
 
@@ -112,7 +113,7 @@ def localtree(localdir, remotedir, recurse=True):
         container = manager.dict()
         with ProcessPoolExecutor() as executor:
             _pool = {
-                executor.submit(localpool, localdir, remotedir): localdir
+                executor.submit(localmap, localdir, remotedir): localdir
             }
 
             while _pool:
@@ -129,7 +130,7 @@ def localtree(localdir, remotedir, recurse=True):
                     if recurse:
                         for _local, _remote in _mappings:
                             if _local not in container.keys():
-                                future = executor.submit(localpool,
+                                future = executor.submit(localmap,
                                                          _local, _remote)
                                 _pool[future] = _local
 

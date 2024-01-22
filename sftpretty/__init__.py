@@ -380,6 +380,42 @@ class Connection(object):
         except Exception as err:
             raise err
 
+    def _remotemap(self, container, remotedir, localdir, recurse):
+        '''Sub-directory mapping remote directory to iterable.
+
+        :param dict container: Hash table to save remote directory tree.
+            {remotedir: [(remotedir/subdir, localdir/remotedir/subdir)]}
+        :param str remotedir:
+            root of remote directory to append localdir
+        :param str localdir:
+            root of local directory to descend, use '.' to start at
+            :attr:`.pwd`
+        :param bool recurse: *Default: True* - To recurse or not to recurse
+            that is the question.
+
+        :returns: None
+
+        :raises: Exception
+
+        '''
+        try:
+            localdir = Path(localdir).expanduser().as_posix()
+            remotedir = self.normalize(remotedir)
+
+            container[remotedir] = container.get(remotedir, deque())
+
+            for attribute in self.listdir_attr(remotedir):
+                if S_ISDIR(attribute.st_mode):
+                    remote = Path(remotedir).joinpath(
+                                  attribute.filename).as_posix()
+                    local = Path(localdir).joinpath(
+                                 Path(attribute.filename).stem).as_posix()
+                    container[remotedir].appendleft((remote, local))
+        except Exception as err:
+            log.error((f'Exception while processing directory {remotedir}: '
+                       f'{err}'))
+            raise
+
     def get(self, remotefile, localpath=None, callback=None,
             max_concurrent_prefetch_requests=None, prefetch=True,
             preserve_mtime=False, resume=False, exceptions=None, tries=None,
@@ -1324,27 +1360,8 @@ class Connection(object):
 
         return link_destination
 
-    def _remotepool(self, container, remotedir, localdir, recurse):
-        try:
-            localdir = Path(localdir).expanduser().as_posix()
-            remotedir = self.normalize(remotedir)
-
-            container[remotedir] = container.get(remotedir, deque())
-
-            for attribute in self.listdir_attr(remotedir):
-                if S_ISDIR(attribute.st_mode):
-                    remote = Path(remotedir).joinpath(
-                                  attribute.filename).as_posix()
-                    local = Path(localdir).joinpath(
-                                 Path(attribute.filename).stem).as_posix()
-                    container[remotedir].appendleft((remote, local))
-        except Exception as err:
-            log.error((f'Exception while processing directory {remotedir}: '
-                       f'{err}'))
-            raise
-
     def remotetree(self, remotedir, localdir, recurse=True):
-        '''Recursively map remote directory tree to a dictionary container.
+        '''Recursively map remote directory using sub-directories as keys.
 
         :param str remotedir: Remote location to descend, use '.' to start at
             :attr:`.pwd`.
@@ -1352,7 +1369,7 @@ class Connection(object):
         :param bool recurse: *Default: True* - To recurse or not to recurse
             that is the question.
 
-        :returns: None
+        :returns: dict container
 
         :raises: Exception
         '''
@@ -1360,7 +1377,7 @@ class Connection(object):
             container = manager.dict()
             with ThreadPoolExecutor() as executor:
                 _pool = {
-                    executor.submit(self.remotepool, container,
+                    executor.submit(self._remotemap, container,
                                     remotedir, localdir, recurse): remotedir
                 }
 
@@ -1380,7 +1397,7 @@ class Connection(object):
                         for _remote, _local in list(container.items()):
                             for remote, local in _local:
                                 if remote not in _pool.values():
-                                    future = executor.submit(self._remotepool,
+                                    future = executor.submit(self._remotemap,
                                                              container, remote,
                                                              local, recurse)
                                     _pool[future] = remote
