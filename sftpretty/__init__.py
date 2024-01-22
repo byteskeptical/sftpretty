@@ -1396,11 +1396,11 @@ class Connection(object):
                     if recurse:
                         for _remote, _local in list(container.items()):
                             for remote, local in _local:
-                                if remote not in _pool.values():
+                                if _remote not in _pool.values():
                                     future = executor.submit(self._remotemap,
-                                                             container, remote,
-                                                             local, recurse)
-                                    _pool[future] = remote
+                                                             container, _remote,
+                                                             _local, recurse)
+                                    _pool[future] = _remote
             return dict(container)
 
     def remove(self, remotefile):

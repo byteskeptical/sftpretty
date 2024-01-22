@@ -130,8 +130,8 @@ def localtree(localdir, remotedir, recurse=True):
                     if recurse:
                         for _local, _remote in _mappings:
                             if _local not in container.keys():
-                                future = executor.submit(_localmap,
-                                                         _local, _remote)
+                                future = executor.submit(_localmap, _local,
+                                                         _remote, recurse)
                                 _pool[future] = _local
 
                 _pool = {
