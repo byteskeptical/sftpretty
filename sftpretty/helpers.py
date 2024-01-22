@@ -56,7 +56,7 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
             content.seek(0)
         except AttributeError:
             if isinstance(content, str):
-                buffer.update(content.encode('utf-8')
+                buffer.update(content.encode('utf-8'))
             else:
                 buffer.update(content)
 
