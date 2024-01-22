@@ -51,16 +51,14 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
     try:
         with open(content, 'rb') as _stream:
             _hashstream(_stream)
-    except (TypeError, FileNotFoundError):
+    except FileNotFoundError:
         try:
             content.seek(0)
         except AttributeError:
             if isinstance(content, str):
                 buffer.update(content.encode('utf-8')
             else:
-                content
-        else:
-            _hashstream(content)
+                buffer.update(content)
 
     return buffer.hexdigest()
 
