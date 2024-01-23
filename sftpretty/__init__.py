@@ -1377,8 +1377,8 @@ class Connection(object):
             container = manager.dict()
             with ThreadPoolExecutor() as executor:
                 _pool = {
-                    executor.submit(self._remotemap, container,
-                                    remotedir, localdir, recurse): remotedir
+                    executor.submit(self._remotemap, container, remotedir,
+                                    localdir, recurse): remotedir
                 }
 
                 while _pool:
@@ -1392,15 +1392,14 @@ class Connection(object):
                             log.error(('Exception while processing directory '
                                       f'{remote}: {err}'))
                         del _pool[future]
-                    
+
                     if recurse:
-                        for _remote, _local in list(container.items()):
-                            for remote, local in _local:
-                                if _remote not in _pool.values():
-                                    future = executor.submit(self._remotemap,
-                                                             container, _remote,
-                                                             _local, recurse)
-                                    _pool[future] = _remote
+                        for _remote, _local in container[remotedir]:
+                            if _remote not in _pool.values():
+                                future = executor.submit(self._remotemap,
+                                                         container, _remote,
+                                                         _local, recurse)
+                                _pool[future] = _remote
             return dict(container)
 
     def remove(self, remotefile):

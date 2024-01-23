@@ -134,12 +134,6 @@ def localtree(localdir, remotedir, recurse=True):
                                                          _remote, recurse)
                                 _pool[future] = _local
 
-                _pool = {
-                    _file: localdir
-                    for _file, localdir in _pool.items()
-                    if _file not in done
-                }
-
         return dict(container)
 
 
