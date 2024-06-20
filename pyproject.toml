@@ -1,0 +1,56 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+authors = [
+    {name = 'byteskeptical'}
+]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: System Administrators',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: Implementation :: CPython'
+]
+dependencies = [
+    'babel',
+    'docutils',
+    'jinja2',
+    'paramiko>=1.17.0',
+    'pep8',
+    'pygments',
+    'pylint',
+    'pytest',
+    'pytest-sftpserver',
+    'Sphinx',
+    'sphinx_rtd_theme'
+]
+description = 'Pretty secure file transfer made easy.'
+license = {file = 'LICENSE'}
+keywords = ['ftp', 'paramiko', 'scp', 'sftp', 'ssh']
+name = 'sftpretty'
+readme = 'README.rst'
+requires-python = '>=3.6'
+version = '1.1.4'
+
+[project.scripts]
+sftpretty = 'sftpretty.__init__'
+
+[project.urls]
+Homepage = 'https://github.com/byteskeptical/sftpretty'
+Issues = 'https://github.com/byteskeptical/sftpretty/issues'
+
+[tool.setuptools.packages.find]
+where = ['.']
