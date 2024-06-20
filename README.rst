@@ -110,36 +110,38 @@ Example
 PySFTP -> SFTPretty Migration Map
 ---------------------------------
 
-| pysftp            | sftpretty                |
-|:-----------------:|:------------------------:|
-| cd                | cd                       |
-| chmod             | chmod                    |
-| chown             | chown                    |
-| cwd               | cd\*                     |
-| exists            | exists                   |
-| listdir           | listdir                  |
-| listdir\_attr     | listdir\_attr            |
-| lexists           | lexists                  |
-| makedirs          | mkdir\_p                 |
-| mkdir             | mkdir                    |
-| get               | get                      |
-| get\_d            | get\_d                   |
-| get\_r            | get\_r                   |
-| isdir             | isdir                    |
-| isfile            | isfile                   |
-| put               | put                      |
-| put\_d            | put\_d                   |
-| put\_r            | put\_r                   |
-| pwd               | pwd                      |
-| readlink          | readlink                 |
-| sftp\_client      | sftp\_client             |
-| st\_mode\_to\_int | st\_mode\_to\_int        |
-| truncate          | truncate                 |
-| walktree          | localtree/remotetree\*\* |
++-------------------+--------------------------+
+|      pysftp       |        sftpretty         |
++===================+==========================+
+|        cd         |            cd            |
+|       chmod       |          chmod           |
+|       chown       |          chown           |
+|        cwd        |           cd\*           |
+|      exists       |          exists          |
+|      listdir      |         listdir          |
+|   listdir\_attr   |      listdir\_attr       |
+|      lexists      |         lexists          |
+|     makedirs      |         mkdir\_p         |
+|       mkdir       |          mkdir           |
+|        get        |           get            |
+|      get\_d       |          get\_d          |
+|      get\_r       |          get\_r          |
+|       isdir       |          isdir           |
+|      isfile       |          isfile          |
+|        put        |           put            |
+|      put\_d       |          put\_d          |
+|      put\_r       |          put\_r          |
+|        pwd        |           pwd            |
+|     readlink      |         readlink         |
+|   sftp\_client    |       sftp\_client       |
+| st\_mode\_to\_int |    st\_mode\_to\_int     |
+|     truncate      |         truncate         |
+|     walktree      | localtree/remotetree\*\* |
++-------------------+--------------------------+
 
-\* cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
-\*\* Connection.walktree & sftp.walktree with explicit naming.
-\*\*\* [path_advance, path_retreat, reparent] no longer needed.
+*\* cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
+*\*\* Connection.walktree & sftp.walktree with explicit naming.
+*\*\*\* [path_advance, path_retreat, reparent] no longer needed.
 
 
 Additional Information
