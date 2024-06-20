@@ -107,41 +107,66 @@ Example
                    exceptions=socket.timeout, preserve_mtime=True, tries=11)
 
 
-PySFTP -> SFTPretty Migration Map
----------------------------------
+.. list-table:: PySFTP -> SFTPretty Migration Map
+   :widths: 25 25 50
+   :header-rows: 1
 
-+-------------------+--------------------------+
-|      pysftp       |        sftpretty         |
-+===================+==========================+
-|        cd         |            cd            |
-|       chmod       |          chmod           |
-|       chown       |          chown           |
-|        cwd        |           cd\*           |
-|      exists       |          exists          |
-|      listdir      |         listdir          |
-|   listdir\_attr   |      listdir\_attr       |
-|      lexists      |         lexists          |
-|     makedirs      |         mkdir\_p         |
-|       mkdir       |          mkdir           |
-|        get        |           get            |
-|      get\_d       |          get\_d          |
-|      get\_r       |          get\_r          |
-|       isdir       |          isdir           |
-|      isfile       |          isfile          |
-|        put        |           put            |
-|      put\_d       |          put\_d          |
-|      put\_r       |          put\_r          |
-|        pwd        |           pwd            |
-|     readlink      |         readlink         |
-|   sftp\_client    |       sftp\_client       |
-| st\_mode\_to\_int |    st\_mode\_to\_int     |
-|     truncate      |         truncate         |
-|     walktree      | localtree/remotetree\*\* |
-+-------------------+--------------------------+
+   * - pysftp
+     - sftpretty
+   * - cd
+     - chmod
+     - chown
+     - cwd
+     - exists
+     - listdir
+     - listdir_attr
+     - lexists
+     - makedirs
+     - mkdir
+     - get
+     - get_d
+     - get_r
+     - isdir
+     - isfile
+     - put
+     - put_d
+     - put_r
+     - pwd
+     - readlink
+     - sftp_client
+     - st_mode_to_int
+     - truncate
+     - walktree
+   * - cd
+     - chmod
+     - chown
+     - [0]
+     - exists
+     - listdir
+     - listdir_attr
+     - lexists
+     - mkdir_p
+     - mkdir
+     - get
+     - get_d
+     - get_r
+     - isdir
+     - isfile
+     - put
+     - put_d
+     - put_r
+     - pwd
+     - readlink
+     - sftp_client
+     - st_mode_to_int
+     - truncate
+     - localtree/remotetree[1]
 
-*\* cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
-*\*\* Connection.walktree & sftp.walktree with explicit naming.
-*\*\*\* [path_advance, path_retreat, reparent] no longer needed.
+.. note::
+  [0] cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
+  [1] Connection.walktree & sftp.walktree with explicit naming.
+  [path_advance, path_retreat, reparent] are no longer needed. Just edit the
+  returned map from either tree function.
 
 
 Additional Information
