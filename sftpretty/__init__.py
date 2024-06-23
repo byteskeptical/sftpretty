@@ -358,7 +358,7 @@ class Connection(object):
                 log.info((f'[{host}] Host Key: \n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
-                          f'Size: {remote_hostkey.get_bits():d}'))  # noqa: E231
+                          f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)

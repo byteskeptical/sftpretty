@@ -8,8 +8,8 @@ from time import sleep
 
 def _callback(filename, bytes_so_far, bytes_total, logger=None):
     message = (f'Transfer of File: [{filename}] @ '
-               f'{100.0 * bytes_so_far / bytes_total:.1f}% '  # noqa: E231
-               f'{bytes_so_far:d}:{bytes_total:d} bytes ')  # noqa: E231
+               f'{100.0 * bytes_so_far / bytes_total:.1f}% '
+               f'{bytes_so_far:d}:{bytes_total:d} bytes ')
     if logger:
         logger.info(message)
     else:
@@ -154,7 +154,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
                                 if type(x) is type(e) and
                                 x.args == e.args)):
                         raise
-                    msg = (f'Retry ({mtries:d}/{tries:d}):\n'  # noqa: E231
+                    msg = (f'Retry ({mtries:d}/{tries:d}):\n'
                            f'{str(e) if str(e) != "" else repr(e)}\n'
                            f'Retrying in {mdelay} second(s)...')
                     if not silent:
