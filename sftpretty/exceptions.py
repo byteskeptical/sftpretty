@@ -7,7 +7,7 @@ class ConnectionException(Exception):
 
     def __init__(self, host, port):
         Exception.__init__(self, host, port)
-        self.message = f'Could not connect to host:port [{host}:{port}]!'
+        self.message = f'Could not connect to [{host}:{port}]!'  # noqa: E231
 
 
 class CredentialException(Exception):

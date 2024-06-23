@@ -203,7 +203,7 @@ class Connection(object):
                     key = key_types[key_id.strip()]
                 except KeyError as err:
                     log.error(('Unable to identify key type from file provided'
-                              f':\n[{key_file}]'))
+                              f': \n[{key_file}]'))
                     raise err
                 except PasswordRequiredException as err:
                     log.error(('No password provided for encrypted private '
@@ -355,10 +355,10 @@ class Connection(object):
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
                 remote_fingerprint = hash(remote_hostkey)
-                log.info((f'[{host}] Host Key:\n\t'
+                log.info((f'[{host}] Host Key: \n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
-                          f'Size: {remote_hostkey.get_bits():d}'))
+                          f'Size: {remote_hostkey.get_bits():d}'))  # noqa: E231
 
                 if self._cnopts.hostkeys is not None:
                     user_hostkey = self._cnopts.get_hostkey(host)
