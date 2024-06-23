@@ -46,7 +46,7 @@ requires-python = '>=3.6'
 version = '1.1.4'
 
 [project.scripts]
-sftpretty = 'sftpretty'
+sftpretty = 'sftpretty.Connection'
 
 [project.urls]
 Homepage = 'https://github.com/byteskeptical/sftpretty'
