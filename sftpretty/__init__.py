@@ -448,10 +448,10 @@ class Connection(object):
                                     remotepath.prefetch(remotesize.st_size,
                                                         max_concurrent_prefetch_requests)  # noqa: E501
                                 channel._transfer_with_callback(
-                                        callback=callback,
-                                        file_size=remotesize.st_size,
-                                        reader=remotepath,
-                                        writer=localfile)
+                                    callback=callback,
+                                    file_size=remotesize.st_size,
+                                    reader=remotepath,
+                                    writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
