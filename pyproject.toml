@@ -79,7 +79,7 @@ Tracker = 'https://github.com/byteskeptical/sftpretty/issues'
 [tool.hatch.build.targets.sdist]
 include = [
     '/.gitignore',
-    "/LICENSE',
+    '/LICENSE',
     '/pyproject.toml',
     '/README.rst',
     '/sftpretty',
