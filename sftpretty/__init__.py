@@ -448,10 +448,10 @@ class Connection(object):
                                     remotepath.prefetch(remotesize.st_size,
                                                         max_concurrent_prefetch_requests)  # noqa: E501
                                 channel._transfer_with_callback(
-                                                callback=callback,
-                                                file_size=remotesize.st_size,
-                                                reader=remotepath,
-                                                writer=localfile)
+                                        callback=callback,
+                                        file_size=remotesize.st_size,
+                                        reader=remotepath,
+                                        writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
@@ -521,23 +521,23 @@ class Connection(object):
 
         if pattern is None:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                      Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, max_concurrent_prefetch_requests, prefetch,
-                      preserve_mtime, resume, exceptions, tries, backoff,
-                      delay, logger, silent)
-                     for attribute in filelist if S_ISREG(attribute.st_mode)
-                    ]
+                (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                 Path(localdir).joinpath(attribute.filename).as_posix(),
+                 callback, max_concurrent_prefetch_requests, prefetch,
+                 preserve_mtime, resume, exceptions, tries, backoff,
+                 delay, logger, silent)
+                for attribute in filelist if S_ISREG(attribute.st_mode)
+            ]
         else:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                      Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, max_concurrent_prefetch_requests, prefetch,
-                      preserve_mtime, resume, exceptions, tries, backoff,
-                      delay, logger, silent)
-                     for attribute in filelist if S_ISREG(attribute.st_mode)
-                     if f'{pattern}' in attribute.filename
-                    ]
+                (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                 Path(localdir).joinpath(attribute.filename).as_posix(),
+                 callback, max_concurrent_prefetch_requests, prefetch,
+                 preserve_mtime, resume, exceptions, tries, backoff,
+                 delay, logger, silent)
+                for attribute in filelist if S_ISREG(attribute.st_mode)
+                if f'{pattern}' in attribute.filename
+            ]
 
         if paths != []:
             thread_prefix = uuid4().hex
@@ -832,15 +832,14 @@ class Connection(object):
         self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
         paths = [
-                 (localpath.as_posix(),
-                  Path(remotedir).joinpath(
-                      localpath.relative_to(
-                          localdir.parent).as_posix()).as_posix(),
-                  callback, confirm, preserve_mtime, resume, exceptions, tries,
-                  backoff, delay, logger, silent)
-                 for localpath in localdir.iterdir()
-                 if localpath.is_file()
-                ]
+            (localpath.as_posix(),
+             Path(remotedir).joinpath(localpath.relative_to(
+                 localdir.parent).as_posix()).as_posix(),
+             callback, confirm, preserve_mtime, resume, exceptions, tries,
+             backoff, delay, logger, silent)
+            for localpath in localdir.iterdir()
+            if localpath.is_file()
+        ]
 
         if paths != []:
             thread_prefix = uuid4().hex
@@ -848,17 +847,18 @@ class Connection(object):
                                     thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
-                           pool.submit(self.put, local, remote,
-                                       callback=callback, confirm=confirm,
-                                       preserve_mtime=preserve_mtime,
-                                       resume=resume, exceptions=exceptions,
-                                       tries=tries, backoff=backoff,
-                                       delay=delay, logger=logger,
-                                       silent=silent): local
-                           for local, remote, callback, confirm,
-                           preserve_mtime, resume, exceptions, tries, backoff,
-                           delay, logger, silent in paths
-                          }
+                    pool.submit(
+                        self.put, local, remote, callback=callback,
+                        confirm=confirm, preserve_mtime=preserve_mtime,
+                        resume=resume, exceptions=exceptions, tries=tries,
+                        backoff=backoff, delay=delay, logger=logger,
+                        silent=silent
+                    ): local
+                    for local, remote, callback, confirm,
+                    preserve_mtime, resume, exceptions, tries, backoff,
+                    delay, logger, silent in paths
+                }
+
                 for future in as_completed(threads):
                     name = threads[future]
                     try:

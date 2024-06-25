@@ -16,9 +16,10 @@ def test_get_d(sftpserver):
 
             checks = [(['', ], ['make.txt', ]), ]
             for pth, fls in checks:
-                assert sorted([path.name
-                               for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                assert sorted([
+                    path.name
+                    for path in Path(localpath).joinpath(*pth).iterdir()
+                ]) == fls
 
             # cleanup local
             rmdir(localpath)
@@ -34,9 +35,10 @@ def test_get_d_pathed(sftpserver):
 
             checks = [(['', ], ['foo1.txt', 'image01.jpg']), ]
             for pth, fls in checks:
-                assert sorted([path.name
-                               for path in Path(localpath).joinpath(
-                                                *pth).iterdir()]) == fls
+                assert sorted([
+                    path.name
+                    for path in Path(localpath).joinpath(*pth).iterdir()
+                ]) == fls
 
             # cleanup local
             rmdir(localpath)
