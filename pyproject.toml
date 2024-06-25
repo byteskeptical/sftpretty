@@ -52,10 +52,10 @@ version = '1.1.5'
 sftpretty = 'sftpretty:Connection'
 
 [project.optional-dependencies]
-develop = [
+dev = [
     'pylint'
 ]
-docs = [
+doc = [
     'babel',
     'docutils',
     'jinja2',
@@ -63,10 +63,10 @@ docs = [
     'Sphinx',
     'sphinx_rtd_theme'
 ]
-formatters = [
+lint = [
     'pep8'
 ]
-testing = [
+test = [
     'pytest',
     'pytest-sftpserver'
 ]
