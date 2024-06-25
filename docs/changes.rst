@@ -1,8 +1,14 @@
 Change Log
 ==========
 
-1.1.4 (current, released 2024-1-04)
+1.1.5 (current, released 2024-6-25)
 -----------------------------------
+    * added API diff table
+    * adding support/testing for python 3.12
+    * switched to pyproject.toml from setup.py
+
+1.1.4 (released 2024-1-04)
+--------------------------
     * missed the console logger in previous behavior change
 
 1.1.3 (released 2023-12-11)
@@ -36,16 +42,16 @@ Change Log
     * test clean-up and major refactor
 
 1.0.7 (released 2023-02-27)
-------------------------------------
+---------------------------
     * fix regression in put_d
 
 1.0.6 (released 2023-01-15)
-------------------------------------
+---------------------------
     * allow CnOpts knownhost to be set to None directly
     * standardize on using is for None checks 
 
 1.0.5 (released 2022-11-29)
-------------------------------------
+---------------------------
     * added log_level to connection options
     * added compression security option for Transport
     * code optimizations in _start_transport() and _set_authentication()
@@ -54,7 +60,7 @@ Change Log
     * switched to using native logging module instead of paramiko util
 
 1.0.4 (released 2022-09-24)
-------------------------------------
+---------------------------
     * added Windows Pure Path logic in put_d() and put_r() through localtree()
     * fix for regression in _sftp_channel() causing UnboundLocalError
     * improved support for dot notation in known_hosts and private key file

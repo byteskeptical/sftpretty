@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 authors = [
-    {name = 'byteskeptical'}
+    { name = 'byteskeptical' }
 ]
 classifiers = [
     'Development Status :: 5 - Production/Stable',
@@ -25,32 +25,78 @@ classifiers = [
     'Programming Language :: Python :: Implementation :: CPython'
 ]
 dependencies = [
-    'babel',
-    'docutils',
-    'jinja2',
-    'paramiko>=1.17.0',
-    'pep8',
-    'pygments',
-    'pylint',
-    'pytest',
-    'pytest-sftpserver',
-    'Sphinx',
-    'sphinx_rtd_theme'
+    'paramiko>=1.17.0'
 ]
 description = 'Pretty secure file transfer made easy.'
 license = {file = 'LICENSE'}
-keywords = ['ftp', 'paramiko', 'scp', 'sftp', 'ssh']
+keywords = [
+    'file-transfer',
+    'file-transfer-protocol',
+    'ftp',
+    'paramiko',
+    'pysftp',
+    'scp',
+    'sftp',
+    'sftp-client',
+    'sftp-download',
+    'sftp-server',
+    'sftp-upload',
+    'ssh'
+]
 name = 'sftpretty'
 readme = 'README.rst'
 requires-python = '>=3.6'
-version = '1.1.4'
+version = '1.1.5'
 
 [project.scripts]
 sftpretty = 'sftpretty:Connection'
 
+[project.optional-dependencies]
+develop = [
+    'pylint'
+]
+docs = [
+    'babel',
+    'docutils',
+    'jinja2',
+    'pygments',
+    'Sphinx',
+    'sphinx_rtd_theme'
+]
+formatters = [
+    'pep8'
+]
+testing = [
+    'pytest',
+    'pytest-sftpserver'
+]
+
 [project.urls]
-Homepage = 'https://github.com/byteskeptical/sftpretty'
-Issues = 'https://github.com/byteskeptical/sftpretty/issues'
+Documentation = 'https://docs.sftpretty.com'
+Repository = 'https://github.com/byteskeptical/sftpretty'
+Tracker = 'https://github.com/byteskeptical/sftpretty/issues'
+
+[tool.hatch.build.targets.sdist]
+include = [
+    '/.gitignore',
+    "/LICENSE',
+    '/pyproject.toml',
+    '/README.rst',
+    '/sftpretty',
+    '/tests'
+
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ['sftpretty']
+
+[tool.pytest.ini_options]
+addopts = '-ra -v --strict-markers'
+
+[tool.setuptools]
+platforms = ['any']
+py-modules = ['setuptools_sftpretty']
+zip-safe = true
 
 [tool.setuptools.packages.find]
 where = ['.']

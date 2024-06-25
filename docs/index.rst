@@ -108,70 +108,28 @@ Example
 
 
 +-------------------+--------------------------+
-|               API Migration Map              |
+|                    API Diff                  |
 +-------------------+--------------------------+
 |      pysftp       |        sftpretty         |
 +===================+==========================+
-|        cd         |            cd            |
-+-------------------+--------------------------+
-|       chmod       |          chmod           |
-+-------------------+--------------------------+
-|       chown       |          chown           |
-+-------------------+--------------------------+
-|        cwd        |           cd\*           |
-+-------------------+--------------------------+
-|      exists       |          exists          |
-+-------------------+--------------------------+
-|      listdir      |         listdir          |
-+-------------------+--------------------------+
-|   listdir\_attr   |      listdir\_attr       |
-+-------------------+--------------------------+
-|      lexists      |         lexists          |
+|        cwd        |         cd[\#]\_         |
 +-------------------+--------------------------+
 |     makedirs      |         mkdir\_p         |
 +-------------------+--------------------------+
-|       mkdir       |          mkdir           |
-+-------------------+--------------------------+
-|        get        |           get            |
-+-------------------+--------------------------+
-|      get\_d       |          get\_d          |
-+-------------------+--------------------------+
-|      get\_r       |          get\_r          |
-+-------------------+--------------------------+
-|       isdir       |          isdir           |
-+-------------------+--------------------------+
-|      isfile       |          isfile          |
-+-------------------+--------------------------+
-|        put        |           put            |
-+-------------------+--------------------------+
-|      put\_d       |          put\_d          |
-+-------------------+--------------------------+
-|      put\_r       |          put\_r          |
-+-------------------+--------------------------+
-|        pwd        |           pwd            |
-+-------------------+--------------------------+
-|     readlink      |         readlink         |
-+-------------------+--------------------------+
-|   sftp\_client    |       sftp\_client       |
-+-------------------+--------------------------+
-| st\_mode\_to\_int |    st\_mode\_to\_int     |
-+-------------------+--------------------------+
-|     truncate      |         truncate         |
-+-------------------+--------------------------+
-|     walktree      | localtree/remotetree\*\* |
+|     walktree      | {local,remote}tree[\#]\_ |
 +-------------------+--------------------------+
 
-* \* cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
-* \*\* Connection.walktree & sftp.walktree with explicit naming.
-* \*\* [path_advance, path_retreat, reparent] no longer needed.
+.. [#] cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
+.. [#] Connection.walktree & sftp.walktree with explicit naming.
+.. [*] [path_advance, path_retreat, reparent] no longer needed.
 
 
 Additional Information
 ----------------------
-* Project: https://github.com/byteskeptical/sftpretty
-* Download: https://pypi.python.org/pypi/sftpretty
 * Documentation: https://docs.sftpretty.com
+* Download: https://pypi.python.org/pypi/sftpretty
 * License: BSD
+* Project: https://github.com/byteskeptical/sftpretty
 
 Requirements
 ------------
