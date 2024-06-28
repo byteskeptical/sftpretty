@@ -1,6 +1,6 @@
 [build-system]
-requires = ['hatchling']
 build-backend = 'hatchling.build'
+requires = ['hatchling']
 
 [project]
 authors = [
@@ -84,7 +84,6 @@ include = [
     '/README.rst',
     '/sftpretty',
     '/tests'
-
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -112,11 +112,11 @@ Example
 +-------------------+--------------------------+
 |      pysftp       |        sftpretty         |
 +===================+==========================+
-|        cwd        |          cd[#]_          |
+|        cwd        |          cd[#]           |
 +-------------------+--------------------------+
 |     makedirs      |         mkdir_p          |
 +-------------------+--------------------------+
-|     walktree      |  {local,remote}tree[#]_  |
+|     walktree      |  {local,remote}tree[#]   |
 +-------------------+--------------------------+
 
 .. [#] cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
