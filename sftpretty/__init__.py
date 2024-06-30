@@ -131,10 +131,10 @@ class CnOpts(object):
         '''Return config options for a given host-match.
 
         :param str host: Identifier to lookup using OpenSSH's ssh_config
-        man page ruleset. The first value matched will be returned.
+            man page ruleset. The first value matched will be returned.
 
         :returns: (obj) SSHConfigDict - A dictionary wrapper/subclass for
-        per-host configuration structures.
+            per-host configuration structures.
         '''
         cval = self.ssh_config.lookup(host)
         return cval or {}
@@ -405,9 +405,9 @@ class Connection(object):
         :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
-            it's st_atime)
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+            it's st_atime).
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param bool prefetch: *Default: True* - Controls whether prefetching
             is performed.
         :param bool resume: *Default: False* - Continue a previous transfer
@@ -493,8 +493,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to filenames to
             transfer only subset of files in a directory.
         :param bool prefetch: *Default: True* - Controls whether prefetching
@@ -596,8 +596,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to all filenames
             transfering only the subset of files that match.
         :param bool prefetch: *Default: True* - Controls whether prefetching
@@ -661,8 +661,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param bool prefetch: *Default: True* - Controls whether prefetching
             is performed.
         :param Exception exceptions: Exception(s) to check. May be a tuple of

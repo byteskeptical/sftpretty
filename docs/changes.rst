@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-1.1.5 (current, released 2024-6-25)
+1.1.5 (current, released 2024-6-30)
 -----------------------------------
     * added API diff table
     * added CnOpts.get_agentkey
