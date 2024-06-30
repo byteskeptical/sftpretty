@@ -4,6 +4,7 @@ Change Log
 1.1.5 (current, released 2024-6-25)
 -----------------------------------
     * added API diff table
+    * added CnOpts.get_agentkey
     * adding support/testing for python 3.12
     * switched to pyproject.toml from setup.py
 

@@ -1,17 +1,17 @@
 Getting Started
 ===============
 
-While in many ways, sftpretty is just a thin wrapper over paramiko's SFTPClient,
-there are a number of ways that we make it more productive and easier to
-accomplish common, higher-level tasks. The following snippets show where we
-add value to this great module. See the :doc:`sftpretty` docs for a complete
-listing.
+While in many ways, sftpretty is just a thin wrapper around paramiko's
+SFTPClient, there are a number of ways that we make it more productive
+to accomplish common, higher-level tasks. The following snippets show
+where we add value to this great module. See the :doc:`sftpretty` docs
+for a complete listing.
 
 
 :meth:`sftpretty.Connection`
 ----------------------------
 The Connection object is the base of sftpretty. It supports connections via
-username and password.
+username and password or private key.
 
 .. code-block:: python
 
@@ -65,21 +65,25 @@ How about a ``paramiko.AgentKey``? No problem, just set the private_key equal to
 
     import sftpretty
 
-    with sftpretty.Connection('hostname', username='me', private_key=my_agentkey) as sftp:
+    cnopts = sftpretty.CnOpts()
+    keys = cnopts.get_agentkey()
+
+    with sftpretty.Connection('hostname', username='me', private_key=keys[1]) as sftp:
         #
         # ... do sftp operations
         #
 
-The connection object allows the use of an IP address for the ``host`` and the
-ability to optionally set the ``port``, which defaults to 22, otherwise.
+The connection object allows the use of a hostname, IP address, or alias for
+the ``host`` and the ability to optionally set the ``port``, which defaults
+to 22, otherwise.
 
 
 :meth:`sftpretty.CnOpts`
 ------------------------
-You can specify additional connection options using the sftpretty.CnOpts
-object. These options are advanced and not applicable to most uses, because of
-this they have been segmented from the Connection parameter list and made
-available via the CnOpts obj/parameter.
+Additional connection options can be configured using the sftpretty.CnOpts
+object. These are advanced options and are not applicable to most use cases.
+Due to this they have been segmented from the Connection object parameter list
+and made available via a modular object.
 
 OpenSSH-style config objects are supported. The user's default home location
 ``~/.ssh/config`` is always checked though not required unless an alternative
@@ -96,7 +100,7 @@ private key or password authentication.
 
 Config options always take precedence over parameters if both exist. Keep in
 mind there will more than likely be a delta between the security option
-algorithms your verion of SSH supports and those supported by our underlying
+algorithms your verion of SSH supports and those supported by the underlying
 paramiko dependency.
 
 AVAILABLE OPENSSH CONFIG OPTIONS:
@@ -327,7 +331,7 @@ want to return to later.
 :meth:`sftpretty.Connection.chmod`
 ----------------------------------
 :meth:`.chmod` is a wrapper around paramiko's except for the fact it will
-takes an integer representation of the octal mode. No leading 0 or 0o
+take an integer representation of the octal mode. No leading 0 or 0o
 wanted. We know it's suppose to be an octal, but who really remembers that?
 
 This way it is just like a command line ``chmod 644 readme.txt``
@@ -348,15 +352,16 @@ This way it is just like a command line ``chmod 644 readme.txt``
 
 :meth:`sftpretty.Connection.chown`
 ----------------------------------
-Allows you to specify just, gid, uid or both. If either gid or uid is None
-*default*, then sftpretty does a stat to get the current ids and uses that to
-fill in the missing parameter because the underlying paramiko method requires
-that you explicitly set both.
+Allows you to specify just, gid, uid or both as integers. If either gid or uid
+is None *default*, then sftpretty does a stat to get the current ids and uses
+that to fill in the missing parameter because the underlying paramiko method
+requiers that you explicitly set both.
 
-**NOTE** uid and gid are integers and relative to each system. Just because you
-are uid 102 on your local system, a uid of 102 on the remote system most likely
-won't be your login. You will need to do some homework to make sure that you
-are setting these values as you intended.
+.. WARNING::
+    uid and gid are relative to each system. A uid of 102 on your local system,
+    is no assurance of a remote system's user uid even when the usernames
+    match. You will need to do some homework to make sure that you are setting
+    these values as you intended.
 
 
 :attr:`sftpretty.Connection.pwd`
@@ -418,7 +423,7 @@ number to use. Just like the unix cmd, `chmod` you use 744 not 0744 or 0o744.
 -------------------------------------
 A common scenario where you need to create all directories in a path as
 needed, setting their mode, if created. Mode argument works just like
-:meth:`.chmod`, that is an integer representation of the mode you want.
+:meth:`.chmod`, that is an integer representation of the octal mode you want.
 
 .. code-block:: python
 

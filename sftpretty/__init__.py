@@ -4,7 +4,7 @@ from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, SEEK_END, utime
-from paramiko import (hostkeys, SFTPClient, SSHConfig, Transport,
+from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
                       SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
@@ -113,12 +113,25 @@ class CnOpts(object):
         else:
             self.hostkeys = None
 
+    def get_agentkey(self):
+        '''Return the list of keys, if any, available through the local
+        SSH agent. If no agent is running or one cannot be contacted, an
+        empty tuple will be returned.
+
+        :returns: (tuple of AgentKey objects) or (empty tuple)
+
+        :raises SSHException:
+        '''
+        agent = Agent()
+        keys = agent.get_keys()
+
+        return keys
+
     def get_config(self, host):
         '''Return config options for a given host-match.
 
-        :param str host: The host-matching rules of OpenSSH's ssh_config
-        man page are used: For each parameter, the first obtained value will
-        be used.
+        :param str host: Identifier to lookup using OpenSSH's ssh_config
+        man page ruleset. The first value matched will be returned.
 
         :returns: (obj) SSHConfigDict - A dictionary wrapper/subclass for
         per-host configuration structures.
