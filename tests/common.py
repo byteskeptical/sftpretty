@@ -15,7 +15,7 @@ SKIP_IF_MAC = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'macOS',
                                  reason='WhackMac')
 SKIP_IF_WIN = pytest.mark.skipif(environ.get('RUNNER_OS', '') == 'Windows',
                                  reason='NoWinZone')
-STARS8192 = '*'*8192
+STARS8192 = '*' * 8192
 USER = environ.get('USER', environ.get('USERNAME'))
 USER_HOME = Path.home().as_posix()
 USER_HOME_PARENT = Path(USER_HOME).parent.as_posix()
@@ -64,22 +64,22 @@ def tempfile_containing(contents=STARS8192, suffix=''):
 
 # filesystem served by pytest-sftpserver plugin
 VFS = {
-       'home': {
-           'test': {
-               'pub': {
-                   'foo1': {
-                       'foo1.txt': 'content of foo1.txt',
-                       'image01.jpg': 'data for image01.jpg'
-                   },
-                   'make.txt': 'content of make.txt',
-                   'foo2': {
-                       'bar1': {
-                           'bar1.txt': 'contents bar1.txt'
-                       },
-                       'foo2.txt': 'content of foo2.txt'
-                   }
-               },
-               'read.me': 'contents of read.me'
-           }
-       }
-      }
+    'home': {
+        'test': {
+            'pub': {
+                'foo1': {
+                    'foo1.txt': 'content of foo1.txt',
+                    'image01.jpg': 'data for image01.jpg'
+                },
+                'make.txt': 'content of make.txt',
+                'foo2': {
+                    'bar1': {
+                        'bar1.txt': 'contents bar1.txt'
+                    },
+                    'foo2.txt': 'content of foo2.txt'
+                }
+            },
+            'read.me': 'contents of read.me'
+        }
+    }
+}

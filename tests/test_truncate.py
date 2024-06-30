@@ -27,8 +27,8 @@ def test_truncate_larger(lsftp):
     except IOError:
         pass
     lsftp.putfo(flo, rname)
-    new_size = lsftp.truncate(rname, 2*8192)
-    assert new_size == 2*8192
+    new_size = lsftp.truncate(rname, 2 * 8192)
+    assert new_size == 2 * 8192
     lsftp.remove(rname)
 
 

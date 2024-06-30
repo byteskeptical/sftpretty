@@ -4,7 +4,7 @@ from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler)
 from os import environ, SEEK_END, utime
-from paramiko import (hostkeys, SFTPClient, SSHConfig, Transport,
+from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
                       SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
@@ -113,15 +113,28 @@ class CnOpts(object):
         else:
             self.hostkeys = None
 
+    def get_agentkey(self):
+        '''Return the list of keys, if any, available through the local
+        SSH agent. If no agent is running or one cannot be contacted, an
+        empty tuple will be returned.
+
+        :returns: (tuple of AgentKey objects) or (empty tuple)
+
+        :raises SSHException:
+        '''
+        agent = Agent()
+        keys = agent.get_keys()
+
+        return keys
+
     def get_config(self, host):
         '''Return config options for a given host-match.
 
-        :param str host: The host-matching rules of OpenSSH's ssh_config
-        man page are used: For each parameter, the first obtained value will
-        be used.
+        :param str host: Identifier to lookup using OpenSSH's ssh_config
+            man page ruleset. The first value matched will be returned.
 
         :returns: (obj) SSHConfigDict - A dictionary wrapper/subclass for
-        per-host configuration structures.
+            per-host configuration structures.
         '''
         cval = self.ssh_config.lookup(host)
         return cval or {}
@@ -203,7 +216,7 @@ class Connection(object):
                     key = key_types[key_id.strip()]
                 except KeyError as err:
                     log.error(('Unable to identify key type from file provided'
-                              f':\n[{key_file}]'))
+                              f': \n[{key_file}]'))
                     raise err
                 except PasswordRequiredException as err:
                     log.error(('No password provided for encrypted private '
@@ -355,7 +368,7 @@ class Connection(object):
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
                 remote_fingerprint = hash(remote_hostkey)
-                log.info((f'[{host}] Host Key:\n\t'
+                log.info((f'[{host}] Host Key: \n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
                           f'Size: {remote_hostkey.get_bits():d}'))
@@ -392,9 +405,9 @@ class Connection(object):
         :param bool preserve_mtime: *Default: False* - Sync the modification
             time(st_mtime) on the local file to match the time on the remote.
             (st_atime can differ because stat'ing the localfile can/does update
-            it's st_atime)
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+            it's st_atime).
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param bool prefetch: *Default: True* - Controls whether prefetching
             is performed.
         :param bool resume: *Default: False* - Continue a previous transfer
@@ -448,10 +461,10 @@ class Connection(object):
                                     remotepath.prefetch(remotesize.st_size,
                                                         max_concurrent_prefetch_requests)  # noqa: E501
                                 channel._transfer_with_callback(
-                                                callback=callback,
-                                                file_size=remotesize.st_size,
-                                                reader=remotepath,
-                                                writer=localfile)
+                                    callback=callback,
+                                    file_size=remotesize.st_size,
+                                    reader=remotepath,
+                                    writer=localfile)
                 else:
                     if preserve_mtime:
                         remote_attributes = channel.stat(remotefile)
@@ -480,8 +493,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to filenames to
             transfer only subset of files in a directory.
         :param bool prefetch: *Default: True* - Controls whether prefetching
@@ -521,23 +534,23 @@ class Connection(object):
 
         if pattern is None:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                      Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, max_concurrent_prefetch_requests, prefetch,
-                      preserve_mtime, resume, exceptions, tries, backoff,
-                      delay, logger, silent)
-                     for attribute in filelist if S_ISREG(attribute.st_mode)
-                    ]
+                (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                 Path(localdir).joinpath(attribute.filename).as_posix(),
+                 callback, max_concurrent_prefetch_requests, prefetch,
+                 preserve_mtime, resume, exceptions, tries, backoff,
+                 delay, logger, silent)
+                for attribute in filelist if S_ISREG(attribute.st_mode)
+            ]
         else:
             paths = [
-                     (Path(remotedir).joinpath(attribute.filename).as_posix(),
-                      Path(localdir).joinpath(attribute.filename).as_posix(),
-                      callback, max_concurrent_prefetch_requests, prefetch,
-                      preserve_mtime, resume, exceptions, tries, backoff,
-                      delay, logger, silent)
-                     for attribute in filelist if S_ISREG(attribute.st_mode)
-                     if f'{pattern}' in attribute.filename
-                    ]
+                (Path(remotedir).joinpath(attribute.filename).as_posix(),
+                 Path(localdir).joinpath(attribute.filename).as_posix(),
+                 callback, max_concurrent_prefetch_requests, prefetch,
+                 preserve_mtime, resume, exceptions, tries, backoff,
+                 delay, logger, silent)
+                for attribute in filelist if S_ISREG(attribute.st_mode)
+                if f'{pattern}' in attribute.filename
+            ]
 
         if paths != []:
             thread_prefix = uuid4().hex
@@ -583,8 +596,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param str pattern: *Default: None* - Filter applied to all filenames
             transfering only the subset of files that match.
         :param bool prefetch: *Default: True* - Controls whether prefetching
@@ -648,8 +661,8 @@ class Connection(object):
         :param callable callback: Optional callback function (form: ``func(
             int, int``)) that accepts the bytes transferred so far and the
             total bytes to be transferred.
-        :param int max_concurrent_prefetch_requests: - The maximum number of
-            concurrent read requests to prefetch.
+        :param int max_concurrent_prefetch_requests: *Default: None* - The
+            maximum number of concurrent read requests to prefetch.
         :param bool prefetch: *Default: True* - Controls whether prefetching
             is performed.
         :param Exception exceptions: Exception(s) to check. May be a tuple of
@@ -832,15 +845,14 @@ class Connection(object):
         self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
 
         paths = [
-                 (localpath.as_posix(),
-                  Path(remotedir).joinpath(
-                      localpath.relative_to(
-                          localdir.parent).as_posix()).as_posix(),
-                  callback, confirm, preserve_mtime, resume, exceptions, tries,
-                  backoff, delay, logger, silent)
-                 for localpath in localdir.iterdir()
-                 if localpath.is_file()
-                ]
+            (localpath.as_posix(),
+             Path(remotedir).joinpath(localpath.relative_to(
+                 localdir.parent).as_posix()).as_posix(),
+             callback, confirm, preserve_mtime, resume, exceptions, tries,
+             backoff, delay, logger, silent)
+            for localpath in localdir.iterdir()
+            if localpath.is_file()
+        ]
 
         if paths != []:
             thread_prefix = uuid4().hex
@@ -848,17 +860,18 @@ class Connection(object):
                                     thread_name_prefix=thread_prefix) as pool:
                 logger.debug(f'Thread Prefix: [{thread_prefix}]')
                 threads = {
-                           pool.submit(self.put, local, remote,
-                                       callback=callback, confirm=confirm,
-                                       preserve_mtime=preserve_mtime,
-                                       resume=resume, exceptions=exceptions,
-                                       tries=tries, backoff=backoff,
-                                       delay=delay, logger=logger,
-                                       silent=silent): local
-                           for local, remote, callback, confirm,
-                           preserve_mtime, resume, exceptions, tries, backoff,
-                           delay, logger, silent in paths
-                          }
+                    pool.submit(
+                        self.put, local, remote, callback=callback,
+                        confirm=confirm, preserve_mtime=preserve_mtime,
+                        resume=resume, exceptions=exceptions, tries=tries,
+                        backoff=backoff, delay=delay, logger=logger,
+                        silent=silent
+                    ): local
+                    for local, remote, callback, confirm,
+                    preserve_mtime, resume, exceptions, tries, backoff,
+                    delay, logger, silent in paths
+                }
+
                 for future in as_completed(threads):
                     name = threads[future]
                     try:

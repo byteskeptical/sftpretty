@@ -107,12 +107,29 @@ Example
                    exceptions=socket.timeout, preserve_mtime=True, tries=11)
 
 
++-------------------+--------------------------+
+|                    API Diff                  |
++-------------------+--------------------------+
+|      pysftp       |        sftpretty         |
++===================+==========================+
+|        cwd        |          cd [#]_         |
++-------------------+--------------------------+
+|     makedirs      |         mkdir_p          |
++-------------------+--------------------------+
+|     walktree      |  {local,remote}tree [#]_ |
++-------------------+--------------------------+
+
+.. [#] cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
+.. [#] Connection.walktree & sftp.walktree with explicit naming.
+.. [*] [path_advance, path_retreat, reparent] no longer needed.
+
+
 Additional Information
 ----------------------
-* Project: https://github.com/byteskeptical/sftpretty
-* Download: https://pypi.python.org/pypi/sftpretty
 * Documentation: https://docs.sftpretty.com
+* Download: https://pypi.python.org/pypi/sftpretty
 * License: BSD
+* Project: https://github.com/byteskeptical/sftpretty
 
 Requirements
 ------------
@@ -120,7 +137,7 @@ paramiko >= 1.17.0
 
 Supports
 --------
-Tested on Python 3.6, 3.7, 3.8, 3.9, 3.10, 3.11
+Tested on Python 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
 
 Contents
 --------

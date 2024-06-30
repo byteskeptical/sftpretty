@@ -1,0 +1,101 @@
+[build-system]
+build-backend = 'hatchling.build'
+requires = ['hatchling']
+
+[project]
+authors = [
+    { name = 'byteskeptical' }
+]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: System Administrators',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: Implementation :: CPython'
+]
+dependencies = [
+    'paramiko>=1.17.0'
+]
+description = 'Pretty secure file transfer made easy.'
+license = {file = 'LICENSE'}
+keywords = [
+    'file-transfer',
+    'file-transfer-protocol',
+    'ftp',
+    'paramiko',
+    'pysftp',
+    'scp',
+    'sftp',
+    'sftp-client',
+    'sftp-download',
+    'sftp-server',
+    'sftp-upload',
+    'ssh'
+]
+name = 'sftpretty'
+readme = 'README.rst'
+requires-python = '>=3.6'
+version = '1.1.5'
+
+[project.scripts]
+sftpretty = 'sftpretty:Connection'
+
+[project.optional-dependencies]
+dev = [
+    'pylint'
+]
+doc = [
+    'babel',
+    'docutils',
+    'jinja2',
+    'pygments',
+    'Sphinx',
+    'sphinx_rtd_theme'
+]
+lint = [
+    'pep8'
+]
+test = [
+    'pytest',
+    'pytest-sftpserver'
+]
+
+[project.urls]
+Documentation = 'https://docs.sftpretty.com'
+Repository = 'https://github.com/byteskeptical/sftpretty'
+Tracker = 'https://github.com/byteskeptical/sftpretty/issues'
+
+[tool.hatch.build.targets.sdist]
+include = [
+    '/.gitignore',
+    '/LICENSE',
+    '/pyproject.toml',
+    '/README.rst',
+    '/sftpretty',
+    '/tests'
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ['sftpretty']
+
+[tool.pytest.ini_options]
+addopts = '-ra -v --strict-markers'
+
+[tool.setuptools]
+platforms = ['any']
+py-modules = ['setuptools_sftpretty']
+zip-safe = true
+
+[tool.setuptools.packages.find]
+where = ['.']
