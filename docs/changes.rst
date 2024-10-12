@@ -1,7 +1,11 @@
 Change Log
 ==========
 
-1.1.5 (current, released 2024-6-30)
+1.1.6 (current, released 2024-10-12)
+------------------------------------
+    * added AES-GCM ciphers
+
+1.1.5 (released 2024-6-30)
 -----------------------------------
     * added API diff table
     * added CnOpts.get_agentkey
