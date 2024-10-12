@@ -59,7 +59,8 @@ class CnOpts(object):
     '''
     def __init__(self, config=None, knownhosts=Path(
                  '~/.ssh/known_hosts').expanduser().as_posix()):
-        self.ciphers = ('aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
+        self.ciphers = ('aes256-gcm@openssh.com', 'aes128-gcm@openssh.com',
+                        'aes256-ctr', 'aes192-ctr', 'aes128-ctr', 'aes256-cbc',
                         'aes192-cbc', 'aes128-cbc', '3des-cbc')
         self.compress = False
         self.compression = ('none',)
