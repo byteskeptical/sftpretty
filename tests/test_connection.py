@@ -59,7 +59,7 @@ def test_connection_with(sftpserver):
 def test_connection_non_default_port(ndp_sftpserver):
     '''connect to a public sftp server on non-default port'''
     with ndp_sftpserver.serve_content(VFS):
-        non_conn = **conn(ndp_sftpserver)
+        non_conn = conn(ndp_sftpserver)
         non_conn['port'] = ndp_sftpserver.port
         with Connection(**non_conn) as sftp:
             assert sftp.listdir() == ['pub', 'read.me']
@@ -84,7 +84,7 @@ def test_connection_with_hashed_host(sftpserver):
     knownhosts = Path('~/.ssh/known_hosts').expanduser()
     knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
     knownhosts.touch(exist_ok=True, mode=0o644)
-    knownhosts.write_bytes((bf'|1|{hashed_host}= '
+    knownhosts.write_bytes((bf'{hashed_host} '
                             b'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyy'
                             b'sJ7f0kqdoWMXhHxxFR7aLJYNIHO/MtsD'))
     with sftpserver.serve_content(VFS):
@@ -99,11 +99,11 @@ def test_connection_with_hashed_host_non_default_port(ndp_sftpserver):
     knownhosts = Path('~/.ssh/known_hosts').expanduser()
     knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
     knownhosts.touch(exist_ok=True, mode=0o644)
-    knownhosts.write_bytes((bf'|1|{hashed_host_port}= '
+    knownhosts.write_bytes((bf'{hashed_host_port} '
                             b'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyy'
                             b'sJ7f0kqdoWMXhHxxFR7aLJYNIHO/MtsD'))
     with ndp_sftpserver.serve_content(VFS):
-        non_conn = **conn(ndp_sftpserver)
+        non_conn = conn(ndp_sftpserver)
         non_conn['port'] = ndp_sftpserver.port
         with Connection(**non_conn) as sftp:
             assert sftp.listdir() == ['pub', 'read.me']
