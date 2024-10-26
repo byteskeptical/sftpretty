@@ -1,12 +1,17 @@
 Change Log
 ==========
 
-1.1.6 (current, released 2024-10-12)
+1.1.7 (current, released 2024-10-26)
 ------------------------------------
+    * added hashed host support for host key matching
+    * bug fix for host key matching servers running on non default ports
+
+1.1.6 (released 2024-10-12)
+---------------------------
     * added AES-GCM ciphers
 
 1.1.5 (released 2024-6-30)
------------------------------------
+--------------------------
     * added API diff table
     * added CnOpts.get_agentkey
     * adding support/testing for python 3.12
