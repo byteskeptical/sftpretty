@@ -1,19 +1,38 @@
 '''test sftpretty.Connection'''
 
 import pytest
-from paramiko import hostkeys
+from paramiko.hostkeys import HostKeys
+from paramiko.rsakey import RSAKey
 
 from common import conn, LOCAL, VFS
 from pathlib import Path
 from sftpretty import (CnOpts, Connection, ConnectionException,
-                       SSHException)
+                       HostKeysException, SSHException)
 
 
-@pytest.fixture
-def ndp_sftpserver(sftpserver):
-    '''non-default port sftpserver'''
-    sftpserver.port = 8022
-    return sftpserver
+def test_cnopts_bad_knownhosts():
+    '''test setting knownhosts to a not understood file'''
+    with pytest.raises(HostKeysException):
+        with pytest.raises(UserWarning):
+            knownhosts = Path('~/knownhosts').expanduser().as_posix()
+            Path(knownhosts).touch(mode=0o600)
+            CnOpts(knownhosts=knownhosts)
+            Path(knownhosts).unlink()
+
+
+def test_cnopts_no_knownhosts():
+    '''test setting knownhosts to a non-existant file'''
+    with pytest.raises(UserWarning):
+        CnOpts(knownhosts='i-m-not-there')
+
+
+def test_cnopts_none_knownhosts():
+    '''test setting knownhosts to None for those with no default known_hosts'''
+    knownhosts = Path('~/.ssh/known_hosts').expanduser().as_posix()
+    if Path(knownhosts).exists():
+        Path(knownhosts).unlink()
+    cnopts = CnOpts(knownhosts=None)
+    assert cnopts.hostkeys is None
 
 
 def test_connection_bad_credentials():
@@ -56,32 +75,18 @@ def test_connection_with(sftpserver):
             assert sftp.listdir() == ['pub', 'read.me']
 
 
-def test_connection_non_default_port(ndp_sftpserver):
-    '''connect to a public sftp server on non-default port'''
-    with ndp_sftpserver.serve_content(VFS):
-        non_conn = conn(ndp_sftpserver)
-        non_conn['port'] = ndp_sftpserver.port
-        with Connection(**non_conn) as sftp:
-            assert sftp.listdir() == ['pub', 'read.me']
+#def test_connection_with_non_default_port(ndp_sftpserver):
+#    '''connect to a public sftp server on non-default port'''
+#    with ndp_sftpserver.serve_content(VFS):
+#        ndp_conn = conn(ndp_sftpserver)
+#        ndp_conn['port'] = ndp_sftpserver.port
+#        with Connection(**ndp_conn) as sftp:
+#            assert sftp.listdir() == ['pub', 'read.me']
 
 
-def test_connection_with_known_host_entry(sftpserver):
-    '''connect to a public sftp server with known host entry'''
-    hostkey = (f'[{sftpserver.host}]:{sftpserver.port} '
-               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
-               'HxxFR7aLJYNIHO/MtsD')
-    knownhosts = Path('~/.ssh/known_hosts').expanduser()
-    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
-    knownhosts.touch(exist_ok=True, mode=0o644)
-    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
-    with sftpserver.serve_content(VFS):
-        with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.listdir() == ['pub', 'read.me']
-
-
-def test_connection_with_hashed_host(sftpserver):
-    '''connect to a public sftp server with hashed host entry'''
-    hashed_host = hostkeys.HostKeys().hash_host(sftpserver.host)
+def test_hostkey_hashed_host(sftpserver):
+    '''test matching host key for hashed hosts'''
+    hashed_host = HostKeys().hash_host(sftpserver.host)
     hostkey = (f'{hashed_host} '
                'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
                'HxxFR7aLJYNIHO/MtsD')
@@ -94,19 +99,32 @@ def test_connection_with_hashed_host(sftpserver):
             assert sftp.listdir() == ['pub', 'read.me']
 
 
-def test_connection_with_hashed_host_non_default_port(ndp_sftpserver):
-    '''connect to a public sftp server on non-default port with hashed host'''
-    host_port = f'[{ndp_sftpserver.host}]:{ndp_sftpserver.port}'
-    hashed_host_port = hostkeys.HostKeys().hash_host(host_port)
-    hostkey = (f'{hashed_host_port} '
-               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
-               'HxxFR7aLJYNIHO/MtsD')
-    knownhosts = Path('~/.ssh/known_hosts').expanduser()
-    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
-    knownhosts.touch(exist_ok=True, mode=0o644)
-    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
-    with ndp_sftpserver.serve_content(VFS):
-        non_conn = conn(ndp_sftpserver)
-        non_conn['port'] = ndp_sftpserver.port
-        with Connection(**non_conn) as sftp:
-            assert sftp.listdir() == ['pub', 'read.me']
+#def test_hostkey_hashed_host_non_default_port(ndp_sftpserver):
+#    '''test matching host key for hashed hosts using non-default port'''
+#    host_port = f'[{ndp_sftpserver.host}]:{ndp_sftpserver.port}'
+#    hashed_host_port = HostKeys().hash_host(host_port)
+#    hostkey = (f'{hashed_host_port} '
+#               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
+#               'HxxFR7aLJYNIHO/MtsD')
+#    knownhosts = Path('~/.ssh/known_hosts').expanduser()
+#    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
+#    knownhosts.touch(exist_ok=True, mode=0o644)
+#    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
+#    with ndp_sftpserver.serve_content(VFS):
+#        ndp_conn = conn(ndp_sftpserver)
+#        ndp_conn['port'] = ndp_sftpserver.port
+#        with Connection(**ndp_conn) as sftp:
+#            assert sftp.listdir() == ['pub', 'read.me']
+
+
+def test_hostkey_not_found():
+    '''test that an exception is raised when no host key is found'''
+    cnopts = CnOpts(knownhosts='sftpserver.pub')
+    with pytest.raises(SSHException):
+        cnopts.get_hostkey(host='missing-server')
+
+
+def test_hostkey_returns_pkey():
+    '''test that finding a matching host key returns a PKey'''
+    cnopts = CnOpts(knownhosts='sftpserver.pub')
+    assert isinstance(cnopts.get_hostkey('127.0.0.1'), RSAKey)

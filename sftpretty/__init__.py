@@ -153,19 +153,24 @@ class CnOpts(object):
 
         :raises SSHException:
         '''
+        hashed_host = self.hostkeys.hash_host(host, salt=salt)
         host_port = f'[{host}]:{port}'
-        kval = self.hostkeys.lookup(host) or self.hostkeys.lookup(host_port)
+        hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
+
+        if port == 22:
+            kval = (
+                self.hostkeys.lookup(host) or
+                self.hostkeys.lookup(hashed_host)
+            )
+        else:
+            kval = (
+                self.hostkeys.lookup(host_port) or
+                self.hostkeys.lookup(hashed_host_port)
+            )
 
         # None | {key_type: private_key}
         if kval is None:
-            hashed_host = self.hostkeys.hash_host(host, salt=salt)
-            hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
-            kval = (
-                self.hostkeys.lookup(hashed_host) or
-                self.hostkeys.lookup(hashed_host_port)
-            )
-            if kval is None:
-                raise SSHException(f'No hostkey for host [{host}] found.')
+            raise SSHException(f'No hostkey for host [{host}] found.')
 
         # Return the public key from the dictionary
         return list(kval.values())[0]
