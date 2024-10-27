@@ -153,16 +153,15 @@ class CnOpts(object):
 
         :raises SSHException:
         '''
-        hashed_host = self.hostkeys.hash_host(host, salt=salt)
-        host_port = f'[{host}]:{port}'
-        hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
-
         if port == 22:
+            hashed_host = self.hostkeys.hash_host(host, salt=salt)
             kval = (
                 self.hostkeys.lookup(host) or
                 self.hostkeys.lookup(hashed_host)
             )
         else:
+            host_port = f'[{host}]:{port}'
+            hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
             kval = (
                 self.hostkeys.lookup(host_port) or
                 self.hostkeys.lookup(hashed_host_port)
@@ -392,10 +391,10 @@ class Connection(object):
                           f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
-                    user_hostkey = self._cnopts.get_hostkey(host, port=port)
-                    user_fingerprint = hash(user_hostkey)
-                    log.info(f'Known Fingerprint: {user_fingerprint}')
-                    if user_fingerprint != remote_fingerprint:
+                    local_key = self._cnopts.get_hostkey(host, port=int(port))
+                    local_fingerprint = hash(local_key)
+                    log.info(f'Known Fingerprint: {local_fingerprint}')
+                    if local_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
                                                  '[FAILED]'))
             else:
