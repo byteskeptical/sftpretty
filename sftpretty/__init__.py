@@ -145,7 +145,7 @@ class CnOpts(object):
         raise an SSHException.
 
         :param str host: *Required* - The Hostname or IP of the remote machine.
-        :param int port: *Default: 22* - SFTP server port of the remote machine.
+        :param int port: *Default: 22* - SFTP server port of remote machine.
         :param str|None salt: *Default: None* - Salt to use when hashing
             (must be 20 bytes long).
 
@@ -161,8 +161,8 @@ class CnOpts(object):
             hashed_host = self.hostkeys.hash_host(host, salt=salt)
             hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
             kval = (
-                self.hostkeys.lookup(hashed_host)
-                or self.hostkeys.lookup(hashed_host_port)
+                self.hostkeys.lookup(hashed_host) or
+                self.hostkeys.lookup(hashed_host_port)
             )
             if kval is None:
                 raise SSHException(f'No hostkey for host [{host}] found.')
