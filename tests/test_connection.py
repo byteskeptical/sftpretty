@@ -75,48 +75,6 @@ def test_connection_with(sftpserver):
             assert sftp.listdir() == ['pub', 'read.me']
 
 
-#def test_connection_with_non_default_port(ndp_sftpserver):
-#    '''connect to a public sftp server on non-default port'''
-#    with ndp_sftpserver.serve_content(VFS):
-#        ndp_conn = conn(ndp_sftpserver)
-#        ndp_conn['port'] = ndp_sftpserver.port
-#        with Connection(**ndp_conn) as sftp:
-#            assert sftp.listdir() == ['pub', 'read.me']
-
-
-def test_hostkey_hashed_host(sftpserver):
-    '''test matching host key for hashed hosts'''
-    hashed_host = HostKeys().hash_host(sftpserver.host)
-    hostkey = (f'{hashed_host} '
-               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
-               'HxxFR7aLJYNIHO/MtsD')
-    knownhosts = Path('~/.ssh/known_hosts').expanduser()
-    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
-    knownhosts.touch(exist_ok=True, mode=0o644)
-    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
-    with sftpserver.serve_content(VFS):
-        with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.listdir() == ['pub', 'read.me']
-
-
-#def test_hostkey_hashed_host_non_default_port(ndp_sftpserver):
-#    '''test matching host key for hashed hosts using non-default port'''
-#    host_port = f'[{ndp_sftpserver.host}]:{ndp_sftpserver.port}'
-#    hashed_host_port = HostKeys().hash_host(host_port)
-#    hostkey = (f'{hashed_host_port} '
-#               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
-#               'HxxFR7aLJYNIHO/MtsD')
-#    knownhosts = Path('~/.ssh/known_hosts').expanduser()
-#    knownhosts.parent.mkdir(exist_ok=True, mode=0o700)
-#    knownhosts.touch(exist_ok=True, mode=0o644)
-#    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
-#    with ndp_sftpserver.serve_content(VFS):
-#        ndp_conn = conn(ndp_sftpserver)
-#        ndp_conn['port'] = ndp_sftpserver.port
-#        with Connection(**ndp_conn) as sftp:
-#            assert sftp.listdir() == ['pub', 'read.me']
-
-
 def test_hostkey_not_found():
     '''test that an exception is raised when no host key is found'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
@@ -127,4 +85,6 @@ def test_hostkey_not_found():
 def test_hostkey_returns_pkey():
     '''test that finding a matching host key returns a PKey'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    assert isinstance(cnopts.get_hostkey('127.0.0.1'), RSAKey)
+    assert isinstance(cnopts.get_hostkey('127.0.0.1'), ED25519)
+    assert isinstance(cnopts.get_hostkey(HostKeys().hash_host('127.0.0.1')),
+                      ED25519)
