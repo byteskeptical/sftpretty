@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import LOCAL, VFS
+from common import conn, LOCAL, VFS
 from paramiko.hostkeys import HostKeys
 from sftpretty import CnOpts, Connection
 
