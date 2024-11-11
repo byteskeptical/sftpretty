@@ -154,18 +154,10 @@ class CnOpts(object):
         :raises SSHException:
         '''
         if port == 22:
-            hashed_host = self.hostkeys.hash_host(host, salt=salt)
-            kval = (
-                self.hostkeys.lookup(host) or
-                self.hostkeys.lookup(hashed_host)
-            )
+            kval = self.hostkeys.lookup(host)
         else:
-            host_port = f'[{host}]:{port}'
-            hashed_host_port = self.hostkeys.hash_host(host_port, salt=salt)
-            kval = (
-                self.hostkeys.lookup(host_port) or
-                self.hostkeys.lookup(hashed_host_port)
-            )
+            host = f'[{host}]:{port}'
+            kval = self.hostkeys.lookup(host)
 
         # None | {key_type: private_key}
         if kval is None:

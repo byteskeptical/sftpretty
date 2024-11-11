@@ -11,7 +11,7 @@ def test_remote_server_key(sftpserver):
     '''test .remote_server_key property'''
     with sftpserver.serve_content(VFS):
         _conn = conn(sftpserver)
-        _conn['cnopts'].hostkeys = None     # turn-off hostkey verification
+        _conn['cnopts'].hostkeys = None
         with Connection(**_conn) as sftp:
             rsk = sftp.remote_server_key
             hks = HostKeys()
