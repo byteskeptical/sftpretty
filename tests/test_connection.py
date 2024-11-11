@@ -2,7 +2,7 @@
 
 import pytest
 from paramiko.hostkeys import HostKeys
-from paramiko.rsakey import RSAKey
+from paramiko.ed25519key import Ed25519Key
 
 from common import conn, LOCAL, VFS
 from pathlib import Path
@@ -85,6 +85,6 @@ def test_hostkey_not_found():
 def test_hostkey_returns_pkey():
     '''test that finding a matching host key returns a PKey'''
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    assert isinstance(cnopts.get_hostkey('127.0.0.1'), ED25519)
+    assert isinstance(cnopts.get_hostkey('127.0.0.1'), Ed25519Key)
     assert isinstance(cnopts.get_hostkey(HostKeys().hash_host('127.0.0.1')),
-                      ED25519)
+                      Ed25519Key)

@@ -1,6 +1,7 @@
 '''session level fixtures'''
 
 import pytest
+from paramiko.hostkeys import HostKeys
 from pathlib import Path
 
 from common import LOCAL
@@ -15,6 +16,7 @@ def lsftp(request):
     lsftp = Connection(**LOCAL)
     request.addfinalizer(lsftp.close)
     return lsftp
+
 
 @pytest.fixture(autouse=True, scope='session')
 def knownhosts(sftpserver):
