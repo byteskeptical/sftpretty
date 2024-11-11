@@ -140,25 +140,17 @@ class CnOpts(object):
         cval = self.ssh_config.lookup(host)
         return cval or {}
 
-    def get_hostkey(self, host, port=22, salt=None):
+    def get_hostkey(self, host):
         '''Return the matching known hostkey to be used for verification or
         raise an SSHException.
 
-        :param str host: *Required* - The Hostname or IP of the remote machine.
-        :param int port: *Default: 22* - SFTP server port of remote machine.
-        :param str|None salt: *Default: None* - Salt to use when hashing
-            (must be 20 bytes long).
+        :param str host: The Hostname or IP of the remote machine.
 
         :returns: (obj) PKey - Public key(s) associated with host or None.
 
         :raises SSHException:
         '''
-        if port == 22:
-            kval = self.hostkeys.lookup(host)
-        else:
-            host = f'[{host}]:{port}'
-            kval = self.hostkeys.lookup(host)
-
+        kval = self.hostkeys.lookup(host)
         # None | {key_type: private_key}
         if kval is None:
             raise SSHException(f'No hostkey for host [{host}] found.')
@@ -200,11 +192,11 @@ class Connection(object):
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
         self._default_path = default_path
-        self._port = self._config.get('port') or port
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
-        self._start_transport(self._config.get('hostname') or host, self._port)
+        self._start_transport(self._config.get('hostname') or host,
+                              self._config.get('port') or port)
         self._set_username(self._config.get('user') or username)
         self._set_authentication(password, private_key, private_key_pass)
 
@@ -383,10 +375,11 @@ class Connection(object):
                           f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
-                    local_key = self._cnopts.get_hostkey(host, port=int(port))
-                    local_fingerprint = hash(local_key)
-                    log.info(f'Known Fingerprint: {local_fingerprint}')
-                    if local_fingerprint != remote_fingerprint:
+                    log.info(f'Hostkey Host: {host}')
+                    user_hostkey = self._cnopts.get_hostkey(host)
+                    user_fingerprint = hash(user_hostkey)
+                    log.info(f'Known Fingerprint: {user_fingerprint}')
+                    if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
                                                  '[FAILED]'))
             else:
