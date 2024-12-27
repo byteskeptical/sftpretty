@@ -1,7 +1,5 @@
 '''test sftpretty.remote_server_key'''
 
-import pytest
-
 from common import conn, VFS
 from paramiko.hostkeys import HostKeys
 from sftpretty import Connection
