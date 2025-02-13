@@ -18,7 +18,7 @@ def lsftp(request):
     return lsftp
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(scope='session')
 def knownhosts(sftpserver):
     '''setup host key for test server in local knownhosts'''
     if sftpserver.port != 22:
@@ -26,14 +26,13 @@ def knownhosts(sftpserver):
     else:
         host = sftpserver.host
     hashed_host = HostKeys().hash_host(host)
-    hashed_hostkey = (f'{hashed_host} '
-                      'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kq'
-                      'doWMXhHxxFR7aLJYNIHO/MtsD')
-    hostkey = (f'{host} '
-               'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXhH'
-               'xxFR7aLJYNIHO/MtsD')
+    hostkeys = (
+        f'{hashed_host} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0k'
+         'qdoWMXhHxxFR7aLJYNIHO/MtsD\n'
+        f'{host} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXh'
+         'HxxFR7aLJYNIHO/MtsD'
+    )
     knownhosts = Path('sftpserver.pub')
-    knownhosts.write_bytes(bytes(hashed_hostkey, 'utf-8'))
-    knownhosts.write_bytes(bytes(hostkey, 'utf-8'))
+    knownhosts.write_bytes(bytes(hostkeys, 'utf-8'))
 
     yield

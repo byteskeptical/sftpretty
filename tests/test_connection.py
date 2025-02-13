@@ -82,9 +82,14 @@ def test_hostkey_not_found():
         cnopts.get_hostkey(host='missing-server')
 
 
-def test_hostkey_returns_pkey():
+def test_hostkey_returns_pkey(sftpserver):
     '''test that finding a matching host key returns a PKey'''
+    if sftpserver.port != 22:
+        host = f'[{sftpserver.host}]:{sftpserver.port}'
+    else:
+        host = sftpserver.host
+
     cnopts = CnOpts(knownhosts='sftpserver.pub')
-    assert isinstance(cnopts.get_hostkey('127.0.0.1'), Ed25519Key)
-    assert isinstance(cnopts.get_hostkey(HostKeys().hash_host('127.0.0.1')),
+    assert isinstance(cnopts.get_hostkey(host), Ed25519Key)
+    assert isinstance(cnopts.get_hostkey(HostKeys().hash_host(host)),
                       Ed25519Key)
