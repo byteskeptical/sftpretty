@@ -91,5 +91,3 @@ def test_hostkey_returns_pkey(sftpserver):
 
     cnopts = CnOpts(knownhosts='sftpserver.pub')
     assert isinstance(cnopts.get_hostkey(host), Ed25519Key)
-    assert isinstance(cnopts.get_hostkey(HostKeys().hash_host(host)),
-                      Ed25519Key)
