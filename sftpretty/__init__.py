@@ -375,7 +375,12 @@ class Connection(object):
                           f'Size: {remote_hostkey.get_bits():d}'))
 
                 if self._cnopts.hostkeys is not None:
-                    user_hostkey = self._cnopts.get_hostkey(host)
+                    if port != 22:
+                        knownhost_name = f'[{host}]:{port}'
+                    else:
+                        knownhost_name = host
+                    log.debug(f'Hostkey Name: {knownhost_name}')
+                    user_hostkey = self._cnopts.get_hostkey(knownhost_name)
                     user_fingerprint = hash(user_hostkey)
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
