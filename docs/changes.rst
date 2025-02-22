@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-1.1.7 (current, released 2024-10-26)
+1.1.7 (current, released 2025-2-22)
 ------------------------------------
     * bug fix for host key matching servers running on non default ports
 

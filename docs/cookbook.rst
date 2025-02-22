@@ -122,13 +122,12 @@ AVAILABLE OPENSSH CONFIG OPTIONS:
     which if no data is received a request for response is sent to server.
   * ``User`` - Replaces the username parameter in the Connection method.
 
-Host Key checking with support for hashed hosts is enabled by default. Loading
-of ``~/.ssh/known_hosts`` is always attempted unless an alternative is passed.
-If you wish to disable host key checking, **NOT ADVISED**, you will need to
-modify the default CnOpts and set the knownhosts to None if no such file
-exists. You can still modify an existing CnOpts by setting cnopts.hostkeys to
-None if a default known_hosts exists or an alternative file was passed when
-CnOpts was created.
+Host Key checking is enabled by default. Loading of ``~/.ssh/known_hosts`` is
+always attempted unless an alternative is passed. If you wish to disable host
+key checking, **NOT ADVISED**, you will need to modify the default CnOpts and
+set the knownhosts to None if no such file exists. You can still modify an
+existing CnOpts by setting cnopts.hostkeys to None if a default known_hosts
+exists or an alternative file was passed when CnOpts was created.
 
 .. code-block:: python
 
