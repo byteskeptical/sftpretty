@@ -376,7 +376,7 @@ class Connection(object):
 
                 if self._cnopts.hostkeys is not None:
                     if port != 22:
-                        knownhost_name = f'[{host}]:{port}' # nopep8
+                        knownhost_name = f'[{host}]:{port}'  # noqa: E701
                     else:
                         knownhost_name = host
                     log.debug(f'Hostkey Name: {knownhost_name}')

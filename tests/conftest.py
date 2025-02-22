@@ -22,7 +22,7 @@ def lsftp(request):
 def knownhosts(sftpserver, key_type='ssh-ed25519'):
     '''setup host key for test server in local knownhosts'''
     if sftpserver.port != 22:
-        host = f'[{sftpserver.host}]:{sftpserver.port}' # nopep8
+        host = f'[{sftpserver.host}]:{sftpserver.port}' # noqa: E701
     else:
         host = sftpserver.host
     host_hashed = HostKeys().hash_host(host)
