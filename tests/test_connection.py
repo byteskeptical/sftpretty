@@ -85,7 +85,7 @@ def test_hostkey_not_found():
 def test_hostkey_returns_pkey(sftpserver):
     '''test that finding a matching host key returns a PKey'''
     if sftpserver.port != 22:
-        host = f'[{sftpserver.host}]:{sftpserver.port}'
+        host = f'[{sftpserver.host}]:{sftpserver.port}' # nopep8
     else:
         host = sftpserver.host
 
