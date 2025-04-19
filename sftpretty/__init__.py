@@ -294,7 +294,7 @@ class Connection(object):
             channel = _channel.get_channel()
             channel_name = uuid4().hex
             channel.set_name(channel_name)
-            channel.settimeout(self._timeout)
+            channel.settimeout(float(self._timeout))
             log.debug(f'Channel Name: [{channel_name}]')
 
             if self._default_path is not None:

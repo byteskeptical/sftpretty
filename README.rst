@@ -133,7 +133,7 @@ Additional Information
 
 Requirements
 ------------
-paramiko >= 1.17.0
+paramiko >= 2.7.0
 
 Supports
 --------
