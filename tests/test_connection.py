@@ -1,6 +1,7 @@
 '''test sftpretty.Connection'''
 
 import pytest
+
 from paramiko.hostkeys import HostKeys
 from paramiko.ed25519key import Ed25519Key
 

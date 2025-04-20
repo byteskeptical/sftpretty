@@ -17,8 +17,7 @@ def test_stat(sftpserver):
 
 
 def test_lstat(lsftp):
-    '''test lstat minimal, have to use real server, plugin doesn't support
-    lstat'''
+    '''test lstat minimal, use a real server, plugin doesn't support lstat'''
     localpath = Path(mkdtemp()).as_posix()
     build_dir_struct(localpath)
     dirname = Path(localpath).joinpath('pub').as_posix()

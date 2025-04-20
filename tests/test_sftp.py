@@ -11,6 +11,7 @@ def test_sftp_client(lsftp):
     with Connection(**LOCAL) as sftp:
         assert 'normalize' in dir(sftp.sftp_client)
         assert 'readlink' in dir(sftp.sftp_client)
+
     assert 'normalize' in dir(lsftp.sftp_client)
     assert 'readlink' in dir(lsftp.sftp_client)
 
