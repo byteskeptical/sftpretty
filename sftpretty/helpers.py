@@ -173,7 +173,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
 
 def st_mode_to_int(val):
     '''SFTAttributes st_mode returns an stat type that shows more than what
-    can be set.  Trim off those bits and convert to an int representation.
+    can be set. Trim off those bits and convert to an int representation.
     if you want an object that was `chmod 711` to return a value of 711, use
     this function
 

@@ -1,4 +1,4 @@
-'''methods to build a known local directory structure, used in testing'''
+'''methods to build a known local directory structure'''
 
 from common import STARS8192
 from pathlib import Path
