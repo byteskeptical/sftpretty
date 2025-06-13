@@ -1,8 +1,13 @@
 Change Log
 ==========
 
-1.1.7 (current, released 2025-2-22)
-------------------------------------
+1.1.8 (current, released 2025-6-13)
+-----------------------------------
+    * added WARN log level to logger, mapped to QUIET in ssh config.
+    * added support for int values in CnOpts.log_level mapped to python logging.
+
+1.1.7 (released 2025-2-22)
+--------------------------
     * bug fix for host key matching servers running on non default ports
 
 1.1.6 (released 2024-10-12)
