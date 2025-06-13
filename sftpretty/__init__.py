@@ -243,7 +243,7 @@ class Connection(object):
 
     def _set_logging(self):
         '''Set logging location and level for connection'''
-        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO:,
+        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO,
                      'quiet': WARN, 'warn': WARN, 'warning': WARN}
         level = self._config.get('loglevel') or self._cnopts.log_level
 
