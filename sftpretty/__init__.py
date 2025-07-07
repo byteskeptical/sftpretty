@@ -2,7 +2,7 @@ from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
-                     StreamHandler)
+                     StreamHandler, WARN)
 from os import environ, SEEK_END, utime
 from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
@@ -49,7 +49,7 @@ class CnOpts(object):
         True, creates a temporary file used to capture logs. If set to an
         existing filepath, logs will be appended.
     :ivar str log_level: *Default: info* - Set logging level for connection.
-        Choose between debug, error, or info.
+        Choose between debug, error, info, or warn.
 
     :returns: (obj) CnOpts - Connection options object, used for passing
         extended options to a Connection object.
@@ -243,11 +243,16 @@ class Connection(object):
 
     def _set_logging(self):
         '''Set logging location and level for connection'''
-        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO}
+        level_map = {'debug': DEBUG, 'error': ERROR, 'info': INFO,
+                     'quiet': WARN, 'warn': WARN, 'warning': WARN}
         level = self._config.get('loglevel') or self._cnopts.log_level
-        level = level_map[level.lower().strip('1,2,3')]
 
         try:
+            if not isinstance(level, int):
+                level = level_map[level.lower().strip('1,2,3')]
+            elif level not in [DEBUG, ERROR, INFO, WARN]:
+                raise KeyError
+
             global log
             log = getLogger('SFTPretty')
             if self._cnopts.log:
@@ -269,7 +274,8 @@ class Connection(object):
             log.setLevel(level)
         except KeyError:
             raise LoggingException(('Log level must set to one of following: '
-                                    '[debug, error, info].'))
+                                    '[debug, error, info, quiet, warn, '
+                                   f'{DEBUG}, {ERROR}, {INFO}, {WARN}].'))
 
     def _set_username(self, username):
         '''Set the username for the connection. If not passed, then look to
