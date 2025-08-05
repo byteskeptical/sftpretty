@@ -304,19 +304,19 @@ class Connection(object):
                 channel.set_name(channel_name)
                 channel.settimeout(self._timeout)
                 log.debug(f'Channel Name: [{channel_name}]')
-
+et
                 if self._default_path is not None:
                     _channel.chdir(drivedrop(self._default_path))
                     log.info(('Current Working Directory: '
                              f'[{self._default_path}]'))
 
-                self._cache.channel = channel
-                self._channels.append(channel)
+                self._cache.channel = _channel
+                self._channels.append(_channel)
                 log.debug(f'Thread Cached: [{get_ident()}]')
 
             yield _channel
         except Exception as err:
-            channel.close()
+            _channel.close()
             self._cache.channel = None
             raise err
 
