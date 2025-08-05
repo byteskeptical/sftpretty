@@ -6,7 +6,7 @@ from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
 from os import environ, SEEK_END, utime
 from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
-                      SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+                      SSHException, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
@@ -209,8 +209,7 @@ class Connection(object):
             private_key = self._config['identityfile'][0]
         if private_key is not None:
             # Use key path or provided key object
-            key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
-                         'RSA': RSAKey}
+            key_types = {'EC': ECDSAKey, 'OPENSSH': Ed25519Key, 'RSA': RSAKey}
             if isinstance(private_key, str):
                 key_file = Path(private_key).expanduser().absolute().as_posix()
                 try:
