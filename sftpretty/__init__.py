@@ -297,7 +297,7 @@ class Connection(object):
         _channel = getattr(self._cache, 'channel', None)
 
         try:
-            if _channel is None or _channel.sock.closed:
+            if _channel is None or _channel.closed:
                 _channel = SFTPClient.from_transport(self._transport)
                 channel = _channel.get_channel()
                 channel_name = uuid4().hex
