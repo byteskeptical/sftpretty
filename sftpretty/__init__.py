@@ -294,7 +294,7 @@ class Connection(object):
     @contextmanager
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        _channel = getattr(self._thread_local, 'channel', None)
+        _channel = getattr(self._cache, 'channel', None)
 
         try:
             if _channel is None or _channel.sock.closed:
