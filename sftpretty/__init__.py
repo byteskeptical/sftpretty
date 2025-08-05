@@ -1138,7 +1138,7 @@ class Connection(object):
         try:
             # Close cached channels
             for channel in self._channels:
-                if not channel.sock.closed:
+                if not channel.closed:
                     channel.close()
             # Close the transport.
             if self._transport and self._transport.is_active():
