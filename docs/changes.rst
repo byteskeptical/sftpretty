@@ -1,8 +1,13 @@
 Change Log
 ==========
 
-1.1.8 (current, released 2025-6-13)
+1.1.9 (current, released 2025-8-06)
 -----------------------------------
+    * removing ssh-dss key type as it was removed in paramiko in 4.0.0.
+    * adding channel cache to place upper limit on creation overhead.
+
+1.1.8 (released 2025-6-13)
+--------------------------
     * added WARN log level to logger, mapped to QUIET in ssh config.
     * added support for int values in CnOpts.log_level mapped to python logging.
 
