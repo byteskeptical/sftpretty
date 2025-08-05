@@ -189,8 +189,8 @@ AVAILABLE CONNECTION OPTIONS:
   * ``.key_types`` - Replaces the key types parameter in the Connection method.
   * ``.log`` - False **Default** logs to console, True logs to temporary file,
     String sets custom location.
-  * ``.log_level`` - Set logger verbosity to either debug, error, or
-    info **Default**.
+  * ``.log_level`` - Set logger verbosity to either debug, error,
+    info **Default**, or warn.
 
 Here is a common scenario, you have your connection information stored in a
 persistence mechanism, like `yamjam <https://yamjam.rtfd.org/>`_ and when you access

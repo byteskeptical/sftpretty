@@ -3,7 +3,7 @@ Change Log
 
 1.1.9 (current, released 2025-8-06)
 -----------------------------------
-    * removing ssh-dss key type as it was removed in paramiko in 4.0.0.
+    * removing ssh-dss key type as it was deprecated in paramiko in 4.0.0.
     * adding channel cache to place upper limit on creation overhead.
 
 1.1.8 (released 2025-6-13)
