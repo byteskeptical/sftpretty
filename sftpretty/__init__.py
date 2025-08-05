@@ -300,7 +300,7 @@ class Connection(object):
         try:
             if _channel is None or _channel.sock.closed:
                 _channel = SFTPClient.from_transport(self._transport)
-                channel = channel.get_channel()
+                channel = _channel.get_channel()
                 channel_name = uuid4().hex
                 channel.set_name(channel_name)
                 channel.settimeout(self._timeout)

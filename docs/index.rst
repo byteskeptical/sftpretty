@@ -6,6 +6,7 @@ routines with progress notifications for reliable, asynchronous transfers. A
 Python3 optimized fork of pysftp with additional features & improvements.
 
 * Built-in retry decorator
+* Channel cache
 * Hash function for integrity checking
 * Improved local & remote directory mapping
 * Improved logging mechanism
