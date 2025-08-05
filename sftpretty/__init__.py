@@ -14,7 +14,7 @@ from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
-from threading import get_ident, local
+from threading import get_ident, local as cache
 from uuid import uuid4
 
 
@@ -190,7 +190,7 @@ class Connection(object):
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
-        self._cache = local()
+        self._cache = cache()
         self._channels = []
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
@@ -1144,7 +1144,7 @@ class Connection(object):
             if self._transport and self._transport.is_active():
                 self._transport.close()
 
-            self._cache = local()
+            self._cache = cache()
             self._channels = []
             self._transport = None
 
