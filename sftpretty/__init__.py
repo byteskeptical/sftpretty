@@ -295,9 +295,10 @@ class Connection(object):
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         _channel = getattr(self._cache, 'channel', None)
+        channel = _channel.get_channel()
 
         try:
-            if _channel is None or _channel.closed:
+            if channel is None or channel.closed:
                 _channel = SFTPClient.from_transport(self._transport)
                 channel = _channel.get_channel()
                 channel_name = uuid4().hex
