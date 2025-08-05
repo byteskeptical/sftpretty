@@ -313,6 +313,9 @@ class Connection(object):
                 self._cache.channel = _channel
                 self._channels.append(_channel)
                 log.debug(f'Thread Cached: [{get_ident()}]')
+            else:
+                channel = _channel.get_channel()
+                channel.settimeout(self._timeout)
 
             yield _channel
         except Exception as err:
