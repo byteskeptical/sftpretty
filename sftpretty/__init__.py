@@ -304,7 +304,7 @@ class Connection(object):
                 channel.set_name(channel_name)
                 channel.settimeout(self._timeout)
                 log.debug(f'Channel Name: [{channel_name}]')
-et
+
                 if self._default_path is not None:
                     _channel.chdir(drivedrop(self._default_path))
                     log.info(('Current Working Directory: '
