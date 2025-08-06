@@ -6,7 +6,7 @@ from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
 from os import environ, SEEK_END, utime
 from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
-                      SSHException, DSSKey, ECDSAKey, Ed25519Key, RSAKey)
+                      SSHException, ECDSAKey, Ed25519Key, RSAKey)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
@@ -14,6 +14,7 @@ from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
+from threading import get_ident, local as cache
 from uuid import uuid4
 
 
@@ -76,7 +77,7 @@ class CnOpts(object):
                     'diffie-hellman-group-exchange-sha1')
         self.key_types = ('ssh-ed25519', 'ecdsa-sha2-nistp521',
                           'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp256',
-                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa', 'ssh-dss')
+                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa')
         self.log = False
         self.log_level = 'info'
         self.ssh_config = SSHConfig()
@@ -189,6 +190,8 @@ class Connection(object):
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
+        self._cache = cache()
+        self._channels = []
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
         self._default_path = default_path
@@ -206,8 +209,7 @@ class Connection(object):
             private_key = self._config['identityfile'][0]
         if private_key is not None:
             # Use key path or provided key object
-            key_types = {'DSA': DSSKey, 'EC': ECDSAKey, 'OPENSSH': Ed25519Key,
-                         'RSA': RSAKey}
+            key_types = {'EC': ECDSAKey, 'OPENSSH': Ed25519Key, 'RSA': RSAKey}
             if isinstance(private_key, str):
                 key_file = Path(private_key).expanduser().absolute().as_posix()
                 try:
@@ -290,29 +292,36 @@ class Connection(object):
             raise CredentialException('No username specified.')
 
     @contextmanager
-    def _sftp_channel(self, keepalive=False):
+    def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        _channel = None
+        _channel = getattr(self._cache, 'channel', None)
 
         try:
-            _channel = SFTPClient.from_transport(self._transport)
+            if _channel is None or _channel.get_channel().closed:
+                _channel = SFTPClient.from_transport(self._transport)
+                channel = _channel.get_channel()
+                channel_name = uuid4().hex
+                channel.set_name(channel_name)
+                channel.settimeout(self._timeout)
+                log.debug(f'Channel Name: [{channel_name}]')
 
-            channel = _channel.get_channel()
-            channel_name = uuid4().hex
-            channel.set_name(channel_name)
-            channel.settimeout(self._timeout)
-            log.debug(f'Channel Name: [{channel_name}]')
+                if self._default_path is not None:
+                    _channel.chdir(drivedrop(self._default_path))
+                    log.info(('Current Working Directory: '
+                             f'[{self._default_path}]'))
 
-            if self._default_path is not None:
-                _channel.chdir(drivedrop(self._default_path))
-                log.info(f'Current Working Directory: [{self._default_path}]')
+                self._cache.channel = _channel
+                self._channels.append(_channel)
+                log.debug(f'Thread Cached: [{get_ident()}]')
+            else:
+                channel = _channel.get_channel()
+                channel.settimeout(self._timeout)
 
             yield _channel
         except Exception as err:
+            _channel.close()
+            self._cache.channel = None
             raise err
-        finally:
-            if _channel and not keepalive:
-                _channel.close()
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
@@ -1127,10 +1136,18 @@ class Connection(object):
     def close(self):
         '''Terminate transport connection and clean up the bits.'''
         try:
+            # Close cached channels
+            for channel in self._channels:
+                if not channel.closed:
+                    channel.close()
             # Close the transport.
             if self._transport and self._transport.is_active():
                 self._transport.close()
+
+            self._cache = cache()
+            self._channels = []
             self._transport = None
+
             # Clean up any loggers
             if log.hasHandlers():
                 # remove lingering handlers if any
@@ -1330,7 +1347,7 @@ class Connection(object):
 
         :raises: IOError, if the file could not be opened.
         '''
-        with self._sftp_channel(keepalive=True) as channel:
+        with self._sftp_channel() as channel:
             remotefile = drivedrop(remotefile)
             flo = channel.open(remotefile, bufsize=bufsize, mode=mode)
 
@@ -1530,7 +1547,7 @@ class Connection(object):
 
         :returns: (obj) Active SFTPClient object.
         '''
-        with self._sftp_channel(keepalive=True) as channel:
+        with self._sftp_channel() as channel:
             return channel
 
     @property

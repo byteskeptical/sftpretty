@@ -2,7 +2,6 @@
 
 import pytest
 
-from paramiko.hostkeys import HostKeys
 from paramiko.ed25519key import Ed25519Key
 
 from common import conn, LOCAL, VFS
