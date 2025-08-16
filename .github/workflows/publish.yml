@@ -14,7 +14,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.12']
+        python-version: ['3.13']
 
     steps:
       - name: Clone Repository
