@@ -1520,7 +1520,7 @@ class Connection(object):
         with self._sftp_channel() as channel:
             pwd = channel.normalize('.')
 
-        return drivedrop(pwd)
+        return pwd.replace('//', '/')
 
     @property
     def remote_server_key(self):
