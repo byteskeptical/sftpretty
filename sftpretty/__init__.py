@@ -309,9 +309,10 @@ class Connection(object):
                 self._channels.append(_channel)
                 log.debug(f'Thread Cached: [{get_ident()}]')
             else:
-                _channel.chdir(None)
+                _channel.chdir(path=None)
                 channel = _channel.get_channel()
                 channel.settimeout(self._timeout)
+                log.debug(f'Using Cached Thread: [{get_ident()}]')
 
             if self._default_path is not None:
                 _channel.chdir(drivedrop(self._default_path))
