@@ -14,7 +14,7 @@ from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
 from socket import gaierror
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
-from threading import get_ident, local as cache
+from threading import local as cache
 from uuid import uuid4
 
 
@@ -307,12 +307,12 @@ class Connection(object):
 
                 self._cache.channel = _channel
                 self._channels.append(_channel)
-                log.debug(f'Thread Cached: [{get_ident()}]')
+                log.debug(f'Thread Cached: [{channel_name}]')
             else:
-                _channel.chdir(path='/')
+                _channel.chdir(path=None)
                 channel = _channel.get_channel()
                 channel.settimeout(self._timeout)
-                log.debug(f'Using Cached Thread: [{get_ident()}]')
+                log.debug(f'Using Cached Thread: [{channel.get_name()}]')
 
             if self._default_path is not None:
                 _channel.chdir(drivedrop(self._default_path))
