@@ -18,4 +18,4 @@ def test_issue_65(sftpserver):
             with sftp.cd(pubpath.as_posix()):
                 pass
 
-            assert sftp.getcwd() == pubpath.parent.as_posix()
+            assert sftp.getcwd() == pubpath.root
