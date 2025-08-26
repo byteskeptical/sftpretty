@@ -309,7 +309,6 @@ class Connection(object):
                 self._channels.append(_channel)
                 log.debug(f'Thread Cached: [{channel_name}]')
             else:
-                _channel.chdir(path=None)
                 channel = _channel.get_channel()
                 channel.settimeout(self._timeout)
                 log.debug(f'Using Cached Thread: [{channel.get_name()}]')
@@ -1083,7 +1082,7 @@ class Connection(object):
         except Exception as err:
             raise err
         finally:
-            self.chdir(original_path)
+            self._default_path = original_path
 
     def chdir(self, remotepath):
         '''Change the current working directory on the remote
