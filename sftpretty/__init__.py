@@ -1078,7 +1078,6 @@ class Connection(object):
 
         try:
             if remotepath is not None:
-                self._default_path = original_path
                 self.chdir(remotepath)
             yield
         except Exception as err:
