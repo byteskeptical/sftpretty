@@ -1084,6 +1084,7 @@ class Connection(object):
         except Exception as err:
             raise err
         finally:
+            self._default_path = original_path
             self.chdir(original_path)
 
     def chdir(self, remotepath):
