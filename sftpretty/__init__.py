@@ -1096,6 +1096,10 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
+            if not Path(remotepath).is_absolute():
+                root = self._default_path or channel.getcwd()
+                remotepath = Path(root).joinpath(
+                                  remotepath).as_posix()
             channel.chdir(drivedrop(remotepath))
             self._default_path = channel.normalize('.')
 
