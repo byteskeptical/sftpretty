@@ -1097,7 +1097,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             if not Path(remotepath).is_absolute():
-                root = self._default_path or channel.getcwd()
+                root = self._default_path or channel.getcwd() or '/'
                 remotepath = Path(root).joinpath(
                                   remotepath).as_posix()
             channel.chdir(drivedrop(remotepath))
