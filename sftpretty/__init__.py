@@ -191,11 +191,10 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cache = cache()
-        self._cache.cwd = default_path
+        self._cache.__dict__.setdefault('cwd', default_path)
         self._channels = []
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
-        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -302,12 +301,11 @@ class Connection(object):
             if not in_use and not chan.closed:
                 channel = ch
                 self._channels[i][1] = True
-                log.debug(f'Cached Thread: [{chan.get_name()}]')
+                log.debug(f'Cached Channel: [{chan.get_name()}]')
                 break
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
-            channel.chdir(getattr(self._cache, 'cwd', self._default_path))
             channel_name = uuid4().hex
             chan = channel.get_channel()
             chan.set_name(channel_name)
@@ -316,7 +314,7 @@ class Connection(object):
 
         try:
             chan.settimeout(self._timeout)
-            default_path = getattr(self._cache, 'cwd', self._default_path)
+            self._cache.cwd, default_path = getattr(self._cache, 'cwd', None)
 
             if default_path:
                 try:
