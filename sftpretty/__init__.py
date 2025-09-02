@@ -316,7 +316,7 @@ class Connection(object):
 
         try:
             chan.settimeout(self._timeout)
-            default_path = getattr(self._cache, 'cwd', None)
+            default_path = getattr(self._cache, 'cwd', self._default_path)
 
             if default_path:
                 try:
