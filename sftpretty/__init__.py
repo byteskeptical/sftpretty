@@ -1075,13 +1075,10 @@ class Connection(object):
         :raises: IOError, if remote path doesn't exist
         '''
         original_path = self.pwd
-        log.info(f'Original: {original_path}')
 
         try:
             if remotepath is not None:
-                log.info(f'Remote: {remotepath}')
                 self.chdir(remotepath)
-                log.info(f'Remote After: {self._default_path}')
             yield
         except Exception as err:
             raise err
@@ -1524,8 +1521,7 @@ class Connection(object):
         :returns: (str) Current working directory.
         '''
         with self._sftp_channel() as channel:
-            pwd = channel.normalize('.')
-            log.info(f'Working Directory: {pwd}')
+            pwd = drivedrop(channel.normalize('.'))
 
         return pwd
 
