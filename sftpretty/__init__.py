@@ -195,6 +195,7 @@ class Connection(object):
         self._channels = []
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
+        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -296,23 +297,21 @@ class Connection(object):
         '''Establish new SFTP channel.'''
         channel = None
 
-        for ch, in_use in self._channels:
+        for i, (ch, in_use) in enumerate(self._channels):
             chan = ch.get_channel()
             if not in_use and not chan.closed:
                 channel = ch
-                in_use = True
+                self._channels[i][1] = True
                 log.debug(f'Cached Thread: [{chan.get_name()}]')
                 break
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
-
             chan = channel.get_channel()
             channel_name = uuid4().hex
             chan.set_name(channel_name)
             chan.settimeout(self._timeout)
             log.debug(f'Channel Name: [{channel_name}]')
-
             self._channels.append([channel, True])
 
         try:
@@ -321,9 +320,9 @@ class Connection(object):
                 try:
                     channel.chdir(drivedrop(default_path))
                     log.info(f'Current Working Directory: [{default_path}]')
-                except IOError:
-                     log.error(f'Failed directory change to [{default_path}]')
-                     raise
+                except IOError as err:
+                     log.error(f'Failed Directory Change: [{default_path}]')
+                     raise err
 
             yield channel
         except Exception as err:
@@ -331,8 +330,8 @@ class Connection(object):
             raise err
         finally:
             if channel and not chan.closed:
-                channel.chdir(None)
-                for i, (ch, _) in enumerate(self._channels):
+                channel.chdir(self._default_path)
+                for i, (ch, in_use) in enumerate(self._channels):
                     if ch == channel:
                         self._channels[i][1] = False
                         break
@@ -1107,11 +1106,8 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            log.info(f'Check: {remotepath}')
             channel.chdir(drivedrop(remotepath))
-            cwd = drivedrop(channel.normalize('.'))
-            log.info(f'After: {cwd}')
-            self._cache.cwd = cwd
+            self._cache.cwd = drivedrop(channel.normalize('.'))
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1351,7 +1347,7 @@ class Connection(object):
         with self._sftp_channel() as channel:
             expanded_path = channel.normalize(drivedrop(remotepath))
 
-        return expanded_path
+        return drivedrop(expanded_path)
 
     def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.
@@ -1381,7 +1377,7 @@ class Connection(object):
             remotelink = drivedrop(remotelink)
             link_destination = channel.normalize(channel.readlink(remotelink))
 
-        return link_destination
+        return drivedrop(link_destination)
 
     def remotetree(self, container, remotedir, localdir, recurse=True):
         '''Recursively map remote directory tree to a dictionary container.
