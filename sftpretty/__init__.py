@@ -307,15 +307,15 @@ class Connection(object):
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
-            chan = channel.get_channel()
+            channel.chdir(self._default_path)
             channel_name = uuid4().hex
+            chan = channel.get_channel()
             chan.set_name(channel_name)
             log.debug(f'Channel Name: [{channel_name}]')
             self._channels.append([channel, True])
 
         try:
             chan.settimeout(self._timeout)
-            channel.chdir(self._default_path)
             default_path = getattr(self._cache, 'cwd', None)
 
             if default_path:
@@ -1261,7 +1261,7 @@ class Connection(object):
         return directory
 
     def listdir_attr(self, remotepath='.'):
-        '''Return a non-sorted list of SFTPAttribute objects for the remote
+        '''Return a sorted list of SFTPAttribute objects for the remote
         directory contents. Will not include the special entries '.' and '..'.
 
         The returned SFTPAttributes objects will each have an additional field:
