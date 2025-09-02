@@ -310,27 +310,28 @@ class Connection(object):
             chan = channel.get_channel()
             channel_name = uuid4().hex
             chan.set_name(channel_name)
-            chan.settimeout(self._timeout)
             log.debug(f'Channel Name: [{channel_name}]')
             self._channels.append([channel, True])
 
         try:
+            chan.settimeout(self._timeout)
+            channel.chdir(self._default_path)
             default_path = getattr(self._cache, 'cwd', None)
+
             if default_path:
                 try:
                     channel.chdir(drivedrop(default_path))
                     log.info(f'Current Working Directory: [{default_path}]')
                 except IOError as err:
-                     log.error(f'Failed Directory Change: [{default_path}]')
-                     raise err
+                    log.error(f'Failed Directory Change: [{default_path}]')
+                    raise err
 
             yield channel
         except Exception as err:
             channel.close()
             raise err
         finally:
-            if channel and not chan.closed:
-                channel.chdir(self._default_path)
+            if not chan.closed:
                 for i, (ch, in_use) in enumerate(self._channels):
                     if ch == channel:
                         self._channels[i][1] = False
