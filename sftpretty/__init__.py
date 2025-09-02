@@ -1096,8 +1096,11 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
+            log.info(f'Check: {remotepath}')
             channel.chdir(drivedrop(remotepath))
-            self._default_path = channel.normalize('.')
+            cwd = drivedrop(channel.normalize('.'))
+            log.info(f'After: {cwd}')
+            self._default_path = cwd
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
