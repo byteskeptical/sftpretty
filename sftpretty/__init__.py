@@ -191,10 +191,10 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cache = cache()
+        self._cache.cwd = default_path
         self._channels = []
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
-        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -294,36 +294,48 @@ class Connection(object):
     @contextmanager
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
-        _channel = getattr(self._cache, 'channel', None)
+        channel = None
+
+        for ch, in_use in self._channels:
+            chan = ch.get_channel()
+            if not in_use and not chan.closed:
+                channel = ch
+                in_use = True
+                log.debug(f'Cached Thread: [{chan.get_name()}]')
+                break
+
+        if channel is None:
+            channel = SFTPClient.from_transport(self._transport)
+
+            chan = channel.get_channel()
+            channel_name = uuid4().hex
+            chan.set_name(channel_name)
+            chan.settimeout(self._timeout)
+            log.debug(f'Channel Name: [{channel_name}]')
+
+            self._channels.append([channel, True])
 
         try:
-            if _channel is None or _channel.get_channel().closed:
-                _channel = SFTPClient.from_transport(self._transport)
-                channel = _channel.get_channel()
-                channel_name = uuid4().hex
-                channel.set_name(channel_name)
-                channel.settimeout(self._timeout)
-                log.debug(f'Channel Name: [{channel_name}]')
+            default_path = getattr(self._cache, 'cwd', None)
+            if default_path:
+                try:
+                    channel.chdir(drivedrop(default_path))
+                    log.info(f'Current Working Directory: [{default_path}]')
+                except IOError:
+                     log.error(f'Failed directory change to [{default_path}]')
+                     raise
 
-                self._cache.channel = _channel
-                self._channels.append(_channel)
-                log.debug(f'Thread Cached: [{channel_name}]')
-            else:
-                _channel.chdir(None)
-                channel = _channel.get_channel()
-                channel.settimeout(self._timeout)
-                log.debug(f'Using Cached Thread: [{channel.get_name()}]')
-
-            if self._default_path is not None:
-                _channel.chdir(drivedrop(self._default_path))
-                log.info(('Current Working Directory: '
-                         f'[{self._default_path}]'))
-
-            yield _channel
+            yield channel
         except Exception as err:
-            _channel.close()
-            self._cache.channel = None
+            channel.close()
             raise err
+        finally:
+            if channel and not chan.closed:
+                channel.chdir(None)
+                for i, (ch, _) in enumerate(self._channels):
+                    if ch == channel:
+                        self._channels[i][1] = False
+                        break
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
@@ -655,7 +667,7 @@ class Connection(object):
         self.chdir(remotedir)
 
         lwd = Path(localdir).absolute().as_posix()
-        rwd = self._default_path
+        rwd = self._cache.cwd
 
         tree = {}
         tree[rwd] = [(rwd, lwd)]
@@ -1083,7 +1095,6 @@ class Connection(object):
         except Exception as err:
             raise err
         finally:
-            self._default_path = original_path
             self.chdir(original_path)
 
     def chdir(self, remotepath):
@@ -1100,7 +1111,7 @@ class Connection(object):
             channel.chdir(drivedrop(remotepath))
             cwd = drivedrop(channel.normalize('.'))
             log.info(f'After: {cwd}')
-            self._default_path = cwd
+            self._cache.cwd = cwd
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1143,7 +1154,7 @@ class Connection(object):
         '''Terminate transport connection and clean up the bits.'''
         try:
             # Close cached channels
-            for channel in self._channels:
+            for channel, _ in self._channels:
                 if not channel.sock.closed:
                     channel.close()
             # Close the transport.
