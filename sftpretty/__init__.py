@@ -307,7 +307,7 @@ class Connection(object):
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
-            channel.chdir(self._default_path)
+            channel.chdir(self._cache.cwd)
             channel_name = uuid4().hex
             chan = channel.get_channel()
             chan.set_name(channel_name)
