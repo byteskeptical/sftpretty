@@ -3,7 +3,7 @@
 import pytest
 
 from common import conn, VFS
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from sftpretty import Connection
 
 

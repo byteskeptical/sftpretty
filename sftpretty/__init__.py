@@ -1075,10 +1075,13 @@ class Connection(object):
         :raises: IOError, if remote path doesn't exist
         '''
         original_path = self.pwd
+        log.info(f'Original: {original_path}')
 
         try:
             if remotepath is not None:
+                log.info(f'Remote: {remotepath}')
                 self.chdir(remotepath)
+                log.info(f'Remote After: {self._default_path}')
             yield
         except Exception as err:
             raise err
@@ -1096,10 +1099,6 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            if not Path(remotepath).is_absolute():
-                root = self._default_path or channel.getcwd() or '/'
-                remotepath = Path(root).joinpath(
-                                  remotepath).as_posix()
             channel.chdir(drivedrop(remotepath))
             self._default_path = channel.normalize('.')
 
@@ -1526,8 +1525,9 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             pwd = channel.normalize('.')
+            log.info(f'Working Directory: {pwd}')
 
-        return pwd.replace('//', '/').rstrip('/')
+        return pwd
 
     @property
     def remote_server_key(self):
