@@ -191,10 +191,10 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cache = cache()
-        self._cache.__dict__.setdefault('cwd', default_path)
-        self._channels = []
+        self._channels = {}
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
+        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -296,32 +296,40 @@ class Connection(object):
         '''Establish new SFTP channel.'''
         channel = None
 
-        for i, (ch, in_use) in enumerate(self._channels):
-            chan = ch.get_channel()
-            if not in_use and not chan.closed:
-                channel = ch
-                self._channels[i][1] = True
-                log.debug(f'Cached Channel: [{chan.get_name()}]')
-                break
+        try:
+            channel_name, data = next(
+                (key, value)
+                for key, value in self._channels.items()
+                if not value['busy']
+            )
+            meta = data['meta']
+            if not meta.closed:
+                channel = data['channel']
+                self._channels[channel_name]['busy'] = True
+                log.debug(f'Cached Channel: [{channel_name}]')
+        except StopIteration:
+            pass
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
             channel_name = uuid4().hex
-            chan = channel.get_channel()
-            chan.set_name(channel_name)
+            meta = channel.get_channel()
+            meta.set_name(channel_name)
             log.debug(f'Channel Name: [{channel_name}]')
-            self._channels.append([channel, True])
+            self._channels[channel_name] = {
+                'busy': True, 'channel': channel, 'meta': meta
+            }
 
         try:
-            chan.settimeout(self._timeout)
-            self._cache.cwd = default_path = getattr(self._cache, 'cwd', None)
+            meta.settimeout(self._timeout)
+            self._cache.__dict__.setdefault('cwd', self._default_path)
 
-            if default_path:
+            if self._cache.cwd:
                 try:
-                    channel.chdir(drivedrop(default_path))
-                    log.info(f'Current Working Directory: [{default_path}]')
+                    channel.chdir(drivedrop(self._cache.cwd))
+                    log.info(f'Current Working Directory: [{self._cache.cwd}]')
                 except IOError as err:
-                    log.error(f'Failed Directory Change: [{default_path}]')
+                    log.error(f'Failed Directory Change: [{self._cache.cwd}]')
                     raise err
 
             yield channel
@@ -329,11 +337,8 @@ class Connection(object):
             channel.close()
             raise err
         finally:
-            if not chan.closed:
-                for i, (ch, in_use) in enumerate(self._channels):
-                    if ch == channel:
-                        self._channels[i][1] = False
-                        break
+            if not meta.closed:
+                self._channels[channel_name]['busy'] = False
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
@@ -1107,6 +1112,7 @@ class Connection(object):
         with self._sftp_channel() as channel:
             channel.chdir(drivedrop(remotepath))
             self._cache.cwd = drivedrop(channel.normalize('.'))
+            self._default_path = self._cache.cwd
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1149,15 +1155,15 @@ class Connection(object):
         '''Terminate transport connection and clean up the bits.'''
         try:
             # Close cached channels
-            for channel, _ in self._channels:
-                if not channel.sock.closed:
-                    channel.close()
+            for channel_name, data in self._channels.items():
+                if not data['channel'].sock.closed:
+                    data['channel'].close()
+
             # Close the transport.
             if self._transport and self._transport.is_active():
                 self._transport.close()
 
-            self._cache = cache()
-            self._channels = []
+            self._channels = {}
             self._transport = None
 
             # Clean up any loggers
