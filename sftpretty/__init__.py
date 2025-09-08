@@ -191,6 +191,7 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cache = cache()
+        self._cache.__dict__.setdefault('cwd', default_path)
         self._channels = {}
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
@@ -312,7 +313,6 @@ class Connection(object):
 
         if channel is None:
             channel = SFTPClient.from_transport(self._transport)
-            channel.chdir(drivedrop(self._default_path))
             channel_name = uuid4().hex
             meta = channel.get_channel()
             meta.set_name(channel_name)
