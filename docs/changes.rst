@@ -1,8 +1,8 @@
-Change Log
-==========
 
-1.1.10 (current, released 2025-8-16)
+
+1.1.10 (current, released 2025-9-19)
 -----------------------------------
+    * fix for channel re-use limitation.
     * regression fix for properly closing channel cache sockets.
 
 1.1.9 (released 2025-8-06)
