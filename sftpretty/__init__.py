@@ -7,7 +7,7 @@ from os import environ, SEEK_END, utime
 from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
                       SSHException, ECDSAKey, Ed25519Key, RSAKey)
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
