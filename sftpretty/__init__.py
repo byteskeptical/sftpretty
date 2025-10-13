@@ -308,10 +308,7 @@ class Connection(object):
                 channel = data['channel']
                 self._channels[channel_name]['busy'] = True
                 log.debug(f'Cached Channel: [{channel_name}]')
-        except StopIteration:
-            pass
 
-        try:
             if channel is None:
                 channel = SFTPClient.from_transport(self._transport)
                 channel_name = uuid4().hex
@@ -337,8 +334,11 @@ class Connection(object):
                 self._channels[channel_name]['busy'] = False
 
             yield channel
+        except StopIteration:
+            pass
         except Exception as err:
-            channel.close()
+            if channel:
+                channel.close()
             raise err
 
     def _start_transport(self, host, port):
@@ -1094,7 +1094,14 @@ class Connection(object):
 
         try:
             if remotepath is not None:
-                self.chdir(remotepath)
+                if not all ([
+                    PurePosixPath(remotepath).root,
+                    PureWindowsPath(remotepath).root
+                ]):
+                    cwd = Path(original_path).joinpath(remotepath).as_posix()
+                    self.chdir(cwd)
+                else:
+                    self.chdir(remotepath)
             yield
         except Exception as err:
             raise err
