@@ -311,17 +311,17 @@ class Connection(object):
         except StopIteration:
             pass
 
-        if channel is None:
-            channel = SFTPClient.from_transport(self._transport)
-            channel_name = uuid4().hex
-            meta = channel.get_channel()
-            meta.set_name(channel_name)
-            log.debug(f'Channel Name: [{channel_name}]')
-            self._channels[channel_name] = {
-                'busy': True, 'channel': channel, 'meta': meta
-            }
-
         try:
+            if channel is None:
+                channel = SFTPClient.from_transport(self._transport)
+                channel_name = uuid4().hex
+                meta = channel.get_channel()
+                meta.set_name(channel_name)
+                log.debug(f'Channel Name: [{channel_name}]')
+                self._channels[channel_name] = {
+                    'busy': True, 'channel': channel, 'meta': meta
+                }
+
             meta.settimeout(self._timeout)
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
@@ -333,13 +333,13 @@ class Connection(object):
                     log.error(f'Failed Directory Change: [{self._cache.cwd}]')
                     raise err
 
+            if not meta.closed:
+                self._channels[channel_name]['busy'] = False
+
             yield channel
         except Exception as err:
             channel.close()
             raise err
-        finally:
-            if not meta.closed:
-                self._channels[channel_name]['busy'] = False
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
@@ -1112,8 +1112,10 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             channel.chdir(drivedrop(remotepath))
-            self._cache.cwd = drivedrop(channel.normalize('.'))
-            self._default_path = self._cache.cwd
+            self._default_path = drivedrop(channel.normalize('.'))
+            self._cache.__dict__.setdefault(
+                'cwd', self._default_path
+            )
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
