@@ -308,7 +308,10 @@ class Connection(object):
                 channel = data['channel']
                 self._channels[channel_name]['busy'] = True
                 log.debug(f'Cached Channel: [{channel_name}]')
+        except StopIteration:
+            pass
 
+        try:
             if channel is None:
                 channel = SFTPClient.from_transport(self._transport)
                 channel_name = uuid4().hex
@@ -323,19 +326,16 @@ class Connection(object):
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
             if self._cache.cwd:
-                try:
-                    channel.chdir(drivedrop(self._cache.cwd))
-                    log.info(f'Current Working Directory: [{self._cache.cwd}]')
-                except IOError as err:
-                    log.error(f'Failed Directory Change: [{self._cache.cwd}]')
-                    raise err
+                channel.chdir(drivedrop(self._cache.cwd))
+                log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             if not meta.closed:
                 self._channels[channel_name]['busy'] = False
 
             yield channel
-        except StopIteration:
-            pass
+        except IOError as err:
+            log.error(f'Failed Directory Change: [{self._cache.cwd}]')
+            raise err
         except Exception as err:
             if channel:
                 channel.close()
