@@ -7,7 +7,7 @@ from os import environ, SEEK_END, utime
 from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
                       ConfigParseError, PasswordRequiredException,
                       SSHException, ECDSAKey, Ed25519Key, RSAKey)
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
@@ -195,7 +195,6 @@ class Connection(object):
         self._channels = {}
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
-        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -311,17 +310,17 @@ class Connection(object):
         except StopIteration:
             pass
 
-        try:
-            if channel is None:
-                channel = SFTPClient.from_transport(self._transport)
-                channel_name = uuid4().hex
-                meta = channel.get_channel()
-                meta.set_name(channel_name)
-                log.debug(f'Channel Name: [{channel_name}]')
-                self._channels[channel_name] = {
-                    'busy': True, 'channel': channel, 'meta': meta
-                }
+        if channel is None:
+            channel = SFTPClient.from_transport(self._transport)
+            channel_name = uuid4().hex
+            meta = channel.get_channel()
+            meta.set_name(channel_name)
+            log.debug(f'Channel Name: [{channel_name}]')
+            self._channels[channel_name] = {
+                'busy': True, 'channel': channel, 'meta': meta
+            }
 
+        try:
             meta.settimeout(self._timeout)
 
             if self._cache.cwd:
@@ -1110,18 +1109,8 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            if not all ([
-                PurePosixPath(remotepath).root,
-                PureWindowsPath(remotepath).root
-            ]) and self._cache.cwd:
-                cwd = Path(self._cache.cwd).joinpath(remotepath).as_posix()
-            else:
-                cwd = drivedrop(remotepath)
-
-            channel.chdir(cwd)
-            self._cache.__dict__.setdefault(
-                'cwd', drivedrop(channel.normalize('.'))
-            )
+            channel.chdir(drivedrop(remotepath))
+            self._cache.cwd = drivedrop(channel.normalize('.'))
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1545,9 +1534,7 @@ class Connection(object):
         :returns: (str) Current working directory.
         '''
         with self._sftp_channel() as channel:
-            self._cache.__dict__.setdefault(
-                'cwd', drivedrop(channel.normalize('.'))
-            )
+            self._cache.cwd = drivedrop(channel.normalize('.'))
 
         return self._cache.cwd
 
