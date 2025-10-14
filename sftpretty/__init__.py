@@ -317,21 +317,16 @@ class Connection(object):
                 meta = channel.get_channel()
                 meta.set_name(channel_name)
                 log.debug(f'Channel Name: [{channel_name}]')
+                self._cache.__dict__.setdefault('cwd', self._default_path)
                 self._channels[channel_name] = {
                     'busy': True, 'channel': channel, 'meta': meta
                 }
-
-                if self._default_path:
-                    self._cache.__dict__.setdefault('cwd', self._default_path)
 
             meta.settimeout(self._timeout)
 
             if self._cache.cwd:
                 channel.chdir(drivedrop(self._cache.cwd))
                 log.info(f'Current Working Directory: [{self._cache.cwd}]')
-
-            if not meta.closed:
-                self._channels[channel_name]['busy'] = False
 
             yield channel
         except IOError as err:
@@ -341,6 +336,9 @@ class Connection(object):
             if channel:
                 channel.close()
             raise err
+        finally:
+            if not meta.closed:
+                self._channels[channel_name]['busy'] = False
 
     def _start_transport(self, host, port):
         '''Start the transport and set connection options if specified.'''
@@ -1095,14 +1093,7 @@ class Connection(object):
 
         try:
             if remotepath is not None:
-                if not all ([
-                    PurePosixPath(remotepath).root,
-                    PureWindowsPath(remotepath).root
-                ]):
-                    cwd = Path(original_path).joinpath(remotepath).as_posix()
-                    self.chdir(cwd)
-                else:
-                    self.chdir(remotepath)
+                self.chdir(remotepath)
             yield
         except Exception as err:
             raise err
@@ -1119,7 +1110,15 @@ class Connection(object):
         :raises: IOError, if path does not exist
         '''
         with self._sftp_channel() as channel:
-            channel.chdir(drivedrop(remotepath))
+            if not all ([
+                PurePosixPath(remotepath).root,
+                PureWindowsPath(remotepath).root
+            ]) and self._cache.cwd:
+                cwd = Path(self._cache.cwd).joinpath(remotepath).as_posix()
+            else:
+                cwd = drivedrop(remotepath)
+
+            channel.chdir(cwd)
             self._cache.__dict__.setdefault(
                 'cwd', drivedrop(channel.normalize('.'))
             )
