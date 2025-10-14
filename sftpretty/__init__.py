@@ -191,10 +191,10 @@ class Connection(object):
                  port=22, private_key=None, private_key_pass=None,
                  timeout=None, username=None):
         self._cache = cache()
-        self._cache.__dict__.setdefault('cwd', default_path)
         self._channels = {}
         self._cnopts = cnopts or CnOpts()
         self._config = self._cnopts.get_config(host)
+        self._default_path = default_path
         self._set_logging()
         self._timeout = self._config.get('connecttimeout') or timeout
         self._transport = None
@@ -322,10 +322,13 @@ class Connection(object):
 
         try:
             meta.settimeout(self._timeout)
+            self._cache.__dict__.setdefault('cwd', self._default_path)
 
             if self._cache.cwd:
                 channel.chdir(drivedrop(self._cache.cwd))
-                log.info(f'Current Working Directory: [{self._cache.cwd}]')
+            else:
+                self._cache.cwd = '/'
+            log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
         except IOError as err:
