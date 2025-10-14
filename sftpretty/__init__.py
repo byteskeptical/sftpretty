@@ -1121,7 +1121,7 @@ class Connection(object):
         with self._sftp_channel() as channel:
             channel.chdir(drivedrop(remotepath))
             self._cache.__dict__.setdefault(
-                'cwd', drivedrop(channel.normalize('.')
+                'cwd', drivedrop(channel.normalize('.'))
             )
 
     def chmod(self, remotepath, mode=700):
@@ -1547,7 +1547,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             self._cache.__dict__.setdefault(
-                'cwd', drivedrop(channel.normalize('.')
+                'cwd', drivedrop(channel.normalize('.'))
             )
 
         return self._cache.cwd
