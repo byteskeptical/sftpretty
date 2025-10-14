@@ -1,6 +1,4 @@
-
-
-1.1.10 (current, released 2025-9-19)
+1.1.10 (current, released 2025-10-14)
 -----------------------------------
     * fix for channel re-use limitation.
     * regression fix for properly closing channel cache sockets.
