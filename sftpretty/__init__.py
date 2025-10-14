@@ -566,6 +566,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
+        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -669,10 +670,10 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        self.chdir(remotedir)
+        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         lwd = Path(localdir).absolute().as_posix()
-        rwd = self._cache.cwd
+        rwd = remotedir
 
         tree = {}
         tree[rwd] = [(rwd, lwd)]
