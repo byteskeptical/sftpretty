@@ -3,13 +3,13 @@
 import pytest
 
 from common import conn, VFS
-from pathlib import Path
+from pathlib import PurePosixPath
 from sftpretty import Connection
 
 
 def test_cd_none(sftpserver):
     '''test sftpretty.cd with None'''
-    pubpath = Path('/home/test').joinpath('pub')
+    pubpath = PurePosixPath('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
@@ -21,7 +21,7 @@ def test_cd_none(sftpserver):
 
 def test_cd_path(sftpserver):
     '''test sftpretty.cd with a path'''
-    pubpath = Path('/home/test').joinpath('pub')
+    pubpath = PurePosixPath('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
@@ -32,7 +32,7 @@ def test_cd_path(sftpserver):
 
 def test_cd_nested(sftpserver):
     '''test nested cd's'''
-    pubpath = Path('/home/test').joinpath('pub')
+    pubpath = PurePosixPath('/home/test').joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd

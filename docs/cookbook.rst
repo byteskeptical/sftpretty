@@ -99,7 +99,7 @@ private key or password authentication.
         # do stuff here
 
 Config options always take precedence over parameters if both exist. Keep in
-mind there will more than likely be a delta between the security option
+mind there it's quite likely there will be a delta between the security option
 algorithms your verion of SSH supports and those supported by the underlying
 paramiko dependency.
 
@@ -127,7 +127,7 @@ always attempted unless an alternative is passed. If you wish to disable host
 key checking, **NOT ADVISED**, you will need to modify the default CnOpts and
 set the knownhosts to None if no such file exists. You can still modify an
 existing CnOpts by setting cnopts.hostkeys to None if a default known_hosts
-exists or an alternative file was passed when CnOpts was created.
+exists or an alternative file was passed when the CnOpts was created.
 
 .. code-block:: python
 
@@ -146,7 +146,7 @@ exists or an alternative file was passed when CnOpts was created.
     with sftpretty.Connection('host', username='me', password='pass', cnopts=cnopts):
         # do stuff here
 
-To use a completely different known_hosts file, you can override CnOpts looking
+To use a completely different known_hosts file, you can override CnOpts search
 for ``~/.ssh/known_hosts`` by specifying the file when instantiating.
 
 .. code-block:: python
@@ -201,7 +201,8 @@ Just send the dict into the connection object like so.
 
     import sftpretty
 
-    cinfo = {'host':'hostname', 'username':'me', 'password':'secret', 'port':2222}
+    cinfo = {'host': 'hostname', 'username': 'me',
+             'password': 'secret', 'port': 2222}
     with sftpretty.Connection(**cinfo) as sftp:
         #
         # ... do sftp operations
@@ -219,7 +220,7 @@ the modification times on the local copy match those on the server.
     # ...
     sftp.get('myfile', preserve_mtime=True)
 
-Now with the ability to resume a previously started download. Based on local
+Resuming a previously initiated download is supported and based on local
 destination path matching.
 
 .. code-block:: python
@@ -258,7 +259,7 @@ connections from above still applies.
 --------------------------------
 In addition to the normal paramiko call, you can optionally set the
 ``preserve_mtime`` parameter to ``True`` and the operation will make sure that
-the modification times on the server copy match those on the local.
+the modification times on the server copy match those of the local.
 
 .. code-block:: python
 
@@ -266,8 +267,8 @@ the modification times on the server copy match those on the local.
     # preserving modification time
     sftp.put('myfile', preserve_mtime=True)
 
-Now with the ability to resume a prematurely ended upload. Based on remote
-destination path matching.
+Resume a prematurely ended upload if desired, still based on destination path
+matching.
 
 .. code-block:: python
 
