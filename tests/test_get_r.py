@@ -11,12 +11,13 @@ def test_get_r(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
-            sftp.get_r('.', localpath)
+            remotepath = '.'
+            sftp.get_r(remotepath, localpath)
 
             local_tree = {}
             remote_tree = {}
 
-            remote_cwd = sftp.pwd
+            remote_cwd = Path(sftp.pwd).joinpath(remotepath).as_posix()
 
             localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
@@ -35,12 +36,13 @@ def test_get_r_pwd(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
-            sftp.get_r('pub/foo2', localpath)
+            remotepath = 'pub/foo2'
+            sftp.get_r(remotepath, localpath)
 
             local_tree = {}
             remote_tree = {}
 
-            remote_cwd = sftp.pwd
+            remote_cwd = Path(sftp.pwd).joinpath(remotepath).as_posix()
 
             localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
@@ -58,14 +60,15 @@ def test_get_r_pathed(sftpserver):
     '''test the get_r for localpath, starting deeper then pwd '''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            sftp.chdir('pub/foo2')
             localpath = Path(mkdtemp()).as_posix()
-            sftp.get_r('./bar1', localpath)
+            remotepath = './bar1'
+            sftp.chdir('pub/foo2')
+            sftp.get_r(remotepath, localpath)
 
             local_tree = {}
             remote_tree = {}
 
-            remote_cwd = sftp.pwd
+            remote_cwd = Path(sftp.pwd).joinpath(remotepath).as_posix()
 
             localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
@@ -86,13 +89,14 @@ def test_get_r_cdd(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             localpath = Path(mkdtemp()).as_posix()
+            remotepath = '.'
             sftp.chdir('pub/foo2')
-            sftp.get_r('.', localpath)
+            sftp.get_r(remotepath, localpath)
 
             local_tree = {}
             remote_tree = {}
 
-            remote_cwd = sftp.pwd
+            remote_cwd = Path(sftp.pwd).joinpath(remotepath).as_posix()
 
             localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
