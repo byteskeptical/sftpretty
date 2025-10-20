@@ -295,6 +295,7 @@ class Connection(object):
     def _sftp_channel(self):
         '''Establish new SFTP channel.'''
         channel = None
+        fatal = False
 
         try:
             channel_name, data = next(
@@ -310,17 +311,17 @@ class Connection(object):
         except StopIteration:
             pass
 
-        if channel is None:
-            channel = SFTPClient.from_transport(self._transport)
-            channel_name = uuid4().hex
-            meta = channel.get_channel()
-            meta.set_name(channel_name)
-            log.debug(f'Channel Name: [{channel_name}]')
-            self._channels[channel_name] = {
-                'busy': True, 'channel': channel, 'meta': meta
-            }
-
         try:
+            if channel is None:
+                channel = SFTPClient.from_transport(self._transport)
+                channel_name = uuid4().hex
+                meta = channel.get_channel()
+                meta.set_name(channel_name)
+                log.debug(f'Channel Name: [{channel_name}]')
+                self._channels[channel_name] = {
+                    'busy': True, 'channel': channel, 'meta': meta
+                }
+
             meta.settimeout(self._timeout)
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
@@ -331,15 +332,88 @@ class Connection(object):
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
-        except IOError as err:
-            log.error(f'Failed Directory Change: [{self._cache.cwd}]')
+        except socket.timeout:
+            fatal = True
+            _message = (
+                f'Channel [{channel_name}] operation timed out after '
+                f'{self._timeout}s while accessing: [{self._cache.cwd}]'
+            )
+            log.error(_message)
+            raise TimeoutError(_message)
+        except SFTPError as err:
+            _message_map = {
+                SFTP_FAILURE: (
+                    'A generic failure occurred on the SFTP server for path: '
+                    f'[{self._cache.cwd}]'
+                ),
+                SFTP_NO_SUCH_FILE: (
+                    f'Directory or file does not exist: [{self._cache.cwd}]'
+                ),
+                SFTP_OP_UNSUPPORTED: (
+                    'Operation (e.g., chdir) unsupported by server for path: '
+                    f'[{self._cache.cwd}]'
+                ),
+                SFTP_PERMISSION_DENIED: (
+                    f'Permission denied for: [{self._cache.cwd}]'
+                ),
+            }
+            _message = _message_map.get(
+                err.errno,
+                ('Unhandled SFTP error on directory change to '
+                 f'[{self._cache.cwd}] (Code {err.errno}): {err}')
+            )
+            log.error(_message)
+            raise err
+        except ChannelException as err:
+            fatal = True
+            log.error(f'Channel [{channel_name}] is invalid or closed: {err}')
+            raise err
+        except SSHException as err:
+            fatal = True
+            log.error(
+                (f'Protocol error occurred during channel [{channel_name}] '
+                 f'setup: {err}')
+            )
+            raise err
+        except OSError as err:
+            fatal = True
+            _message = (f'Channel [{channel_name}] experienced an OS-level network error '
+                        f'(Code: {err.errno} - {errno.errorcode.get(err.errno)}): '
+                        f'{err}')
+
+            if err.errno == errno.ECONNRESET:
+                _message = (
+                    f'Channel [{channel_name}] connection forcefully reset by '
+                    f'the remote host: {err}'
+            )
+            elif err.errno == errno.EPIPE:
+                _message = (
+                    f'Channel [{channel_name}] connection was broken '
+                    f'(broken pipe): {err}'
+            )
+
+            log.error(_message)
             raise err
         except Exception as err:
-            if channel:
-                channel.close()
+            err_type = type(err).__name__
+            fatal = True
+            log.error(
+                (f'An unexpected error of type [{err_type}] occurred in channel '
+                 f'[{channel_name}]: {err}')
+            )
             raise err
         finally:
-            if not meta.closed:
+            if fatal and channel:
+                channel.close()
+                log.debug(
+                    (f'Closed compromised channel [{channel_name}] due to '
+                     'fatal error!')
+                )
+                self._channels.pop(channel_name, None)
+            elif channel and not meta.closed:
+                log.debug(
+                    f'Recycling channel [{channel_name}] back to the pool.'
+                )
                 self._channels[channel_name]['busy'] = False
 
     def _start_transport(self, host, port):
