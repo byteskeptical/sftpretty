@@ -1,17 +1,20 @@
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
+from errno ECONNRESET, EPIPE, errorcode
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler, WARN)
 from os import environ, SEEK_END, utime
-from paramiko import (Agent, hostkeys, SFTPClient, SSHConfig, Transport,
-                      ConfigParseError, PasswordRequiredException,
-                      SSHException, ECDSAKey, Ed25519Key, RSAKey)
+from paramiko import (Agent, ChannelException, ConfigParseError, ECDSAKey,
+                      Ed25519Key, hostkeys, PasswordRequiredException,
+                      SFTPClient, SFTPError, SFTP_FAILURE, SFTP_NO_SUCH_FILE,
+                      SFTP_OP_UNSUPPORTED, SFTP_PERMISSION_DENIED, SSHConfig,
+                      SSHException, RSAKey, Transport)
 from pathlib import Path
 from sftpretty.exceptions import (CredentialException, ConnectionException,
                                   HostKeysException, LoggingException)
 from sftpretty.helpers import _callback, drivedrop, hash, localtree, retry
-from socket import gaierror
+from socket import gaierror, timeout
 from stat import S_ISDIR, S_ISREG
 from tempfile import mkstemp
 from threading import local as cache
@@ -332,7 +335,7 @@ class Connection(object):
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
-        except socket.timeout:
+        except timeout:
             fatal = True
             _message = (
                 f'Channel [{channel_name}] operation timed out after '
@@ -378,15 +381,15 @@ class Connection(object):
         except OSError as err:
             fatal = True
             _message = (f'Channel [{channel_name}] experienced an OS-level network error '
-                        f'(Code: {err.errno} - {errno.errorcode.get(err.errno)}): '
+                        f'(Code: {err.errno} - {errorcode.get(err.errno)}): '
                         f'{err}')
 
-            if err.errno == errno.ECONNRESET:
+            if err.errno == ECONNRESET:
                 _message = (
                     f'Channel [{channel_name}] connection forcefully reset by '
                     f'the remote host: {err}'
             )
-            elif err.errno == errno.EPIPE:
+            elif err.errno == EPIPE:
                 _message = (
                     f'Channel [{channel_name}] connection was broken '
                     f'(broken pipe): {err}'
