@@ -1,6 +1,6 @@
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from contextlib import contextmanager
-from errno ECONNRESET, EPIPE, errorcode
+from errno import ECONNRESET, EPIPE, errorcode
 from functools import partial
 from logging import (DEBUG, ERROR, FileHandler, Formatter, getLogger, INFO,
                      StreamHandler, WARN)
