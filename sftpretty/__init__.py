@@ -380,20 +380,20 @@ class Connection(object):
             raise err
         except OSError as err:
             fatal = True
-            _message = (f'Channel [{channel_name}] experienced an OS-level network error '
-                        f'(Code: {err.errno} - {errorcode.get(err.errno)}): '
-                        f'{err}')
+            _message = (f'Channel [{channel_name}] experienced an OS-level '
+                        f'network error (Code: {err.errno} - '
+                        f'{errorcode.get(err.errno)}): {err}')
 
             if err.errno == ECONNRESET:
                 _message = (
                     f'Channel [{channel_name}] connection forcefully reset by '
                     f'the remote host: {err}'
-            )
+                )
             elif err.errno == EPIPE:
                 _message = (
                     f'Channel [{channel_name}] connection was broken '
                     f'(broken pipe): {err}'
-            )
+                )
 
             log.error(_message)
             raise err
@@ -401,8 +401,8 @@ class Connection(object):
             err_type = type(err).__name__
             fatal = True
             log.error(
-                (f'An unexpected error of type [{err_type}] occurred in channel '
-                 f'[{channel_name}]: {err}')
+                (f'An unexpected error of type [{err_type}] occurred in '
+                 f'channel [{channel_name}]: {err}')
             )
             raise err
         finally:
