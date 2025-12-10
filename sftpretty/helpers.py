@@ -88,7 +88,8 @@ def localtree(container, localdir, remotedir, recurse=True):
         for localpath in Path(localdir).iterdir():
             if localpath.is_dir():
                 local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(localpath.stem).as_posix()
+                stem = localpath.parts[-1]
+                remote = Path(remotedir).joinpath(stem).as_posix()
                 if localdir.as_posix() in container.keys():
                     container[localdir.as_posix()].append((local, remote))
                 else:

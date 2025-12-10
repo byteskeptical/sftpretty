@@ -1,6 +1,10 @@
-1.1.11 (current, released 2025-10-22)
+1.1.12 (current, released 2025-12-11)
 -------------------------------------
-    * Improved exception handling in _sftp_channel.
+    * fix for parsing limitation of .stem causing issues with dots in path names.
+
+1.1.11 (released 2025-10-22)
+----------------------------
+    * improved exception handling in _sftp_channel.
 
 1.1.10 (released 2025-10-14)
 ----------------------------

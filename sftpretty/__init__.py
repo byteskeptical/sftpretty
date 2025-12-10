@@ -961,7 +961,7 @@ class Connection(object):
         '''
         localdir = Path(localdir)
 
-        self.mkdir_p(Path(remotedir).joinpath(localdir.stem).as_posix())
+        self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
 
         paths = [
             (localpath.as_posix(),
@@ -1409,11 +1409,11 @@ class Connection(object):
                                'already exists.'))
             else:
                 parent = Path(remotedir).parent.as_posix()
-                stem = Path(remotedir).stem
+                stem = Path(remotedir).parts[-1]
                 if parent != remotedir:
                     if not self.isdir(parent):
                         self.mkdir_p(parent, mode=mode)
-                if stem:
+                if stem and stem != Path(remotedir).root:
                     self.mkdir(remotedir, mode=mode)
         except Exception as err:
             raise err
@@ -1487,7 +1487,7 @@ class Connection(object):
                     remote = Path(remotedir).joinpath(
                         attribute.filename).as_posix()
                     local = Path(localdir).joinpath(
-                        Path(remote).stem).as_posix()
+                        Path(remote).parts[-1]).as_posix()
                     if remotedir in container.keys():
                         container[remotedir].append((remote, local))
                     else:
