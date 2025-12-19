@@ -1,5 +1,5 @@
-1.1.12 (current, released 2025-12-11)
--------------------------------------
+1.2.0 (current, released 2025-12-19)
+------------------------------------
     * fix for parsing limitation of .stem causing issues with dots in path names.
 
 1.1.11 (released 2025-10-22)

@@ -19,10 +19,6 @@ jobs:
             python-version: 3.7
           - os: ubuntu-latest
             python-version: 3.7
-          - os: windows-latest
-            python-version: 3.13
-          - os: windows-latest
-            python-version: 3.14
 
     steps:
       - name: Clone Repository
