@@ -1,10 +1,19 @@
-1.1.10 (current, released 2025-10-14)
------------------------------------
+1.2.0 (current, released 2025-12-21)
+------------------------------------
+    * fix for change in pathlib behavior in Python 3.13+ on Windows.
+    * fix for parsing limitation of .stem causing issues with dots in path names.
+
+1.1.11 (released 2025-10-22)
+----------------------------
+    * improved exception handling in _sftp_channel.
+
+1.1.10 (released 2025-10-14)
+----------------------------
     * fix for channel re-use limitation.
     * regression fix for properly closing channel cache sockets.
 
 1.1.9 (released 2025-8-06)
------------------------------------
+--------------------------
     * adding channel cache to place upper limit on creation overhead.
     * removing ssh-dss key type as it was deprecated in paramiko in 4.0.0.
 

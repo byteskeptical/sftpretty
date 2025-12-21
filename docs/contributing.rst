@@ -13,13 +13,15 @@ Code
     #. Fork the repository `sftpretty <https://github.com/byteskeptical/sftpretty>`_
     #. Install supporting software packages and sftpretty in --editable mode
 
-        a. Make a virtualenv, clone the repos, install the deps from pip install -r requirements-dev.txt
-        b. Install sftpretty in editable mode, pip install -e .
+        a. Make a virtualenv, python3 -m venv .sftpretty 
+        b. Clone the repo, git clone https://github.com/`username`/sftpretty
+        c. Install sftpretty and it's dependencies in editable mode, python3 -m pip install -e .[dev,lint,test]
+
     #. Write any new tests needed and ensure existing tests continue to pass without modification.
 
-        a. Setup CI testing for your Fork. Currently testing is done on Github Actions but feel free to use the testing framework of your choosing.
-        b. Testing features that concern chmod, chown on Windows is NOT supported. Testing compression has to be ran against a local compatible sshd and not the plugin as it does NOT support this test.
-        c. You will need to setup an ssh daemon on your local machine and create a user: copy the contents of id_sftpretty.pub to the newly created user's authorized_keys file -- Tests that can only be run locally are skipped using the @skip_if_ci decorator so they don't fail when the test suite is run on the CI server.
+        a. Setup CI testing for your fork. Currently testing is done on Github Actions but feel free to use the framework of your choosing.
+        b. Testing features that concern chmod, chown on Windows is NOT supported. Testing compression has to be ran against a local compatible sshd and not the pytest-sftpserver plugin as it does NOT support this feature.
+        c. You will need to setup an ssh daemon on your local machine and create a user: copy the contents of id_sftpretty.pub to the newly created user's authorized_keys file -- Tests that can only be ran locally are skipped using the @skip_if_ci decorator so they don't fail when the test suite runs on the CI server.
 
     #. Ensure that your name is added to the end of the :doc:`authors` file using the format Name <email@domain.com> (url), where the (url) portion is optional.
     #. Submit a Pull Request to the project.
@@ -40,4 +42,4 @@ This section lists the priority that will be assigned to an issue:
 
 Testing
 -------
-Tests specific to an issue should be put in the tests/ directory and the module should be named test_issue_xx.py The tests within that module should be named test_issue_xx or test_issue_xx_YYYYYY if more than one test. Pull requests should not modify existing tests (exceptions apply). See tests/test_issue_xx.py for a template and further explanation.
+Tests specific to an issue should be placed inside the tests/ directory and the file should be named test_issue_xx.py. The tests within that module should be named test_issue_xx or test_issue_xx_YYYYYY if more than one test exists. Pull requests should not modify existing tests with extremely rare exception. See tests/test_issue_xx.py for a template and additional context.
