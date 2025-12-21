@@ -20,7 +20,7 @@ def drivedrop(filepath):
     if filepath:
         if PureWindowsPath(filepath).drive:
             filepath = PurePosixPath('/').joinpath(
-                *Path(filepath).parts[1:]).as_posix()
+                *PurePosixPath(filepath).parts[1:]).as_posix()
 
     return filepath
 
