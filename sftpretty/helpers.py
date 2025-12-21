@@ -1,7 +1,7 @@
 from functools import wraps
 from hashlib import new, sha3_512
 from io import BytesIO, IOBase
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from stat import S_IMODE
 from time import sleep
 
@@ -19,7 +19,8 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 def drivedrop(filepath):
     if filepath:
         if PureWindowsPath(filepath).drive:
-            filepath = Path('/').joinpath(*Path(filepath).parts[1:]).as_posix()
+            filepath = PurePosixPath('/').joinpath(
+                *Path(filepath).parts[1:]).as_posix()
 
     return filepath
 
