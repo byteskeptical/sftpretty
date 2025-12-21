@@ -1280,7 +1280,7 @@ class Connection(object):
         :returns: (str) Remote current working directory. None, if not set.
         '''
         with self._sftp_channel() as channel:
-            cwd = channel.getcwd()
+            cwd = drivedrop(channel.getcwd())
 
         return cwd
 
