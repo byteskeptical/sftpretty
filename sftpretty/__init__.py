@@ -331,7 +331,7 @@ class Connection(object):
             if self._cache.cwd is None:
                 self._cache.cwd = drivedrop(channel.normalize('.'))
 
-            channel.chdir(self._cache.cwd)
+            channel.chdir(drivedrop(self._cache.cwd))
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
@@ -643,9 +643,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        with self._sftp_channel():
-            remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
-
+        remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -750,8 +748,7 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
         '''
         lwd = Path(localdir).absolute().as_posix()
-        with self._sftp_channel():
-            rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        rwd = self.normalize(remotedir)
 
         tree = {}
         tree[rwd] = [(rwd, lwd)]
@@ -960,8 +957,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         localdir = Path(localdir)
-        with self._sftp_channel():
-            remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        remotedir = self.normalize(remotedir)
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
 
@@ -1048,8 +1044,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         lwd = Path(localdir).absolute().as_posix()
-        with self._sftp_channel():
-            rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        rwd = self.normalize(remotedir)
 
         tree = {}
         tree[lwd] = [(lwd, rwd)]
@@ -1283,7 +1278,7 @@ class Connection(object):
         :returns: (str) Remote current working directory. None, if not set.
         '''
         with self._sftp_channel() as channel:
-            cwd = channel.getcwd()
+            cwd = drivedrop(channel.getcwd())
 
         return cwd
 
