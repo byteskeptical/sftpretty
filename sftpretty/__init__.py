@@ -329,7 +329,7 @@ class Connection(object):
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
             if self._cache.cwd is None:
-                self._cache.cwd = channel.normalize('.')
+                self._cache.cwd = drivedrop(channel.normalize('.'))
 
             channel.chdir(self._cache.cwd)
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
@@ -1195,7 +1195,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             channel.chdir(drivedrop(remotepath))
-            self._cache.cwd = channel.normalize('.')
+            self._cache.cwd = drivedrop(channel.normalize('.'))
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1435,7 +1435,7 @@ class Connection(object):
         with self._sftp_channel() as channel:
             absolute = channel.normalize(drivedrop(remotepath))
 
-        return absolute
+        return drivedrop(absolute)
 
     def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.
@@ -1619,7 +1619,7 @@ class Connection(object):
         :returns: (str) Current working directory.
         '''
         with self._sftp_channel() as channel:
-            self._cache.cwd = channel.normalize('.')
+            self._cache.cwd = drivedrop(channel.normalize('.'))
 
         return self._cache.cwd
 
