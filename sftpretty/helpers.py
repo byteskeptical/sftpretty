@@ -23,7 +23,7 @@ def drivedrop(filepath):
                 *PureWindowsPath(filepath).parts[1:]).as_posix()
             filepath = filepath.encode('unicode_escape').decode()
             filepath = filepath.replace('\\', '/').replace('//', '/')
-        else if filepath.startswith('//'):
+        elif filepath.startswith('//'):
             filepath = filepath.replace('//', '/')
 
     return filepath
