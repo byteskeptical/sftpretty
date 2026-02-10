@@ -14,7 +14,7 @@ def test_issue_65(sftpserver):
         cnn = conn(sftpserver)
         cnn['default_path'] = None
         with Connection(**cnn) as sftp:
-            assert sftp.getcwd() is None
+            assert sftp.getcwd() == '/'
             with sftp.cd(pubpath.as_posix()):
                 pass
 

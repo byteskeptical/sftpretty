@@ -643,7 +643,9 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        with self._sftp_channel():                                                    
+            remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -748,7 +750,8 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
         '''
         lwd = Path(localdir).absolute().as_posix()
-        rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        with self._sftp_channel():                                                    
+            rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         tree = {}
         tree[rwd] = [(rwd, lwd)]
@@ -957,7 +960,8 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         localdir = Path(localdir)
-        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        with self._sftp_channel():                                                    
+            remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
 
@@ -1044,7 +1048,8 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         lwd = Path(localdir).absolute().as_posix()
-        rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        with self._sftp_channel():                                                    
+            rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         tree = {}
         tree[lwd] = [(lwd, rwd)]
@@ -1428,9 +1433,9 @@ class Connection(object):
         :raises: IOError, if remotepath can't be resolved
         '''
         with self._sftp_channel() as channel:
-            absolute_path = channel.normalize(drivedrop(remotepath))
+            absolute = channel.normalize(drivedrop(remotepath))
 
-        return absolute_path
+        return absolute
 
     def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.

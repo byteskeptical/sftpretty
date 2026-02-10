@@ -15,6 +15,7 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
     else:
         print(message)
 
+
 def drivedrop(filepath):
     if filepath:
         if PureWindowsPath(filepath).drive and not filepath.startswith('//'):
