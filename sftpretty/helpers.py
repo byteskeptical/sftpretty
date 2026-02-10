@@ -24,7 +24,7 @@ def drivedrop(filepath):
             filepath = filepath.encode('unicode_escape').decode()
             filepath = filepath.replace('\\', '/').replace('//', '/')
         elif filepath.startswith('//'):
-            filepath = filepath.replace('//', '/')
+            filepath = PurePosixPath(filepath.replace('//', '/')).as_posix()
 
     return filepath
 
