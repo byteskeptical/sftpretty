@@ -643,7 +643,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        with self._sftp_channel():                                                    
+        with self._sftp_channel():
             remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         filelist = self.listdir_attr(remotedir)
@@ -750,7 +750,7 @@ class Connection(object):
         :raises: Any exception raised by operations will be passed through.
         '''
         lwd = Path(localdir).absolute().as_posix()
-        with self._sftp_channel():                                                    
+        with self._sftp_channel():
             rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         tree = {}
@@ -960,7 +960,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         localdir = Path(localdir)
-        with self._sftp_channel():                                                    
+        with self._sftp_channel():
             remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
@@ -1048,7 +1048,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         lwd = Path(localdir).absolute().as_posix()
-        with self._sftp_channel():                                                    
+        with self._sftp_channel():
             rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         tree = {}
