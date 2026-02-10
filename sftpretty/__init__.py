@@ -328,10 +328,10 @@ class Connection(object):
             meta.settimeout(self._timeout)
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
-            if self._cache.cwd:
-                channel.chdir(drivedrop(self._cache.cwd))
-            else:
-                self._cache.cwd = '/'
+            if self._cache.cwd is None:
+                self._cache.cwd = channel.normalize('.')
+
+            channel.chdir(self._cache.cwd)
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
@@ -957,6 +957,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         localdir = Path(localdir)
+        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
 
@@ -1043,7 +1044,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         lwd = Path(localdir).absolute().as_posix()
-        rwd = self.normalize(remotedir)
+        rwd = Path(self._cache.cwd).joinpath(remotedir).as_posix()
 
         tree = {}
         tree[lwd] = [(lwd, rwd)]
@@ -1189,7 +1190,7 @@ class Connection(object):
         '''
         with self._sftp_channel() as channel:
             channel.chdir(drivedrop(remotepath))
-            self._cache.cwd = drivedrop(channel.normalize('.'))
+            self._cache.cwd = channel.normalize('.')
 
     def chmod(self, remotepath, mode=700):
         '''Set the permission mode of a remotepath, where mode is an octal.
@@ -1277,7 +1278,7 @@ class Connection(object):
         :returns: (str) Remote current working directory. None, if not set.
         '''
         with self._sftp_channel() as channel:
-            cwd = drivedrop(channel.getcwd())
+            cwd = channel.getcwd()
 
         return cwd
 
@@ -1427,9 +1428,9 @@ class Connection(object):
         :raises: IOError, if remotepath can't be resolved
         '''
         with self._sftp_channel() as channel:
-            expanded_path = channel.normalize(drivedrop(remotepath))
+            absolute_path = channel.normalize(drivedrop(remotepath))
 
-        return drivedrop(expanded_path)
+        return absolute_path
 
     def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.
@@ -1613,7 +1614,7 @@ class Connection(object):
         :returns: (str) Current working directory.
         '''
         with self._sftp_channel() as channel:
-            self._cache.cwd = drivedrop(channel.normalize('.'))
+            self._cache.cwd = channel.normalize('.')
 
         return self._cache.cwd
 

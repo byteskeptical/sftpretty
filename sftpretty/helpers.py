@@ -25,6 +25,7 @@ def drivedrop(filepath):
 
     return filepath
 
+
 def hash(filename, algorithm=sha3_512(), blocksize=65536):
     '''hash contents of a file, file like object or string
 
@@ -56,6 +57,7 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
             buffer.update(chunk)
 
     return algorithm.hexdigest()
+
 
 def localtree(container, localdir, remotedir, recurse=True):
     '''recursively descend local directory mapping the tree to a
@@ -98,6 +100,7 @@ def localtree(container, localdir, remotedir, recurse=True):
                     localtree(container, local, remote, recurse=recurse)
     except Exception as err:
         raise err
+
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     '''Exception type based retry decorator for all your problematic functions
@@ -170,6 +173,7 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
             return f(*args, **kwargs)
         return _retry
     return wrapper
+
 
 def st_mode_to_int(val):
     '''SFTAttributes st_mode returns an stat type that shows more than what
