@@ -17,7 +17,7 @@ def test_rename(lsftp):
         rdirs = lsftp.listdir()
         assert 'alice' in rdirs
         assert base_fname not in rdirs
-        lsftp.rename(base_fname, 'bob', posix=False)
+        lsftp.rename('alice', 'bob', posix=False)
         rdirs = lsftp.listdir()
         assert 'alice' not in rdirs
         assert 'bob' in rdirs
