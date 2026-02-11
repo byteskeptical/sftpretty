@@ -328,10 +328,10 @@ class Connection(object):
             meta.settimeout(self._timeout)
             self._cache.__dict__.setdefault('cwd', self._default_path)
 
-            if self._cache.cwd:
-                channel.chdir(drivedrop(self._cache.cwd))
-            else:
-                self._cache.cwd = '/'
+            if self._cache.cwd is None:
+                self._cache.cwd = drivedrop(channel.normalize('.'))
+
+            channel.chdir(drivedrop(self._cache.cwd))
             log.info(f'Current Working Directory: [{self._cache.cwd}]')
 
             yield channel
@@ -643,7 +643,7 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
+        remotedir = self.normalize(remotedir)
         filelist = self.listdir_attr(remotedir)
 
         if not Path(localdir).is_dir():
@@ -747,11 +747,8 @@ class Connection(object):
 
         :raises: Any exception raised by operations will be passed through.
         '''
-        with self._sftp_channel():
-            remotedir = Path(self._cache.cwd).joinpath(remotedir).as_posix()
-
         lwd = Path(localdir).absolute().as_posix()
-        rwd = remotedir
+        rwd = self.normalize(remotedir)
 
         tree = {}
         tree[rwd] = [(rwd, lwd)]
@@ -960,6 +957,7 @@ class Connection(object):
         :raises OSError: if localdir doesn't exist
         '''
         localdir = Path(localdir)
+        remotedir = self.normalize(remotedir)
 
         self.mkdir_p(Path(remotedir).joinpath(localdir.parts[-1]).as_posix())
 
@@ -1430,9 +1428,9 @@ class Connection(object):
         :raises: IOError, if remotepath can't be resolved
         '''
         with self._sftp_channel() as channel:
-            expanded_path = channel.normalize(drivedrop(remotepath))
+            absolute = channel.normalize(drivedrop(remotepath))
 
-        return drivedrop(expanded_path)
+        return drivedrop(absolute)
 
     def open(self, remotefile, bufsize=-1, mode='r'):
         '''Open a file on the remote server.
@@ -1511,19 +1509,22 @@ class Connection(object):
         with self._sftp_channel() as channel:
             channel.remove(drivedrop(remotefile))
 
-    def rename(self, remotepath, newpath):
+    def rename(self, remotepath, newpath, posix=True):
         '''Rename a path on the remote host.
 
         :param str remotepath: Remote path to rename.
-
         :param str newpath: New name for remote path.
+        :param bool posix: *Default: True* - If set uses posix rename
+            extension behavior from OpenSSH otherwise fallback to standard
+            SFTP rename behavior.
 
         :returns: None
 
         :raises: IOError
         '''
         with self._sftp_channel() as channel:
-            channel.posix_rename(drivedrop(remotepath), drivedrop(newpath))
+            renamer = channel.posix_rename if posix else channel.rename
+            renamer(drivedrop(remotepath), drivedrop(newpath))
 
     def rmdir(self, remotedir):
         '''Delete remote directory.

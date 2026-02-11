@@ -1,7 +1,13 @@
-1.2.0 (current, released 2025-12-21)
-------------------------------------
+1.2.1 (current, released 2026-2-11)
+-----------------------------------
+    * adding boolean to rename for switch between posix and standard behavior.
+    * change in default path behavior where cwd is set when default path is not.
+    * update drivedrop to better handle all non-UNC Windows path possibilities.
+
+1.2.0 (released 2025-12-21)
+---------------------------
     * fix for change in pathlib behavior in Python 3.13+ on Windows.
-    * fix for parsing limitation of .stem causing issues with dots in path names.
+    * fix for parsing limitation of .stem causing issue with dots in path names.
 
 1.1.11 (released 2025-10-22)
 ----------------------------

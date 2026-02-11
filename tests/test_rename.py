@@ -13,10 +13,14 @@ def test_rename(lsftp):
             lsftp.remove(base_fname)
         assert base_fname not in lsftp.listdir()
         lsftp.put(fname)
-        lsftp.rename(base_fname, 'bob')
+        lsftp.rename(base_fname, 'alice')
         rdirs = lsftp.listdir()
-        assert 'bob' in rdirs
+        assert 'alice' in rdirs
         assert base_fname not in rdirs
+        lsftp.rename('alice', 'bob', posix=False)
+        rdirs = lsftp.listdir()
+        assert 'alice' not in rdirs
+        assert 'bob' in rdirs
         lsftp.remove('bob')
 
 

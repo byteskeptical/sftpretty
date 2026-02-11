@@ -18,9 +18,13 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 
 def drivedrop(filepath):
     if filepath:
-        if PureWindowsPath(filepath).drive:
+        if PureWindowsPath(filepath).drive and not filepath.startswith('//'):
             filepath = PurePosixPath('/').joinpath(
-                *PurePosixPath(filepath).parts[1:]).as_posix()
+                *PureWindowsPath(filepath).parts[1:]).as_posix()
+            filepath = filepath.encode('unicode_escape').decode()
+            filepath = filepath.replace('\\', '/').replace('//', '/')
+        elif filepath.startswith('//'):
+            filepath = PurePosixPath(filepath.replace('//', '/')).as_posix()
 
     return filepath
 
