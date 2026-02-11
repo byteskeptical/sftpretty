@@ -1509,19 +1509,22 @@ class Connection(object):
         with self._sftp_channel() as channel:
             channel.remove(drivedrop(remotefile))
 
-    def rename(self, remotepath, newpath):
+    def rename(self, remotepath, newpath, posix=True):
         '''Rename a path on the remote host.
 
         :param str remotepath: Remote path to rename.
-
         :param str newpath: New name for remote path.
+        :param bool posix: *Default: True* - If set uses posix rename
+            extension behavior from OpenSSH otherwise fallback to standard
+            SFTP rename behavior.
 
         :returns: None
 
         :raises: IOError
         '''
         with self._sftp_channel() as channel:
-            channel.posix_rename(drivedrop(remotepath), drivedrop(newpath))
+            renamer = channel.posix_rename if posix else channel.rename
+            renamer(drivedrop(remotepath), drivedrop(newpath))
 
     def rmdir(self, remotedir):
         '''Delete remote directory.
