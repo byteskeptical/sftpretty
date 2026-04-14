@@ -316,8 +316,8 @@ class Connection(object):
 
         try:
             if channel is None:
-                channel = SFTPClient.from_transport(self._transport)
                 channel_name = uuid4().hex
+                channel = SFTPClient.from_transport(self._transport)
                 meta = channel.get_channel()
                 meta.set_name(channel_name)
                 log.debug(f'Channel Name: [{channel_name}]')
