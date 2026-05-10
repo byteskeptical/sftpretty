@@ -23,12 +23,12 @@ def test_channel_exception(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             with pytest.raises(OSError):
                 sftp.chdir('/does/not/exist')
- 
+
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             with pytest.raises(SFTPError):
                 sftp.chdir('/home/test/read.me')
- 
+
     with sftpserver.serve_content(VFS):
         sftp = Connection(**conn(sftpserver))
         sftp._transport.close()
@@ -38,9 +38,10 @@ def test_channel_exception(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.timeout = 0.0001
-            with pytest.raises(TimeoutError, match='operation timed out after'):
+            with pytest.raises(TimeoutError,
+                               match='operation timed out after'):
                 sftp.listdir()
- 
+
 
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
