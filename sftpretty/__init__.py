@@ -300,17 +300,19 @@ class Connection(object):
         channel = None
         fatal = False
 
+        self._cache.__dict__.setdefault('cwd', self._default_path)
+
         try:
             channel_name, data = next(
                 (key, value)
                 for key, value in self._channels.items()
-                if not value['busy']
+                if not value['busy'] and not value['meta'].closed
             )
+
+            channel = data['channel']
             meta = data['meta']
-            if not meta.closed:
-                channel = data['channel']
-                self._channels[channel_name]['busy'] = True
-                log.debug(f'Cached Channel: [{channel_name}]')
+            self._channels[channel_name]['busy'] = True
+            log.debug(f'Cached Channel: [{channel_name}]')
         except StopIteration:
             pass
 
@@ -326,7 +328,6 @@ class Connection(object):
                 }
 
             meta.settimeout(self._timeout)
-            self._cache.__dict__.setdefault('cwd', self._default_path)
 
             if self._cache.cwd is None:
                 self._cache.cwd = drivedrop(channel.normalize('.'))
@@ -344,6 +345,7 @@ class Connection(object):
             log.error(_message)
             raise TimeoutError(_message)
         except SFTPError as err:
+            code = err.args[0] if err.args else None
             _message_map = {
                 SFTP_FAILURE: (
                     'A generic failure occurred on the SFTP server for path: '
@@ -361,9 +363,9 @@ class Connection(object):
                 ),
             }
             _message = _message_map.get(
-                err.errno,
+                code,
                 ('Unhandled SFTP error on directory change to '
-                 f'[{self._cache.cwd}] (Code {err.errno}): {err}')
+                 f'[{self._cache.cwd}] (Code {code}): {err}')
             )
             log.error(_message)
             raise err

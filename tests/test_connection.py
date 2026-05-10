@@ -10,6 +10,37 @@ from sftpretty import (CnOpts, Connection, ConnectionException,
                        HostKeysException, SSHException)
 
 
+def test_channel_exception(sftpserver):
+    '''test except blocks in _sftp_channel don't raise secondary errors'''
+    with sftpserver.serve_content(VFS):
+        with Connection(**conn(sftpserver)) as sftp:
+            sftp.close()
+        with pytest.raises(AttributeError):
+            sftp.listdir()
+
+    with sftpserver.serve_content(VFS):
+        with Connection(**conn(sftpserver)) as sftp:
+            with pytest.raises(OSError):
+                sftp.chdir('/does/not/exist')
+ 
+    with sftpserver.serve_content(VFS):
+        with Connection(**conn(sftpserver)) as sftp:
+            with pytest.raises(SFTPError):
+                sftp.chdir('/home/test/read.me')
+ 
+    with sftpserver.serve_content(VFS):
+        sftp = Connection(**conn(sftpserver))
+        sftp._transport.close()
+        with pytest.raises(SSHException):
+            sftp.listdir()
+
+    with sftpserver.serve_content(VFS):
+        with Connection(**conn(sftpserver)) as sftp:
+            sftp.timeout = 0.0001
+            with pytest.raises(TimeoutError, match='operation timed out after'):
+                sftp.listdir()
+ 
+
 def test_cnopts_bad_knownhosts():
     '''test setting knownhosts to a not understood file'''
     with pytest.raises(HostKeysException):

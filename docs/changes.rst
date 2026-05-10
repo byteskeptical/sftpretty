@@ -1,5 +1,9 @@
-1.2.1 (current, released 2026-2-11)
+1.2.2 (current, released 2026-5-10)
 -----------------------------------
+    * adding boolean to rename for switch between posix and standard behavior.
+
+1.2.1 (released 2026-2-11)
+--------------------------
     * adding boolean to rename for switch between posix and standard behavior.
     * change in default path behavior where cwd is set when default path is not.
     * update drivedrop to better handle all non-UNC Windows path possibilities.
