@@ -2,6 +2,7 @@
 
 import pytest
 
+from paramiko import SFTPError, SSHException
 from paramiko.ed25519key import Ed25519Key
 
 from common import conn, LOCAL, VFS
