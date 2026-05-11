@@ -74,13 +74,14 @@ class CnOpts(object):
                         'hmac-sha1', 'hmac-md5')
         self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = ('ecdh-sha2-nistp521', 'ecdh-sha2-nistp384',
-                    'ecdh-sha2-nistp256', 'diffie-hellman-group16-sha512',
+        self.kex = ('curve25519-sha256@libssh.org', 'ecdh-sha2-nistp521',
+                    'ecdh-sha2-nistp384', 'ecdh-sha2-nistp256',
+                    'diffie-hellman-group16-sha512',
                     'diffie-hellman-group-exchange-sha256',
-                    'diffie-hellman-group-exchange-sha1')
+                    'diffie-hellman-group14-sha256')
         self.key_types = ('ssh-ed25519', 'ecdsa-sha2-nistp521',
                           'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp256',
-                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa')
+                          'rsa-sha2-512', 'rsa-sha2-256')
         self.log = False
         self.log_level = 'info'
         self.ssh_config = SSHConfig()

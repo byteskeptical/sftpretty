@@ -1,6 +1,10 @@
 1.2.2 (current, released 2026-5-10)
 -----------------------------------
-    * adding boolean to rename for switch between posix and standard behavior.
+    * adding new test for _sftp_channel exception handling.
+    * adding curve25519-sha256@libssh.org to kex list.
+    * fix for UnboundLocalError on a certain exception in _sftp_channel.
+    * removing diffie-hellman-group-exchange-sha1 from kex list per paramiko.
+    * removing ssh-rsa from public key type list per paramiko.
 
 1.2.1 (released 2026-2-11)
 --------------------------
