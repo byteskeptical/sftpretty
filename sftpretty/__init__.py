@@ -74,13 +74,14 @@ class CnOpts(object):
                         'hmac-sha1', 'hmac-md5')
         self.disabled_algorithms = {}
         self.hostkeys = hostkeys.HostKeys()
-        self.kex = ('ecdh-sha2-nistp521', 'ecdh-sha2-nistp384',
-                    'ecdh-sha2-nistp256', 'diffie-hellman-group16-sha512',
+        self.kex = ('curve25519-sha256@libssh.org', 'ecdh-sha2-nistp521',
+                    'ecdh-sha2-nistp384', 'ecdh-sha2-nistp256',
+                    'diffie-hellman-group16-sha512',
                     'diffie-hellman-group-exchange-sha256',
-                    'diffie-hellman-group-exchange-sha1')
+                    'diffie-hellman-group14-sha256')
         self.key_types = ('ssh-ed25519', 'ecdsa-sha2-nistp521',
                           'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp256',
-                          'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa')
+                          'rsa-sha2-512', 'rsa-sha2-256')
         self.log = False
         self.log_level = 'info'
         self.ssh_config = SSHConfig()
@@ -300,24 +301,26 @@ class Connection(object):
         channel = None
         fatal = False
 
+        self._cache.__dict__.setdefault('cwd', self._default_path)
+
         try:
             channel_name, data = next(
                 (key, value)
                 for key, value in self._channels.items()
-                if not value['busy']
+                if not value['busy'] and not value['meta'].closed
             )
+
+            channel = data['channel']
             meta = data['meta']
-            if not meta.closed:
-                channel = data['channel']
-                self._channels[channel_name]['busy'] = True
-                log.debug(f'Cached Channel: [{channel_name}]')
+            self._channels[channel_name]['busy'] = True
+            log.debug(f'Cached Channel: [{channel_name}]')
         except StopIteration:
             pass
 
         try:
             if channel is None:
-                channel = SFTPClient.from_transport(self._transport)
                 channel_name = uuid4().hex
+                channel = SFTPClient.from_transport(self._transport)
                 meta = channel.get_channel()
                 meta.set_name(channel_name)
                 log.debug(f'Channel Name: [{channel_name}]')
@@ -326,7 +329,6 @@ class Connection(object):
                 }
 
             meta.settimeout(self._timeout)
-            self._cache.__dict__.setdefault('cwd', self._default_path)
 
             if self._cache.cwd is None:
                 self._cache.cwd = drivedrop(channel.normalize('.'))
@@ -344,6 +346,7 @@ class Connection(object):
             log.error(_message)
             raise TimeoutError(_message)
         except SFTPError as err:
+            code = err.args[0] if err.args else None
             _message_map = {
                 SFTP_FAILURE: (
                     'A generic failure occurred on the SFTP server for path: '
@@ -361,9 +364,9 @@ class Connection(object):
                 ),
             }
             _message = _message_map.get(
-                err.errno,
+                code,
                 ('Unhandled SFTP error on directory change to '
-                 f'[{self._cache.cwd}] (Code {err.errno}): {err}')
+                 f'[{self._cache.cwd}] (Code {code}): {err}')
             )
             log.error(_message)
             raise err
