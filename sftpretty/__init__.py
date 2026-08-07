@@ -190,6 +190,7 @@ class Connection(object):
     :raises LoggingException:
     :raises PasswordRequiredException:
     :raises SSHException:
+    :raises FileNotFoundError:
     '''
     def __init__(self, host, cnopts=None, default_path=None, password=None,
                  port=22, private_key=None, private_key_pass=None,
@@ -220,10 +221,16 @@ class Connection(object):
                     with open(key_file, 'r', encoding='utf-8') as head:
                         key_id = head.readline()[11:][:-18]
                     log.debug(f'Key ID: [{key_id}]')
+
+                    if key_id.strip() not in key_types:
+                        error_msg = f'Unable to identity key type from file provided: \n[{key_file}]'
+                        log.error(error_msg)
+                        raise CredentialException(error_msg)
+
                     key = key_types[key_id.strip()]
-                except KeyError as err:
-                    log.error(('Unable to identify key type from file provided'
-                              f': \n[{key_file}]'))
+
+                except FileNotFoundError as err:
+                    log.error(f'identity key file not found: \n[{key_file}]')
                     raise err
                 except PasswordRequiredException as err:
                     log.error(('No password provided for encrypted private '
