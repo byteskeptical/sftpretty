@@ -238,7 +238,7 @@ class Connection(object):
                                'directory or does not exist, please revise '
                                'and provide a path to a valid private key.'))
                     raise err
-                finally:
+                else:
                     private_key = key.from_private_key_file(
                         key_file, password=private_key_pass)
             self._transport.auth_publickey(self._username, private_key)

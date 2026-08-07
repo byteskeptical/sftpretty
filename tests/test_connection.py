@@ -78,6 +78,27 @@ def test_connection_bad_credentials():
             sftp.listdir()
 
 
+def test_connection_missing_private_key_file():
+    '''missing private-key file should raise the original parse error'''
+    copts = LOCAL.copy()
+    copts['private_key'] = 'id_doesnt_exist'
+    with pytest.raises(FileNotFoundError):
+        with Connection(**copts) as sftp:
+            sftp.close()
+
+
+def test_connection_invalid_private_key_type(tmp_path):
+    '''invalid private-key content should raise the original parse error'''
+    key_path = Path(tmp_path / 'id_sftpretty.bad')
+    key_path.write_text('not a real key\n', encoding='utf-8')
+
+    copts = LOCAL.copy()
+    copts['private_key'] = str(key_path)
+    with pytest.raises(KeyError):
+        with Connection(**copts) as sftp:
+            sftp.close()
+
+
 def test_connection_bad_host():
     '''attempt connection to a non-existing server'''
     knownhosts = Path('~/.ssh/known_hosts').expanduser()
