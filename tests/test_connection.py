@@ -81,7 +81,7 @@ def test_connection_bad_credentials():
 def test_connection_missing_private_key_file():
     '''missing private-key file should raise the original parse error'''
     copts = LOCAL.copy()
-    copts['private_key'] = 'id_doesnt_exist'
+    copts['private_key'] = 'id_sftpretty_missing'
     with pytest.raises(FileNotFoundError):
         with Connection(**copts) as sftp:
             sftp.close()
@@ -89,7 +89,7 @@ def test_connection_missing_private_key_file():
 
 def test_connection_invalid_private_key_type(tmp_path):
     '''invalid private-key content should raise the original parse error'''
-    key_path = Path(tmp_path / 'id_sftpretty.bad')
+    key_path = tmp_path / 'id_sftpretty_bad'
     key_path.write_text('not a real key\n', encoding='utf-8')
 
     copts = LOCAL.copy()
