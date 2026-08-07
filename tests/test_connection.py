@@ -68,14 +68,24 @@ def test_cnopts_none_knownhosts():
     assert cnopts.hostkeys is None
 
 
-def test_connection_bad_credentials():
+def test_connection_wrong_password():
     '''attempt connection to a non-existing server'''
     copts = LOCAL.copy()
     copts['password'] = 'badword'
     del copts['private_key'], copts['private_key_pass']
     with pytest.raises(SSHException):
-        with Connection(**copts) as sftp:
-            sftp.listdir()
+        with Connection(**copts):
+            pass
+
+
+def test_connection_bad_password_datatype():
+    '''attempt connection to a non-existing server'''
+    copts = LOCAL.copy()
+    copts['password'] = True
+    del copts['private_key'], copts['private_key_pass']
+    with pytest.raises(CredentialException):
+        with Connection(**copts):
+            pass
 
 
 def test_connection_missing_private_key_file():
@@ -83,6 +93,15 @@ def test_connection_missing_private_key_file():
     copts = LOCAL.copy()
     copts['private_key'] = 'id_sftpretty_missing'
     with pytest.raises(FileNotFoundError):
+        with Connection(**copts):
+            pass
+
+
+def test_connection_bad_private_key_datatype():
+    '''missing private-key file should raise the original parse error'''
+    copts = LOCAL.copy()
+    copts['private_key'] = True
+    with pytest.raises(CredentialException):
         with Connection(**copts):
             pass
 

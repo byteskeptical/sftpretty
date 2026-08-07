@@ -212,44 +212,43 @@ class Connection(object):
         '''Authenticate transport. Prefer private key over password.'''
         if self._config.get('identityfile'):
             private_key = self._config['identityfile'][0]
-        if private_key is not None:
+        if private_key is not None and isinstance(private_key, str):
             # Use key path or provided key object
             key_types = {'EC': ECDSAKey, 'OPENSSH': Ed25519Key, 'RSA': RSAKey}
-            if isinstance(private_key, str):
-                key_file = Path(private_key).expanduser().absolute().as_posix()
-                try:
-                    with open(key_file, 'r', encoding='utf-8') as head:
-                        key_id = head.readline()[11:][:-18]
-                    log.debug(f'Key ID: [{key_id}]')
+            key_file = Path(private_key).expanduser().absolute().as_posix()
+            try:
+                with open(key_file, 'r', encoding='utf-8') as head:
+                    key_id = head.readline()[11:][:-18]
+                log.debug(f'Key ID: [{key_id}]')
 
-                    if key_id.strip() not in key_types:
-                        error_msg = f'Unable to identity key type from file provided: \n[{key_file}]'
-                        log.error(error_msg)
-                        raise CredentialException(error_msg)
+                if key_id.strip() not in key_types:
+                    error_msg = f'Unable to identity key type from file provided: \n[{key_file}]'
+                    log.error(error_msg)
+                    raise CredentialException(error_msg)
 
-                    key = key_types[key_id.strip()]
+                key = key_types[key_id.strip()]
 
-                except FileNotFoundError as err:
-                    log.error(f'identity key file not found: \n[{key_file}]')
-                    raise err
-                except PasswordRequiredException as err:
-                    log.error(('No password provided for encrypted private '
-                               'key encrypted private key.'))
-                    raise err
-                except PermissionError as err:
-                    log.error(('File permission preventing user access to:\n'
-                              f'[{key_file}]'))
-                    raise err
-                except SSHException as err:
-                    log.error(('Path provided is an invalid key file, a '
-                               'directory or does not exist, please revise '
-                               'and provide a path to a valid private key.'))
-                    raise err
-                else:
-                    private_key = key.from_private_key_file(
-                        key_file, password=private_key_pass)
-            self._transport.auth_publickey(self._username, private_key)
-        elif password is not None:
+            except FileNotFoundError as err:
+                log.error(f'identity key file not found: \n[{key_file}]')
+                raise err
+            except PasswordRequiredException as err:
+                log.error(('No password provided for encrypted private '
+                            'key encrypted private key.'))
+                raise err
+            except PermissionError as err:
+                log.error(('File permission preventing user access to:\n'
+                            f'[{key_file}]'))
+                raise err
+            except SSHException as err:
+                log.error(('Path provided is an invalid key file, a '
+                            'directory or does not exist, please revise '
+                            'and provide a path to a valid private key.'))
+                raise err
+            else:
+                private_key = key.from_private_key_file(
+                    key_file, password=private_key_pass)
+                self._transport.auth_publickey(self._username, private_key)
+        elif password is not None and isinstance(password, str):
             self._transport.auth_password(self._username, password)
         else:
             raise CredentialException('No password or private key provided.')
