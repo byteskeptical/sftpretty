@@ -440,42 +440,43 @@ class Connection(object):
             log.debug(f'Disabled Algorithms: [{disabled_algorithms}]')
 
             # Security Options
+            security_options = self._transport.get_security_options()
             # Set allowed ciphers
             ciphers = self._config.get('ciphers') or self._cnopts.ciphers
-            _ciphers = self._transport.get_security_options().ciphers
+            _ciphers = security_options.ciphers
             if not isinstance(ciphers, tuple):
                 ciphers = tuple(ciphers.split(','))
-            self._transport.get_security_options().ciphers = tuple(
+            security_options.ciphers = tuple(
                 cipher for cipher in ciphers if cipher in _ciphers)
             log.debug(f'Ciphers: [{ciphers}]')
             # Set compression algorithms
             compression = self._cnopts.compression
             if bool(compress) and compression != ('none',):
-                self._transport.get_security_options().compression = compression
-            log.debug(f'Compression: [{self._transport.get_security_options().compression}]')
+                security_options.compression = compression
+            log.debug(f'Compression: [{security_options.compression}]')
             # Set connection digests
             digests = self._config.get('macs') or self._cnopts.digests
-            _digests = self._transport.get_security_options().digests
+            _digests = security_options.digests
             if not isinstance(digests, tuple):
                 digests = tuple(digests.split(','))
-            self._transport.get_security_options().digests = tuple(
+            security_options.digests = tuple(
                 digest for digest in digests if digest in _digests)
             log.debug(f'MACs: [{digests}]')
             # Set connection kex
             kexs = self._config.get('kexalgorithms') or self._cnopts.kex
-            _kex = self._transport.get_security_options().kex
+            _kex = security_options.kex
             if not isinstance(kexs, tuple):
                 kexs = tuple(kexs.split(','))
-            self._transport.get_security_options().kex = tuple(
+            security_options.kex = tuple(
                 kex for kex in kexs if kex in _kex)
             log.debug(f'KEX: [{kexs}]')
             # Set allowed key types
             key_types = self._config.get('pubkeyacceptedalgorithms') or\
                 self._cnopts.key_types
-            _key_types = self._transport.get_security_options().key_types
+            _key_types = security_options.key_types
             if not isinstance(key_types, tuple):
                 key_types = tuple(key_types.split(','))
-            self._transport.get_security_options().key_types = tuple(
+            security_options.key_types = tuple(
                 key_type for key_type in key_types if key_type in _key_types)
             log.debug(f'Public Key Types: [{key_types}]')
 
