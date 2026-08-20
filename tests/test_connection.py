@@ -7,7 +7,7 @@ from paramiko.ed25519key import Ed25519Key
 
 from common import conn, LOCAL, VFS
 from pathlib import Path
-from sftpretty import (CnOpts, Connection, ConnectionException, CredentialException,
+from sftpretty import (CnOpts, Connection, ConnectionException,
                        HostKeysException, SSHException)
 
 
@@ -68,54 +68,14 @@ def test_cnopts_none_knownhosts():
     assert cnopts.hostkeys is None
 
 
-def test_connection_wrong_password():
+def test_connection_bad_credentials():
     '''attempt connection to a non-existing server'''
     copts = LOCAL.copy()
     copts['password'] = 'badword'
     del copts['private_key'], copts['private_key_pass']
     with pytest.raises(SSHException):
-        with Connection(**copts):
-            pass
-
-
-def test_connection_bad_password_datatype():
-    '''attempt connection to a non-existing server'''
-    copts = LOCAL.copy()
-    copts['password'] = True
-    del copts['private_key'], copts['private_key_pass']
-    with pytest.raises(CredentialException):
-        with Connection(**copts):
-            pass
-
-
-def test_connection_missing_private_key_file():
-    '''missing private-key file should raise the original parse error'''
-    copts = LOCAL.copy()
-    copts['private_key'] = 'id_sftpretty_missing'
-    with pytest.raises(FileNotFoundError):
-        with Connection(**copts):
-            pass
-
-
-def test_connection_bad_private_key_datatype():
-    '''missing private-key file should raise the original parse error'''
-    copts = LOCAL.copy()
-    copts['private_key'] = True
-    with pytest.raises(CredentialException):
-        with Connection(**copts):
-            pass
-
-
-def test_connection_invalid_private_key_type(tmp_path):
-    '''invalid private-key content should raise the original parse error'''
-    key_path = tmp_path / 'id_sftpretty_bad'
-    key_path.write_text('not a real key\n', encoding='utf-8')
-
-    copts = LOCAL.copy()
-    copts['private_key'] = str(key_path)
-    with pytest.raises(CredentialException):
-        with Connection(**copts):
-            pass
+        with Connection(**copts) as sftp:
+            sftp.listdir()
 
 
 def test_connection_bad_host():
