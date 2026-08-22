@@ -431,9 +431,6 @@ class Connection(object):
             self._transport.set_keepalive(int(keepalive))
             self._transport.set_log_channel(host)
 
-            compress = self._config.get('compression') or self._cnopts.compress
-            self._transport.use_compression(compress=bool(compress))
-
             # Set disabled algorithms
             disabled_algorithms = self._cnopts.disabled_algorithms
             self._transport.disabled_algorithms = disabled_algorithms
@@ -449,6 +446,9 @@ class Connection(object):
             security_options.ciphers = tuple(
                 cipher for cipher in ciphers if cipher in _ciphers)
             log.debug(f'Ciphers: [{ciphers}]')
+            # Enable/Disable compression
+            compress = self._config.get('compression') or self._cnopts.compress
+            self._transport.use_compression(compress=bool(compress))
             # Set compression algorithms
             compression = self._cnopts.compression
             if bool(compress) and compression != ('none',):
