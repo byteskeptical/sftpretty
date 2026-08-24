@@ -94,6 +94,41 @@ def test_connection_bad_host():
         sftp.listdir()
 
 
+@pytest.mark.parametrize('blob', (
+    b'\x30\x82\x04\xbe\x02\x01\x00',            # binary DER, undecodable
+    b'-----BEGIN DSA PRIVATE KEY-----\n',       # deprecated algorithm
+    b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n', # PKCS#8, encrypted
+    b'-----BEGIN PRIVATE KEY-----\n',           # PKCS#8
+    b''                                         # empty file
+))
+def test_connection_bad_private_key_format(blob, tmp_path):
+    '''deprecated or unsupported key formats must raise, not fail'''
+    key = tmp_path.joinpath('id_sftpretty_unsupported')
+    key.write_bytes(blob)
+
+    copts = LOCAL.copy()
+    copts['private_key'] = key.as_posix()
+    with pytest.raises(KeyError):
+        Connection(**copts) as sftp:
+            sftp.listdir()
+
+
+@pytest.mark.parametrize('kind', ('missing', 'directory'))
+def test_connection_bad_private_key_path(kind, tmp_path):
+    '''private-key path pointing to missing or non-file type'''
+    key = tmp_path.joinpath(f'id_sftpretty_{kind}')
+
+    if kind == 'directory':
+        key.mkdir()
+
+    copts = LOCAL.copy()
+    key = tmp_path.joinpath(f'id_sftpretty_{kind}')
+
+    with pytest.raises(OSError, match=key.name):
+        with Connection(**copts) as sftp:
+            sftp.listdir()
+
+
 def test_connection_good(sftpserver):
     '''connect to a public sftp server'''
     with sftpserver.serve_content(VFS):

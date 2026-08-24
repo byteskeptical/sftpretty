@@ -217,7 +217,7 @@ class Connection(object):
         if private_key is not None:
             # Use key path or provided key object
             key_types = {'EC': ECDSAKey, 'OPENSSH': Ed25519Key, 'RSA': RSAKey}
-            if isinstance(private_key, str):
+            if isinstance(private_key, (str, Path)):
                 key_file = Path(private_key).expanduser().absolute().as_posix()
                 try:
                     with open(key_file, 'rb') as head:
