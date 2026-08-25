@@ -18,13 +18,27 @@ def test_normalize(sftpserver):
             assert sftp.normalize('.') == pubpath.as_posix()
 
 
-# TODO
-# def test_normalize_symlink(sftp):
-#     '''test normalize against a symlink'''
-#     home = Path.home()
-#     sftp.chdir(home.as_posix())
-#     rsym = 'readme.sym'
-#     assert sftp.normalize(rsym) == home.joinpath(rsym).as_posix()
+def test_normalize_dangling_symlink(lsftp, remote_tmpdir):
+    '''test normalize against a symlink whose target is missing'''
+    missing = Path(remote_tmpdir).joinpath('gone.txt').as_posix()
+    rsym = Path(remote_tmpdir).joinpath('dangling.sym').as_posix()
+    lsftp.symlink(missing, rsym)
+
+    assert lsftp.lexists(rsym)
+    assert lsftp.exists(rsym) is False
+    assert lsftp.normalize(rsym) == missing
+
+
+def test_normalize_symlink(lsftp, remote_tmpdir):
+    '''test normalize against a symlink'''
+    rfile = Path(remote_tmpdir).joinpath('readme.txt').as_posix()
+    rsym = Path(remote_tmpdir).joinpath('readme.sym').as_posix()
+    lsftp.putfo(BytesIO(b'My hovercraft is full of eels.'), rfile)
+    lsftp.symlink(rfile, rsym)
+
+    assert S_ISLNK(lsftp.lstat(rsym).st_mode)
+    assert lsftp.normalize(rsym) == lsftp.normalize(rfile)
+    assert lsftp.normalize(rsym) != rsym
 
 
 def test_pwd(sftpserver):

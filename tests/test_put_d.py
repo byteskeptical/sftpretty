@@ -4,31 +4,25 @@ import pytest
 
 from blddirs import build_dir_struct
 from common import rmdir
-from pathlib import Path
-from tempfile import mkdtemp
 
 
-def test_put_d(lsftp):
+def test_put_d(lsftp, remote_tmpdir, tmp_path):
     '''test put_d'''
-    localpath = Path(mkdtemp()).as_posix()
-    remote = Path.home()
-    build_dir_struct(localpath)
-    local = Path(localpath).joinpath('pub')
-    lsftp.put_d(local.as_posix(), remote.as_posix())
+    build_dir_struct(tmp_path.as_posix())
+    local = temp_path.joinpath('pub').as_posix()
+    lsftp.put_d(local, remote_tempdir)
+    remote = Path(remote_tmpdir).joinpath('pub').as_posix()
 
-    rmdir(localpath)
-
+    assert lsftp.listdir(remote) == ['make.txt']
 
 # TODO
-# def test_put_d_ro(psftp):
-#     '''test put_d failure on remote read-only srvr'''
-#     # run the op
+# def test_put_d_ro(lsftp):
+#     '''test put_d failure on remote read-only server'''
 #     with pytest.raises(IOError):
-#         psftp.put_d('.', '.')
+#         lsftp.put_d('.', '.')
 
 
-def test_put_d_bad_local(lsftp):
+def test_put_d_bad_local(lsftp, remote_tmpdir):
     '''test put_d failure on non-existing local directory'''
-    # run the op
     with pytest.raises(OSError):
-        lsftp.put_d('/non-existing', '.')
+        lsftp.put_d('/non-existing', remote_tmpdir)

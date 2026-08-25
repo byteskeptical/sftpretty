@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from os import close, environ
 from pathlib import Path
 from sftpretty import CnOpts
+from stat import S_ISDIR
 from tempfile import mkstemp
 
 
@@ -36,7 +37,25 @@ def conn(sftpsrv):
             'username': USER}
 
 
+def remote_rmdir(sftp, dir):
+    '''recursively remove a remote directory tree'''
+    try:
+        listing = sftp.listdir_attr(dir)
+    except FileNotFoundError:
+        return
+
+    for attr in listing:
+        remotepath = Path(dir).joinpath(attr.filename).as_posix()
+        if S_ISDIR(attr.st_mode):
+            remote_rmdir(sftp, remotepath)
+        else:
+            sftp.remove(remotepath)
+
+    sftp.rmdir(dir)
+
+
 def rmdir(dir):
+    '''recursively remove a directory tree'''
     dir = Path(dir)
     for item in dir.iterdir():
         if item.is_dir():

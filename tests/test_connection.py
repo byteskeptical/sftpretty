@@ -109,7 +109,7 @@ def test_connection_bad_private_key_format(blob, tmp_path):
     copts = LOCAL.copy()
     copts['private_key'] = key.as_posix()
     with pytest.raises(KeyError):
-        Connection(**copts) as sftp:
+        with Connection(**copts) as sftp:
             sftp.listdir()
 
 
