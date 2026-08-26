@@ -1,8 +1,10 @@
 '''test sftpretty.normalize'''
 
 from common import VFS, conn
+from io import BytesIO
 from pathlib import Path
 from sftpretty import Connection
+from stat import S_ISLNK
 
 
 def test_normalize(sftpserver):

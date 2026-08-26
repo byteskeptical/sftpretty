@@ -1,5 +1,7 @@
 '''test sftpretty.listdir'''
 
+import pytest
+
 from common import STARS8192
 from io import BytesIO
 from path import Path

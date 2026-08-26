@@ -1,5 +1,10 @@
 '''test sftpretty.rmdir'''
 
+import pytest
+
+from common import SKIP_IF_ROOT
+from pathlib import Path
+
 
 def test_rmdir(lsftp, remote_tmpdir):
     '''test mkdir'''

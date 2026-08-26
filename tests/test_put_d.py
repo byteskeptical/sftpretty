@@ -3,14 +3,14 @@
 import pytest
 
 from blddirs import build_dir_struct
-from common import rmdir
+from pathlib import Path
 
 
 def test_put_d(lsftp, remote_tmpdir, tmp_path):
     '''test put_d'''
     build_dir_struct(tmp_path.as_posix())
-    local = temp_path.joinpath('pub').as_posix()
-    lsftp.put_d(local, remote_tempdir)
+    local = tmp_path.joinpath('pub').as_posix()
+    lsftp.put_d(local, remote_tmpdir)
     remote = Path(remote_tmpdir).joinpath('pub').as_posix()
 
     assert lsftp.listdir(remote) == ['make.txt']
