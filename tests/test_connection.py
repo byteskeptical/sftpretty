@@ -95,11 +95,11 @@ def test_connection_bad_host():
 
 
 @pytest.mark.parametrize('blob', (
-    b'\x30\x82\x04\xbe\x02\x01\x00',            # binary DER, undecodable
-    b'-----BEGIN DSA PRIVATE KEY-----\n',       # deprecated algorithm
-    b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n', # PKCS#8, encrypted
-    b'-----BEGIN PRIVATE KEY-----\n',           # PKCS#8
-    b''                                         # empty file
+    b'\x30\x82\x04\xbe\x02\x01\x00',             # binary DER, undecodable
+    b'-----BEGIN DSA PRIVATE KEY-----\n',        # deprecated algorithm
+    b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n',  # PKCS#8, encrypted
+    b'-----BEGIN PRIVATE KEY-----\n',            # PKCS#8
+    b''                                          # empty file
 ))
 def test_connection_bad_private_key_format(blob, tmp_path):
     '''deprecated or unsupported key formats must raise, not fail'''
@@ -122,7 +122,7 @@ def test_connection_bad_private_key_path(kind, tmp_path):
         key.mkdir()
 
     copts = LOCAL.copy()
-    key = tmp_path.joinpath(f'id_sftpretty_{kind}')
+    copts['private_key'] = key.as_posix()
 
     with pytest.raises(OSError, match=key.name):
         with Connection(**copts) as sftp:
