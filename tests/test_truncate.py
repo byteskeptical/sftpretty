@@ -4,7 +4,7 @@ import pytest
 
 from common import STARS8192
 from io import BytesIO
-from path import Path
+from pathlib import Path
 
 
 @pytest.mark.parametrize('size', (2 * 8192, 8192, 4096),

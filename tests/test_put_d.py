@@ -3,6 +3,7 @@
 import pytest
 
 from blddirs import build_dir_struct
+from common import SKIP_IF_ROOT
 from pathlib import Path
 
 
@@ -15,11 +16,26 @@ def test_put_d(lsftp, remote_tmpdir, tmp_path):
 
     assert lsftp.listdir(remote) == ['make.txt']
 
-# TODO
-# def test_put_d_ro(lsftp):
-#     '''test put_d failure on remote read-only server'''
-#     with pytest.raises(IOError):
-#         lsftp.put_d('.', '.')
+
+@SKIP_IF_ROOT
+@pytest.mark.parametrize('refuse', ('mkdir', 'write'))
+def test_put_d_ro(lsftp, refuse, remote_tmpdir, tmp_path):
+    '''test put_d failure on remote read-only server'''
+    build_dir_struct(tmp_path.as_posix())
+    local = tmp_path.joinpath('pub').as_posix()
+
+    if refuse == 'mkdir':
+        remote = remote_tmpdir
+    else:
+        remote = Path(remote_tmpdir).joinpath('pub').as_posix()
+        lsftp.mkdir_p(remote)
+
+    lsftp.chmod(remote, 500)
+    try:
+        with pytest.raises(PermissionError):
+            lsftp.put_d(local, remote_tmpdir)
+    finally:
+        lsftp.chmod(remote, 700)
 
 
 def test_put_d_bad_local(lsftp, remote_tmpdir):
