@@ -39,6 +39,7 @@ jobs:
           echo "::add-mask::$PASSWORD"
           echo "SFTPRETTY_KEY_PASS=$PASS" >> $GITHUB_ENV
           echo "PASSWORD=$PASSWORD" >> $GITHUB_ENV
+        shell: bash
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'macos')
         run: |
