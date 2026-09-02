@@ -59,7 +59,7 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
         for chunk in iter(lambda: filestream.read(blocksize), b''):
             buffer.update(chunk)
 
-    return algorithm.hexdigest()
+    return buffer.hexdigest()
 
 
 def localtree(container, localdir, remotedir, recurse=True):
