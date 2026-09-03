@@ -23,7 +23,7 @@ from sftpretty.helpers import drivepath
     ('/C:', '/C:/'), ('/C:/', '/C:/'),
     # leading backslash is UNC, typed pairs arrive collapsed
     ('\\\\server\\share\\file.txt', '//server/share/file.txt'),
-    (r'\\server\share\file.txt', '//server/share\file.txt'),
+    ('\\server\share\file.txt', '//server/share\file.txt'),  # noqa: W605
     ('\\tmp\test.txt', '//tmp/test.txt'),
     ('//tmp/test.txt', '//tmp/test.txt'),
     ('//server/share//dbl/f.txt', '//server/share/dbl/f.txt'),
