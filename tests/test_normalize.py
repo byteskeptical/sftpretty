@@ -20,7 +20,7 @@ def test_normalize(sftpserver):
             assert sftp.normalize('.') == pubpath.as_posix()
 
 
-@SKIP_IF_WIN
+@SKIP_IF_WIN # CreateSymbolicLinkW stats target on creation, returns ENOENT
 def test_normalize_dangling_symlink(lsftp, remote_tmpdir):
     '''test normalize against a symlink whose target is missing'''
     missing = Path(remote_tmpdir).joinpath('gone.txt').as_posix()
@@ -32,6 +32,7 @@ def test_normalize_dangling_symlink(lsftp, remote_tmpdir):
     assert lsftp.normalize(rsym) == missing
 
 
+@SKIP_IF_WIN # uses lexical _wfullpath instead of realpath, undereferenced
 def test_normalize_symlink(lsftp, remote_tmpdir):
     '''test normalize against a symlink'''
     rfile = Path(remote_tmpdir).joinpath('readme.txt').as_posix()

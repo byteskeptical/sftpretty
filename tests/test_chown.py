@@ -35,7 +35,7 @@ def test_chown_gid(lsftp):
 
 
 def test_chown_none(lsftp):
-    '''call .chown with no gid or uid specified'''
+    '''call chown with no gid or uid specified'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
         org_attrs = lsftp.put(fname)
@@ -47,13 +47,20 @@ def test_chown_none(lsftp):
 
 
 def test_chown_not_exist(lsftp):
-    '''call .chown on a non-existing path'''
+    '''call chown on a non-existing path'''
     with pytest.raises(IOError):
         lsftp.chown('i-do-not-exist.txt', 666)
 
 
-# TODO
-# def test_chown_ro_server(psftp):
-#     '''call .chown against path on read-only server'''
-#     with pytest.raises(IOError):
-#         psftp.chown('readme.txt', gid=1000, uid=1000)
+@SKIP_IF_ROOT
+@SKIP_IF_WIN  # ownership ids are synthetic, cannot be set
+def test_chown_ro(lsftp):
+    '''call chown against path on read-only server'''
+    with tempfile_containing() as fname:
+        base_fname = Path(fname).name
+        lsftp.put(fname)
+        try:
+            with pytest.raises(PermissionError):
+                lsftp.chown(base_fname, gid=0, uid=0)
+        finally:
+            lsftp.remove(base_fname)
