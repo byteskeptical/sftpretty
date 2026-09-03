@@ -1,6 +1,6 @@
 '''test sftpretty.normalize'''
 
-from common import VFS, conn
+from common import conn, SKIP_IF_WIN, VFS
 from io import BytesIO
 from pathlib import Path
 from sftpretty import Connection
@@ -20,6 +20,7 @@ def test_normalize(sftpserver):
             assert sftp.normalize('.') == pubpath.as_posix()
 
 
+@SKIP_IF_WIN
 def test_normalize_dangling_symlink(lsftp, remote_tmpdir):
     '''test normalize against a symlink whose target is missing'''
     missing = Path(remote_tmpdir).joinpath('gone.txt').as_posix()

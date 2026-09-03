@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import SKIP_IF_ROOT
+from common import SKIP_IF_ROOT, SKIP_IF_WIN
 from pathlib import Path
 
 
@@ -17,6 +17,7 @@ def test_rmdir(lsftp, remote_tmpdir):
 
 
 @SKIP_IF_ROOT
+@SKIP_IF_WIN
 def test_rmdir_ro(lsftp, remote_tmpdir):
     '''test rmdir against read-only server'''
     parent = Path(remote_tmpdir).joinpath('readonly')

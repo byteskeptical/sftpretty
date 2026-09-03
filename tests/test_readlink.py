@@ -2,6 +2,7 @@
 
 from io import BytesIO
 from pathlib import Path
+from sftpretty.helpers import drivepath
 
 
 def test_readlink(lsftp, remote_tmpdir):
@@ -14,4 +15,4 @@ def test_readlink(lsftp, remote_tmpdir):
     lsftp.putfo(flo, rfile)
     lsftp.symlink(rfile, rlink)
 
-    assert lsftp.readlink(rlink).endswith(rfile)
+    assert lsftp.readlink(rlink).endswith(drivepath(rfile))

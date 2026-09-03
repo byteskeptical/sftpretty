@@ -47,6 +47,6 @@ def remote_tmpdir(lsftp):
     lsftp.mkdir_p(remotedir.as_posix())
 
     try:
-        yield remotedir.as_posix()
+        yield lsftp.normalize(remotedir.as_posix())
     finally:
         remote_rmdir(lsftp, remotedir.as_posix())
