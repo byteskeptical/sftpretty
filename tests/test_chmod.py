@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, SKIP_IF_WIN, tempfile_containing, VFS
+from common import conn, SKIP_IF_ROOT, SKIP_IF_WIN, tempfile_containing, VFS
 from pathlib import Path
 from sftpretty import Connection
 from sftpretty.helpers import st_mode_to_int

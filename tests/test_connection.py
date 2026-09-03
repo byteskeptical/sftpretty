@@ -129,10 +129,20 @@ def test_connection_bad_private_key_path(kind, tmp_path):
             sftp.listdir()
 
 
-def test_connection_good(sftpserver):
-    '''connect to a public sftp server'''
+@pytest.mark.parametrize('kind', ('path', 'pkey'))
+def test_connection_good(kind, sftpserver):
+    '''connect to a public sftp server with key given as path or object'''
+    copts = conn(sftpserver)
+
+    if kind == 'pkey':
+        copts['private_key'] = Ed25519Key(
+            filename=copts['private_key'],
+            password=copts['private_key_pass'])
+        del copts['private_key_pass']
+
     with sftpserver.serve_content(VFS):
-        sftp = Connection(**conn(sftpserver))
+        sftp = Connection(**copts)
+        assert sftp.listdir() == ['pub', 'read.me']
         sftp.close()
 
 
