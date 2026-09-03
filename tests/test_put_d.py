@@ -18,7 +18,7 @@ def test_put_d(lsftp, remote_tmpdir, tmp_path):
 
 
 @SKIP_IF_ROOT
-@SKIP_IF_WIN # Win32-OpenSSH doesn't translate mode bits into ACLs
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
 @pytest.mark.parametrize('refuse', ('mkdir', 'write'))
 def test_put_d_ro(lsftp, refuse, remote_tmpdir, tmp_path):
     '''test put_d failure on remote read-only server'''

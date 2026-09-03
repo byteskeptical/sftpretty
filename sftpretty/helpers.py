@@ -1,7 +1,7 @@
 from functools import wraps
 from hashlib import new, sha3_512
 from io import BytesIO, IOBase
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path, PureWindowsPath
 from re import sub
 from stat import S_IMODE
 from time import sleep

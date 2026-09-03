@@ -17,7 +17,7 @@ def test_rmdir(lsftp, remote_tmpdir):
 
 
 @SKIP_IF_ROOT
-@SKIP_IF_WIN # Win32-OpenSSH doesn't translate mode bits into ACLs
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
 def test_rmdir_ro(lsftp, remote_tmpdir):
     '''test rmdir against read-only server'''
     parent = Path(remote_tmpdir).joinpath('readonly')

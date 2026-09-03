@@ -17,7 +17,7 @@ def test_chmod_not_exist(sftpserver):
 
 
 @SKIP_IF_ROOT
-@SKIP_IF_WIN # Win32-OpenSSH doesn't translate mode bits into ACLs
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
 def test_chmod_ro(lsftp, remote_tmpdir):
     '''test chmod against read-only path'''
     parent = Path(remote_tmpdir).joinpath('readonly')
@@ -33,7 +33,7 @@ def test_chmod_ro(lsftp, remote_tmpdir):
         lsftp.chmod(parent.as_posix(), 700)
 
 
-@SKIP_IF_WIN # Win32-OpenSSH doesn't translate mode bits into ACLs
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
 def test_chmod_simple(lsftp):
     '''test basic chmod with octal mode represented by an int'''
     new_mode = 711
