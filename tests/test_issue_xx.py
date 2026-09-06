@@ -1,7 +1,7 @@
 '''a template for creating tests that display or duplicate issues'''
 
 
-from common import conn, VFS, VFS_HOME
+from common import conn, USER_HOME, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import Connection
 from sftpretty.helpers import drivepath
@@ -13,27 +13,27 @@ from sftpretty.helpers import drivepath
 # server (see test_issue_xx_lsftp)
 def test_issue_xx_sftpserver_plugin(sftpserver):
     '''an example showing how to use the sftpserver plugin in a test'''
-    testpath = Path(VFS_HOME).joinpath('pub')
+    testpath = Path(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
             with sftp.cd():
                 sftp.chdir('pub')
-                assert sftp.pwd == drivepath(testpath.as_posix())
-            assert home == drivepath(testpath.parent.as_posix())
+                assert sftp.pwd == testpath.as_posix()
+            assert home == testpath.parent.as_posix()
 
 
 def test_issue_xx_local_sftpserver(lsftp):
     '''same as test_issue_xx_sftpserver_plugin but written with the local
     sfptserver mechanism, lsftp'''
     home = lsftp.pwd
-    testpath = Path(VFS_HOME).joinpath('pub')
+    testpath = Path(drivepath(USER_HOME)).joinpath('pub')
     # starting condition of default directory should be empty, so we need to
     # construct whatever structure we need prior to peforming the test
     lsftp.mkdir('pub')
     with lsftp.cd():
         lsftp.chdir('pub')
-        pubdir = lsftp.pwd.endswith(drivepath(testpath.as_posix()))
+        pubdir = lsftp.pwd.endswith(testpath.as_posix())
     homedir = home == lsftp.pwd
 
     lsftp.rmdir('pub')

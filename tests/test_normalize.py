@@ -10,15 +10,15 @@ from stat import S_ISLNK
 
 def test_normalize(sftpserver):
     '''test the normalize function'''
-    pubpath = Path(VFS_HOME).joinpath('pub')
+    pubpath = Path(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             makepath = pubpath.parent.joinpath('make.txt').as_posix()
-            assert sftp.normalize('make.txt') == drivepath(makepath)
-            assert sftp.normalize('.') == drivepath(pubpath.parent.as_posix())
-            assert sftp.normalize('pub') == drivepath(pubpath.as_posix())
+            assert sftp.normalize('make.txt') == makepath
+            assert sftp.normalize('.') == pubpath.parent.as_posix()
+            assert sftp.normalize('pub') == pubpath.as_posix()
             sftp.chdir('pub')
-            assert sftp.normalize('.') == drivepath(pubpath.as_posix())
+            assert sftp.normalize('.') == pubpath.as_posix()
 
 
 @SKIP_IF_WIN  # CreateSymbolicLinkW stats target on creation, returns ENOENT
@@ -48,14 +48,12 @@ def test_normalize_symlink(lsftp, remote_tmpdir):
 
 def test_pwd(sftpserver):
     '''test the pwd property'''
-    pubpath = Path(VFS_HOME).joinpath('pub')
+    pubpath = Path(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             sftp.chdir('pub/foo2')
-            assert sftp.pwd == drivepath(pubpath.joinpath('foo2').as_posix())
+            assert sftp.pwd == pubpath.joinpath('foo2').as_posix()
             sftp.chdir('bar1')
-            assert sftp.pwd == drivepath(
-                    pubpath.joinpath('foo2/bar1').as_posix()
-            )
+            assert sftp.pwd == pubpath.joinpath('foo2/bar1').as_posix()
             sftp.chdir('../../foo1')
-            assert sftp.pwd == drivepath(pubpath.joinpath('foo1').as_posix())
+            assert sftp.pwd == pubpath.joinpath('foo1').as_posix()

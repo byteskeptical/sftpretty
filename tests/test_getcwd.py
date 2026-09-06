@@ -19,7 +19,7 @@ def test_getcwd_default_path(sftpserver):
     '''test .getcwd when using default_path arg'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.getcwd() == VFS_HOME
+            assert sftp.getcwd() == drivepath(VFS_HOME)
 
 
 def test_getcwd_after_chdir(sftpserver):
