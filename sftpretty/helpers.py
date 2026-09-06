@@ -27,7 +27,9 @@ def drivepath(filepath):
     '''
     if filepath:
         if '\\' in filepath or PureWindowsPath(filepath).drive:
-            unc = filepath[:1] == '\\' or filepath[:2] == '//'
+            host = filepath.lstrip('\\/')
+            unc = ((filepath[:1] == '\\' or filepath[:2] == '//')
+                   and host != '' and host[1:2] != ':')
             utf = filepath.encode('unicode_escape').decode()
             utf = utf.replace('\\\\', '/')
             utf = sub(r'\\([^xuU])', r'/\1', utf)

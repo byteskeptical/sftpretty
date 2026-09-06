@@ -5,7 +5,7 @@ import pytest
 from paramiko import SFTPError
 from paramiko.ed25519key import Ed25519Key
 
-from common import conn, LOCAL, VFS
+from common import conn, LOCAL, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import (CnOpts, Connection, ConnectionException,
                        HostKeysException, SSHException)
@@ -27,7 +27,7 @@ def test_channel_exception(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             with pytest.raises(SFTPError):
-                sftp.chdir('/home/test/read.me')
+                sftp.chdir(f'{VFS_HOME}/read.me')
 
     with sftpserver.serve_content(VFS):
         sftp = Connection(**conn(sftpserver))
