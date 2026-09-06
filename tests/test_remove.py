@@ -6,30 +6,30 @@ from common import tempfile_containing
 from pathlib import Path
 
 
-def test_remove(lsftp):
+def test_remove(lsftp, remote_tmpdir):
     '''test the remove method'''
     with tempfile_containing() as fname:
         base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
-        lsftp.put(fname)
-        is_there = base_fname in lsftp.listdir()
-        lsftp.remove(base_fname)
-        not_there = base_fname not in lsftp.listdir()
+        rfile = Path(remote_tmpdir).joinpath(base_fname).as_posix()
+        lsftp.put(fname, rfile)
+        is_there = base_fname in lsftp.listdir(remote_tmpdir)
+        lsftp.remove(rfile)
+        not_there = base_fname not in lsftp.listdir(remote_tmpdir)
 
     assert is_there
     assert not_there
 
 
 # TODO
-# def test_remove_roserver(psftp):
+# def test_remove_roserver(lsftp, remote_tmpdir):
 #     '''test reaction of attempting remove on read-only server'''
-#     psftp.chdir(Path.home().as_posix())
+#     rfile = Path(remote_tmpdir).joinpath('readme.txt').as_posix()
 #     with pytest.raises(IOError):
-#         psftp.remove('readme.txt')
+#         lsftp.remove(rfile)
 
 
-def test_remove_does_not_exist(lsftp):
+def test_remove_does_not_exist(lsftp, remote_tmpdir):
     '''test remove against a non-existant file'''
-    lsftp.chdir(Path.home().as_posix())
+    rfile = Path(remote_tmpdir).joinpath('i-am-not-here.txt').as_posix()
     with pytest.raises(IOError):
-        lsftp.remove('i-am-not-here.txt')
+        lsftp.remove(rfile)

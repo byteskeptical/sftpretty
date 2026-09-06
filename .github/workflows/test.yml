@@ -27,6 +27,19 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Runner Environment
+        run: |
+          PASS=$(grep -m1 '^PASS = ' tests/common.py | cut -d\' -f2)
+          if [ -z "$PASS" ]; then
+            LINE=$(awk '/^PASS/{print NR; exit}' tests/common.py)
+            echo "::error file=tests/common.py,line=${LINE:-1},title=Test passphrase unreadable::No single-quoted value found for the PASS assignment."
+            exit 1
+          fi
+          PASSWORD="$(openssl rand -base64 33)"
+          echo "::add-mask::$PASSWORD"
+          echo "SFTPRETTY_KEY_PASS=$PASS" >> $GITHUB_ENV
+          echo "PASSWORD=$PASSWORD" >> $GITHUB_ENV
+        shell: bash
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'macos')
         run: |
@@ -35,12 +48,12 @@ jobs:
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          (echo ${{ secrets.PASSWORD }}; echo ${{ secrets.PASSWORD }}) | sudo passwd $USER
+          (echo "$PASSWORD"; echo "$PASSWORD") | sudo passwd $USER
       - name: ${{ matrix.os }} SSH
         if: startsWith(matrix.os, 'windows')
         run: |
           $authorizedKey = Get-Content -Path id_sftpretty.pub
-          $pass = ConvertTo-SecureString -AsPlainText -Force -String ${{ secrets.PASSWORD }}
+          $pass = ConvertTo-SecureString -AsPlainText -Force -String $env:PASSWORD
           $privateKey = Get-Content -Path id_sftpretty
           $user = Get-LocalUser -Name (([System.Environment]::UserName))
           $user | Set-LocalUser -Password $pass
@@ -58,7 +71,7 @@ jobs:
           Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
           Set-Service -Name sshd -StartupType Automatic -Status Running
           Set-Service -Name ssh-agent -StartupType Automatic -Status Running
-          ssh-keygen -f $Key --% -N "" -p -P ${{ secrets.PRIVATE_KEY }}
+          ssh-keygen -f $Key --% -N "" -p -P %SFTPRETTY_KEY_PASS%
           if (!(Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
               Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
               New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22

@@ -1,8 +1,9 @@
 '''test sftpretty.getcwd'''
 
-from common import conn, VFS
+from common import conn, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import Connection
+from sftpretty.helpers import drivepath
 
 
 def test_getcwd_none(sftpserver):
@@ -18,15 +19,15 @@ def test_getcwd_default_path(sftpserver):
     '''test .getcwd when using default_path arg'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            assert sftp.getcwd() == '/home/test'
+            assert sftp.getcwd() == drivepath(VFS_HOME)
 
 
 def test_getcwd_after_chdir(sftpserver):
     '''test getcwd after a chdir operation'''
-    pubpath = Path('/home/test').joinpath('pub/foo1')
+    pubpath = Path(VFS_HOME).joinpath('pub/foo1')
     with sftpserver.serve_content(VFS):
         cnn = conn(sftpserver)
         cnn['default_path'] = None
         with Connection(**cnn) as sftp:
             sftp.chdir(pubpath.as_posix())
-            assert sftp.getcwd() == pubpath.as_posix()
+            assert sftp.getcwd() == drivepath(pubpath.as_posix())

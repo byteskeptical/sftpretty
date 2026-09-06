@@ -3,32 +3,43 @@
 import pytest
 
 from blddirs import build_dir_struct
-from common import rmdir
+from common import SKIP_IF_ROOT, SKIP_IF_WIN
 from pathlib import Path
-from tempfile import mkdtemp
 
 
-def test_put_d(lsftp):
+def test_put_d(lsftp, remote_tmpdir, tmp_path):
     '''test put_d'''
-    localpath = Path(mkdtemp()).as_posix()
-    remote = Path.home()
-    build_dir_struct(localpath)
-    local = Path(localpath).joinpath('pub')
-    lsftp.put_d(local.as_posix(), remote.as_posix())
+    build_dir_struct(tmp_path.as_posix())
+    local = tmp_path.joinpath('pub').as_posix()
+    lsftp.put_d(local, remote_tmpdir)
+    remote = Path(remote_tmpdir).joinpath('pub').as_posix()
 
-    rmdir(localpath)
-
-
-# TODO
-# def test_put_d_ro(psftp):
-#     '''test put_d failure on remote read-only srvr'''
-#     # run the op
-#     with pytest.raises(IOError):
-#         psftp.put_d('.', '.')
+    assert lsftp.listdir(remote) == ['make.txt']
 
 
-def test_put_d_bad_local(lsftp):
+@SKIP_IF_ROOT
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
+@pytest.mark.parametrize('refuse', ('mkdir', 'write'))
+def test_put_d_ro(lsftp, refuse, remote_tmpdir, tmp_path):
+    '''test put_d failure on remote read-only server'''
+    build_dir_struct(tmp_path.as_posix())
+    local = tmp_path.joinpath('pub').as_posix()
+
+    if refuse == 'mkdir':
+        remote = remote_tmpdir
+    else:
+        remote = Path(remote_tmpdir).joinpath('pub').as_posix()
+        lsftp.mkdir_p(remote)
+
+    lsftp.chmod(remote, 500)
+    try:
+        with pytest.raises(PermissionError):
+            lsftp.put_d(local, remote_tmpdir)
+    finally:
+        lsftp.chmod(remote, 700)
+
+
+def test_put_d_bad_local(lsftp, remote_tmpdir):
     '''test put_d failure on non-existing local directory'''
-    # run the op
     with pytest.raises(OSError):
-        lsftp.put_d('/non-existing', '.')
+        lsftp.put_d('/non-existing', remote_tmpdir)
