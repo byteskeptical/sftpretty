@@ -1,8 +1,9 @@
 '''test sftpretty.remotetree'''
 
-from common import conn, VFS
+from common import conn, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import Connection
+from sftpretty.helpers import drivepath
 from tempfile import mkdtemp
 
 
@@ -12,22 +13,23 @@ def test_remotetree(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             localpath = Path(mkdtemp()).as_posix()
+            testpath = drivepath(VFS_HOME)
             tree = {}
 
             sftp.remotetree(tree, cwd, localpath)
 
             remote = {
-                '/home/test': [
-                    ('/home/test/pub', f'{localpath}/pub')
+                f'{testpath}': [
+                    (f'{testpath}/pub', f'{localpath}/pub')
                 ],
-                '/home/test/pub': [
-                    ('/home/test/pub/foo1',
+                f'{testpath}/pub': [
+                    (f'{testpath}/pub/foo1',
                      f'{localpath}/pub/foo1'),
-                    ('/home/test/pub/foo2',
+                    (f'{testpath}/pub/foo2',
                      f'{localpath}/pub/foo2')
                 ],
-                '/home/test/pub/foo2': [
-                    ('/home/test/pub/foo2/bar1',
+                f'{testpath}/pub/foo2': [
+                    (f'{testpath}/pub/foo2/bar1',
                      f'{localpath}/pub/foo2/bar1')
                 ]
             }
@@ -44,13 +46,14 @@ def test_remotetree_no_recurse(sftpserver):
         with Connection(**conn(sftpserver)) as sftp:
             cwd = sftp.pwd
             localpath = Path(mkdtemp()).as_posix()
+            testpath = drivepath(VFS_HOME)
             tree = {}
 
             sftp.remotetree(tree, cwd, localpath, recurse=False)
 
             remote = {
-                '/home/test': [
-                    ('/home/test/pub', f'{localpath}/pub')
+                f'{testpath}': [
+                    (f'{testpath}/pub', f'{localpath}/pub')
                 ]
             }
 
