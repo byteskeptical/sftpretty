@@ -73,11 +73,10 @@ def test_get_r_pathed(sftpserver):
             localtree(local_tree, localpath, remote_cwd)
             sftp.remotetree(remote_tree, remote_cwd, localpath)
 
-            actual = hash(remote_cwd + '/bar1.txt')
-            expected = ('d870af1b9d001a0507935ece059c0b6d75782400bdad43f'
-                        '8470ca6e992b8a5bef317a9c645ddbdf4cfb0a2340ae632ec'
-                        '9b31286f4ea5b68be9b2d89f4dec5de4'
-                        )
+            actual = hash(Path(localpath).joinpath('bar1.txt').as_posix())
+            expected = ('126f175986225cdaa8c6eccd1ed9296b487cc799a982ff'
+                        'db33818806228c9efb8d4ca14c37641097eb367bdd2f4c'
+                        'a7916d63893af38da137251520fff41f3cba')
 
             assert local_tree.keys() == remote_tree.keys()
             assert actual == expected

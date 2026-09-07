@@ -5,7 +5,7 @@ import pytest
 from paramiko import SFTPError
 from paramiko.ed25519key import Ed25519Key
 
-from common import conn, LOCAL, VFS
+from common import conn, LOCAL, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import (CnOpts, Connection, ConnectionException,
                        HostKeysException, SSHException)
@@ -27,7 +27,7 @@ def test_channel_exception(sftpserver):
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             with pytest.raises(SFTPError):
-                sftp.chdir('/home/test/read.me')
+                sftp.chdir(f'{VFS_HOME}/read.me')
 
     with sftpserver.serve_content(VFS):
         sftp = Connection(**conn(sftpserver))
@@ -94,10 +94,55 @@ def test_connection_bad_host():
         sftp.listdir()
 
 
-def test_connection_good(sftpserver):
-    '''connect to a public sftp server'''
+@pytest.mark.parametrize('blob', (
+    b'\x30\x82\x04\xbe\x02\x01\x00',             # binary DER, undecodable
+    b'-----BEGIN DSA PRIVATE KEY-----\n',        # deprecated algorithm
+    b'-----BEGIN ENCRYPTED PRIVATE KEY-----\n',  # PKCS#8, encrypted
+    b'-----BEGIN PRIVATE KEY-----\n',            # PKCS#8
+    b''                                          # empty file
+))
+def test_connection_bad_private_key_format(blob, tmp_path):
+    '''deprecated or unsupported key formats must raise, not fail'''
+    key = tmp_path.joinpath('id_sftpretty_unsupported')
+    key.write_bytes(blob)
+
+    copts = LOCAL.copy()
+    copts['private_key'] = key.as_posix()
+    with pytest.raises(KeyError):
+        with Connection(**copts) as sftp:
+            sftp.listdir()
+
+
+@pytest.mark.parametrize('kind', ('missing', 'directory'))
+def test_connection_bad_private_key_path(kind, tmp_path):
+    '''private-key path pointing to missing or non-file type'''
+    key = tmp_path.joinpath(f'id_sftpretty_{kind}')
+
+    if kind == 'directory':
+        key.mkdir()
+
+    copts = LOCAL.copy()
+    copts['private_key'] = key.as_posix()
+
+    with pytest.raises(OSError, match=key.name):
+        with Connection(**copts) as sftp:
+            sftp.listdir()
+
+
+@pytest.mark.parametrize('kind', ('path', 'pkey'))
+def test_connection_good(kind, sftpserver):
+    '''connect to a public sftp server with key given as path or object'''
+    copts = conn(sftpserver)
+
+    if kind == 'pkey':
+        copts['private_key'] = Ed25519Key(
+            filename=copts['private_key'],
+            password=copts['private_key_pass'])
+        del copts['private_key_pass']
+
     with sftpserver.serve_content(VFS):
-        sftp = Connection(**conn(sftpserver))
+        sftp = Connection(**copts)
+        assert sftp.listdir() == ['pub', 'read.me']
         sftp.close()
 
 

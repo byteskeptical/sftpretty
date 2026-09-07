@@ -1,7 +1,8 @@
 from functools import wraps
 from hashlib import new, sha3_512
 from io import BytesIO, IOBase
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path, PureWindowsPath
+from re import sub
 from stat import S_IMODE
 from time import sleep
 
@@ -16,15 +17,35 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
         print(message)
 
 
-def drivedrop(filepath):
+def drivepath(filepath):
+    '''Normalize a filepath to POSIX form, retaining any drive letter
+
+    :param str filename:
+        path to file or string to process
+
+    :returns str: normalized POSIX path
+    '''
     if filepath:
-        if PureWindowsPath(filepath).drive and not filepath.startswith('//'):
-            filepath = PurePosixPath('/').joinpath(
-                *PureWindowsPath(filepath).parts[1:]).as_posix()
-            filepath = filepath.encode('unicode_escape').decode()
-            filepath = filepath.replace('\\', '/').replace('//', '/')
-        elif filepath.startswith('//'):
-            filepath = PurePosixPath(filepath.replace('//', '/')).as_posix()
+        if '\\' in filepath or PureWindowsPath(filepath).drive:
+            host = filepath.lstrip('\\/')
+            unc = ((filepath[:1] == '\\' or filepath[:2] == '//') and
+                   host != '' and host[1:2] != ':')
+            utf = filepath.encode('unicode_escape').decode()
+            utf = utf.replace('\\\\', '/')
+            utf = sub(r'\\([^xuU])', r'/\1', utf)
+            filepath = sub('/{2,}', '/',
+                           utf.encode('ascii').decode('unicode_escape'))
+            winpath = PureWindowsPath(filepath)
+            drive = winpath.drive
+            filepath = winpath.as_posix()
+            if unc:
+                filepath = f'/{filepath}'
+            elif drive:
+                if not winpath.root:
+                    filepath = f'{drive}/{filepath[len(drive):]}'
+                filepath = f'/{filepath}'
+        if filepath.endswith(':'):
+            filepath += '/'
 
     return filepath
 
@@ -50,7 +71,7 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
             with open(filename, 'rb') as filestream:
                 for chunk in iter(lambda: filestream.read(blocksize), b''):
                     buffer.update(chunk)
-        except FileNotFoundError:
+        except OSError:
             buffer.update(bytes(filename.encode('utf-8')))
     elif isinstance(filename, BytesIO):
         for chunk in iter(lambda: filestream.read1(blocksize), b''):

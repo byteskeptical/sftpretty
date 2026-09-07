@@ -1,18 +1,19 @@
 '''a template for creating tests that display or duplicate issues'''
 
 
-from common import conn, USER, USER_HOME_PARENT, VFS
+from common import conn, USER_HOME, VFS, VFS_HOME
 from pathlib import Path
 from sftpretty import Connection
+from sftpretty.helpers import drivepath
 
 
 # this is the preferred test type as it can be run on the CI server and
-# requires no configuarion of a real sftp server.  However issues that involve
+# requires no configuarion of a real sftp server. However issues that involve
 # authentication and/or authorization currently have to use a real sftp
 # server (see test_issue_xx_lsftp)
 def test_issue_xx_sftpserver_plugin(sftpserver):
     '''an example showing how to use the sftpserver plugin in a test'''
-    testpath = Path('/home/test').joinpath('pub')
+    testpath = Path(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd
@@ -26,7 +27,7 @@ def test_issue_xx_local_sftpserver(lsftp):
     '''same as test_issue_xx_sftpserver_plugin but written with the local
     sfptserver mechanism, lsftp'''
     home = lsftp.pwd
-    testpath = Path(f'{USER_HOME_PARENT}/{USER}').joinpath('pub')
+    testpath = Path(drivepath(USER_HOME)).joinpath('pub')
     # starting condition of default directory should be empty, so we need to
     # construct whatever structure we need prior to peforming the test
     lsftp.mkdir('pub')

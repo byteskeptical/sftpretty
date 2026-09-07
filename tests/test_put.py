@@ -46,6 +46,7 @@ def test_put_callback(lsftp):
         lsftp.put(fname, callback=cback)
         # clean up
         lsftp.remove(base_fname)
+
     # verify callback was called
     assert cback.call_count
 
@@ -58,6 +59,7 @@ def test_put_confirm(lsftp):
         result = lsftp.put(fname)
         # clean up
         lsftp.remove(base_fname)
+
     # verify that an SFTPAttribute like Path.stat() was returned
     assert result.st_size == 8192
     assert result.st_uid is not None
@@ -67,11 +69,11 @@ def test_put_confirm(lsftp):
 
 
 # TODO
-# def test_put_not_allowed(psftp):
+# def test_put_not_allowed(lsftp):
 #     '''try to put a file to a read-only server'''
 #     with tempfile_containing() as fname:
 #         with pytest.raises(IOError):
-#             psftp.put(fname)
+#             lsftp.put(fname)
 
 
 def test_put_preserve_mtime(lsftp):
@@ -85,6 +87,7 @@ def test_put_preserve_mtime(lsftp):
         result2 = lsftp.put(fname, preserve_mtime=True)
         # clean up
         lsftp.remove(base_fname)
+
     # see if times are modified
     # assert base.st_atime == result1.st_atime
     assert int(base.st_mtime) == result1.st_mtime
@@ -101,5 +104,6 @@ def test_put_resume(lsftp):
         with open(fname, 'ab') as fh:
             fh.write('this...'.encode('utf-8'))
         result = lsftp.put(fname, preserve_mtime=True, resume=True)
+
     assert base.st_size == result.st_size
     assert partial.st_mtime == result.st_mtime
