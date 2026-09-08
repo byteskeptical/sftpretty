@@ -2,63 +2,67 @@
 
 import pytest
 
-from common import conn, tempfile_containing, VFS
+from common import conn, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep
 from unittest.mock import Mock
 
 
-def test_put(lsftp):
+def test_put(lsftp, tempfile_containing):
     '''test upload to localhost'''
-    contents = 'now is the time\nfor all good...'
-    with tempfile_containing(contents=contents) as fname:
-        base_fname = Path(fname).name
-        if base_fname in lsftp.listdir():
-            lsftp.remove(base_fname)
-        assert base_fname not in lsftp.listdir()
-        lsftp.put(fname)
-        assert base_fname in lsftp.listdir()
-        with tempfile_containing(contents='') as tfile:
-            lsftp.get(base_fname, tfile)
-            assert open(tfile).read() == contents
-        # clean up
+    content = 'now is the time\nfor all good...'
+    localfile = tempfile_containing(contents=content)
+    localfileZ = tempfile_containing(contents='')
+    base_fname = Path(localfile).name
+    if base_fname in lsftp.listdir():
         lsftp.remove(base_fname)
 
+    assert base_fname not in lsftp.listdir()
 
-def test_put_bad_local(sftpserver):
+    lsftp.put(localfile)
+    assert base_fname in lsftp.listdir()
+
+    lsftp.get(base_fname, localfileZ)
+    assert open(localfileZ).read() == contents
+
+    # clean up
+    lsftp.remove(base_fname)
+
+
+def test_put_bad_local(sftpserver, tempfile_containing):
     '''try to put a non-existing file to a read-only server'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
-            with tempfile_containing() as fname:
-                pass
+            localfile = tempfile_containing()
+            Path(localfile).unlink()
             # tempfile has been removed
             with pytest.raises(OSError):
-                sftp.put(fname)
+                sftp.put(localfile)
 
 
-def test_put_callback(lsftp):
+def test_put_callback(lsftp, tempfile_containing):
     '''test the callback feature of put'''
     cback = Mock(return_value=None)
-    with tempfile_containing() as fname:
-        base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
-        lsftp.put(fname, callback=cback)
-        # clean up
-        lsftp.remove(base_fname)
+    localfile = tempfile_containing()
+    base_fname = Path(localfile).name
+    lsftp.chdir(Path.home().as_posix())
+    lsftp.put(localfile, callback=cback)
+    # clean up
+    lsftp.remove(base_fname)
 
     # verify callback was called
     assert cback.call_count
 
 
-def test_put_confirm(lsftp):
+def test_put_confirm(lsftp, tempfile_containing):
     '''test the confirm feature of put'''
-    with tempfile_containing() as fname:
-        base_fname = Path(fname).name
-        lsftp.chdir(Path.home().as_posix())
-        result = lsftp.put(fname)
-        # clean up
-        lsftp.remove(base_fname)
+    localfile = tempfile_containing()
+    base_fname = Path(localfile).name
+    lsftp.chdir(Path.home().as_posix())
+    result = lsftp.put(localfile)
+    # clean up
+    lsftp.remove(base_fname)
 
     # verify that an SFTPAttribute like Path.stat() was returned
     assert result.st_size == 8192
@@ -68,25 +72,17 @@ def test_put_confirm(lsftp):
     assert result.st_mtime
 
 
-# TODO
-# def test_put_not_allowed(lsftp):
-#     '''try to put a file to a read-only server'''
-#     with tempfile_containing() as fname:
-#         with pytest.raises(IOError):
-#             lsftp.put(fname)
-
-
-def test_put_preserve_mtime(lsftp):
+def test_put_preserve_mtime(lsftp, tempfile_containing):
     '''test that m_time is preserved from local to remote, when put'''
-    with tempfile_containing() as fname:
-        base_fname = Path(fname).name
-        base = Path(fname).stat()
-        # with Connection(**LOCAL) as sftp:
-        result1 = lsftp.put(fname, preserve_mtime=True)
-        sleep(2)
-        result2 = lsftp.put(fname, preserve_mtime=True)
-        # clean up
-        lsftp.remove(base_fname)
+    localfile = tempfile_containing()
+    base_fname = Path(localfile).name
+    base = Path(localfile).stat()
+    # with Connection(**LOCAL) as sftp:
+    result1 = lsftp.put(localfile, preserve_mtime=True)
+    sleep(2)
+    result2 = lsftp.put(localfile, preserve_mtime=True)
+    # clean up
+    lsftp.remove(base_fname)
 
     # see if times are modified
     # assert base.st_atime == result1.st_atime
@@ -95,15 +91,32 @@ def test_put_preserve_mtime(lsftp):
     assert int(result1.st_mtime) == result2.st_mtime
 
 
-def test_put_resume(lsftp):
+def test_put_resume(lsftp, tempfile_containing):
     '''test upload resume feature'''
-    with tempfile_containing(contents='resume this...') as fname:
-        base = Path(fname).stat()
-    with tempfile_containing(contents='resume ') as fname:
-        partial = lsftp.put(fname)
-        with open(fname, 'ab') as fh:
-            fh.write('this...'.encode('utf-8'))
-        result = lsftp.put(fname, preserve_mtime=True, resume=True)
+    localfile = tempfile_containing(contents='resume this...')
+    localfileZ = tempfile_containing(contents='resume ')
+    base = Path(localfile).stat()
+    partial = lsftp.put(localfileZ)
+    with open(localfileZ, 'ab') as fh:
+        fh.write('this...'.encode('utf-8'))
+    result = lsftp.put(localfileZ, preserve_mtime=True, resume=True)
 
     assert base.st_size == result.st_size
+
+
+@SKIP_IF_ROOT
+@SKIP_IF_WIN  # Win32-OpenSSH doesn't translate mode bits into ACLs
+def test_put_ro(lsftp, remote_tmpdir, tempfile_containing):
+    '''try to put a file on a read-only server'''
+    localfile = tempfile_containing()
+    remotedir = Path(remote_tmpdir).joinpath('readonly')
+    remotefile = remotedir.joinpath(Path(localfile).name)
+    lsftp.mkdir_p(remotedir.as_posix())
+    lsftp.chmod(remotedir.as_posix(), 500)
+    try:
+        with pytest.raises(PermissionError):
+            lsftp.put(localfile, remotefile.as_posix())
+    finally:
+        lsftp.chmod(remotedir.as_posix(), 700)
+
     assert partial.st_mtime == result.st_mtime

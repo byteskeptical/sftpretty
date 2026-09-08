@@ -1,6 +1,6 @@
 '''test sftpretty module'''
 
-from common import conn, LOCAL, tempfile_containing, VFS
+from common import conn, LOCAL, VFS
 from pathlib import Path
 from sftpretty import Connection
 from stat import S_ISLNK
@@ -38,13 +38,13 @@ def test_mkdir_p(lsftp, remote_tmpdir):
 #     assert lsftp.lexists(rsym)
 
 
-def test_symlink(lsftp, remote_tmpdir):
+def test_symlink(lsftp, remote_tmpdir, tempfile_containing):
     '''test symlink creation'''
     rdest = Path(remote_tmpdir).joinpath('honey-boo-boo').as_posix()
-    with tempfile_containing() as fname:
-        rfile = Path(remote_tmpdir).joinpath(Path(fname).name).as_posix()
-        lsftp.put(fname, rfile)
-        lsftp.symlink(rfile, rdest)
+    localfile = tempfile_containing()
+    rfile = Path(remote_tmpdir).joinpath(Path(localfile).name).as_posix()
+    lsftp.put(localfile, rfile)
+    lsftp.symlink(rfile, rdest)
 
     assert S_ISLNK(lsftp.lstat(rdest).st_mode)
 
@@ -60,14 +60,14 @@ def test_exists(sftpserver):
             assert sftp.exists('pub')
 
 
-def test_lexists(lsftp, remote_tmpdir):
+def test_lexists(lsftp, remote_tmpdir, tempfile_containing):
     '''test lexists functionality'''
-    with tempfile_containing() as fname:
-        rfile = Path(remote_tmpdir).joinpath(Path(fname).name).as_posix()
-        rbad = Path(remote_tmpdir).joinpath('peek-a-boo.txt').as_posix()
-        lsftp.put(fname, rfile)
+    localfile = tempfile_containing()
+    rfile = Path(remote_tmpdir).joinpath(Path(localfile).name).as_posix()
+    rbad = Path(remote_tmpdir).joinpath('peek-a-boo.txt').as_posix()
+    lsftp.put(localfile, rfile)
 
-        assert lsftp.lexists(rfile)
-        lsftp.remove(rfile)
-        assert lsftp.lexists(rfile) is False
-        assert lsftp.lexists(rbad) is False
+    assert lsftp.lexists(rfile)
+    lsftp.remove(rfile)
+    assert lsftp.lexists(rfile) is False
+    assert lsftp.lexists(rbad) is False

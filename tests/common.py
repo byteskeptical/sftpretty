@@ -3,11 +3,10 @@
 import pytest
 
 from contextlib import contextmanager
-from os import close, environ
+from os import environ
 from pathlib import Path
 from sftpretty import CnOpts
 from stat import S_ISDIR
-from tempfile import mkstemp
 
 
 PASS = 'tEst@!357'
@@ -81,20 +80,3 @@ def rmdir(dir):
         else:
             item.unlink()
     dir.rmdir()
-
-
-@contextmanager
-def tempfile_containing(contents=STARS8192, suffix=''):
-    '''create a temporary file, with optional suffix and return the filename,
-    cleanup when finished'''
-
-    fd, temp_path = mkstemp(suffix=suffix)
-    close(fd)
-
-    with open(temp_path, 'wb') as fh:
-        fh.write(contents.encode('utf-8'))
-
-    try:
-        yield Path(temp_path).as_posix()
-    finally:
-        Path(temp_path).unlink()

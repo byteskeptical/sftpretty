@@ -1,5 +1,14 @@
-1.2.2 (current, released 2026-5-10)
+1.2.3 (current, released 2026-9-08)
 -----------------------------------
+    * adding new tests for connections, hash, drivepath and read-only servers.
+    * reworking tests to incorporate self-cleaning of all artifacts.
+    * fix for error handling catches in _set_authentication function.  
+    * fix for github workflow so all tests can run from fork PRs.
+    * fix for hash function return that was breaking host key verification.
+    * use paramiko's compression algorithm list by default instead of None.
+
+1.2.2 (released 2026-5-10)
+--------------------------
     * adding new test for _sftp_channel exception handling.
     * adding curve25519-sha256@libssh.org to kex list.
     * fix for UnboundLocalError on a certain exception in _sftp_channel.
