@@ -9,7 +9,7 @@ from sftpretty.helpers import drivepath
 
 
 def test_cd_none(sftpserver):
-    '''test sftpretty.cd with None'''
+    '''test cd with None'''
     pubpath = PurePosixPath(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
@@ -21,7 +21,7 @@ def test_cd_none(sftpserver):
 
 
 def test_cd_path(sftpserver):
-    '''test sftpretty.cd with a path'''
+    '''test cd with a path'''
     pubpath = PurePosixPath(drivepath(VFS_HOME)).joinpath('pub')
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
@@ -46,7 +46,7 @@ def test_cd_nested(sftpserver):
 
 
 def test_cd_bad_path(sftpserver):
-    '''test sftpretty.cd with a bad path'''
+    '''test cd with a bad path'''
     with sftpserver.serve_content(VFS):
         with Connection(**conn(sftpserver)) as sftp:
             home = sftp.pwd

@@ -2,12 +2,13 @@
 
 import pytest
 
+from common import LOCAL, remote_rmdir, STARS8192, USER_HOME
+from os import close
 from paramiko.hostkeys import HostKeys
 from pathlib import Path
-from uuid import uuid4
-
-from common import LOCAL, remote_rmdir, USER_HOME
 from sftpretty import CnOpts, Connection
+from tempfile import mkstemp
+from uuid import uuid4
 
 
 @pytest.fixture(scope='session')
@@ -50,3 +51,19 @@ def remote_tmpdir(lsftp):
         yield lsftp.normalize(remotedir.as_posix())
     finally:
         remote_rmdir(lsftp, remotedir.as_posix())
+
+
+@pytest.fixture
+def tempfile_containing(tmp_path):
+    '''create a temporary file, with optional suffix, holding content and
+    return the filename'''
+    def contentfile(contents=STARS8192, suffix=''):
+        fd, temp_path = mkstemp(dir=tmp_path, suffix=suffix)
+        close(fd)
+
+        with open(temp_path, 'wb') as tempfile:
+            tempfile.write(contents.encode('utf-8'))
+
+        return Path(temp_path).as_posix()
+
+    return contentfile
