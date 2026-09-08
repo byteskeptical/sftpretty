@@ -130,7 +130,7 @@ def test_hash_repeatable(tempfile_containing):
 
 @pytest.mark.parametrize('unreadable', ('/C:/Users/test/pub/bar1.txt',
                                         'i-do-not-exist.txt',
-                                        'some content', 'a' * 512)
+                                        'some content', 'a' * 512),
                          ids=('drive', 'missing', 'spaces', 'toolong'))
 def test_hash_unreadable(unreadable):
     '''test a string that cannot be opened is digested as a string'''

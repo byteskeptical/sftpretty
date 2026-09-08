@@ -2,7 +2,7 @@
 
 import pytest
 
-from common import conn, VFS
+from common import conn, SKIP_IF_ROOT, SKIP_IF_WIN, VFS
 from pathlib import Path
 from sftpretty import Connection
 from time import sleep
@@ -24,7 +24,7 @@ def test_put(lsftp, tempfile_containing):
     assert base_fname in lsftp.listdir()
 
     lsftp.get(base_fname, localfileZ)
-    assert open(localfileZ).read() == contents
+    assert open(localfileZ).read() == content
 
     # clean up
     lsftp.remove(base_fname)
@@ -102,6 +102,7 @@ def test_put_resume(lsftp, tempfile_containing):
     result = lsftp.put(localfileZ, preserve_mtime=True, resume=True)
 
     assert base.st_size == result.st_size
+    assert partial.st_mtime == result.st_mtime
 
 
 @SKIP_IF_ROOT
@@ -118,5 +119,3 @@ def test_put_ro(lsftp, remote_tmpdir, tempfile_containing):
             lsftp.put(localfile, remotefile.as_posix())
     finally:
         lsftp.chmod(remotedir.as_posix(), 700)
-
-    assert partial.st_mtime == result.st_mtime
