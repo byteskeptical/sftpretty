@@ -74,10 +74,10 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
         except OSError:
             buffer.update(bytes(filename.encode('utf-8')))
     elif isinstance(filename, BytesIO):
-        for chunk in iter(lambda: filestream.read1(blocksize), b''):
+        for chunk in iter(lambda: filename.read1(blocksize), b''):
             buffer.update(chunk)
     elif isinstance(filename, IOBase):
-        for chunk in iter(lambda: filestream.read(blocksize), b''):
+        for chunk in iter(lambda: filename.read(blocksize), b''):
             buffer.update(chunk)
 
     return buffer.hexdigest()

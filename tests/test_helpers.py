@@ -54,8 +54,8 @@ def test_drivepath(path, expected):
                          ids=('md5', 'sha1', 'sha256', 'sha3_512'))
 def test_hash_algorithm(algorithm, tempfile_containing):
     '''test file and string digest agree with hashlib, per algorithm'''
-    content = b'My hovercraft is full of eels.'
-    expected = new(algorithm.name, content).hexdigest()
+    content = 'My hovercraft is full of eels.'
+    expected = new(algorithm.name, content.encode()).hexdigest()
     localfile = tempfile_containing(contents=content)
 
     assert hash(localfile, algorithm=algorithm) == expected
@@ -66,12 +66,12 @@ def test_hash_algorithm(algorithm, tempfile_containing):
                          ids=('byte', 'partial', 'default'))
 def test_hash_blocksize(blocksize, tempfile_containing):
     '''test chunked reads digest the same as a single read'''
-    content = b'My hovercraft is full of eels.'
-    expected = sha3_512(content).hexdigest()
+    content = 'My hovercraft is full of eels.'
+    expected = sha3_512(content.encode()).hexdigest()
     localfile = tempfile_containing(contents=content)
 
     assert hash(localfile, blocksize=blocksize) == expected
-    assert hash(BytesIO(content), blocksize=blocksize) == expected
+    assert hash(BytesIO(content.encode()), blocksize=blocksize) == expected
 
 
 @pytest.mark.parametrize('left, right', (
@@ -87,14 +87,12 @@ def test_hash_distinct(left, right):
 
 
 @pytest.mark.parametrize('form', ('bytesio', 'path', 'string'))
-def test_hash_empty(form, tmp_path):
+def test_hash_empty(form, tempfile_containing):
     '''test empty input digests to the empty digest, whatever the form'''
     empty = sha3_512(b'').hexdigest()
 
     if form == 'path':
-        blank = tmp_path.joinpath('blank.txt')
-        blank.touch()
-        assert hash(blank.as_posix()) == empty
+        assert hash(tempfile_containing(contents='')) == empty
     elif form == 'string':
         assert hash('') == empty
     else:
@@ -104,16 +102,16 @@ def test_hash_empty(form, tmp_path):
 @pytest.mark.parametrize('form', ('path', 'string', 'bytesio', 'fileobject'))
 def test_hash_input(form, tempfile_containing):
     '''test input form digests the same bytes alike'''
-    content = b'My hovercraft is full of eels.'
-    expected = sha3_512(content).hexdigest()
+    content = 'My hovercraft is full of eels.'
+    expected = sha3_512(content.encode()).hexdigest()
     localfile = tempfile_containing(contents=content)
 
     if form == 'path':
         assert hash(localfile) == expected
     elif form == 'string':
-        assert hash(content.decode()) == expected
+        assert hash(content) == expected
     elif form == 'bytesio':
-        assert hash(BytesIO(content)) == expected
+        assert hash(BytesIO(content.encode())) == expected
     else:
         with open(localfile, 'rb') as filestream:
             assert hash(filestream) == expected
@@ -121,7 +119,7 @@ def test_hash_input(form, tempfile_containing):
 
 def test_hash_repeatable(tempfile_containing):
     '''test repeated calls do not accumulate state'''
-    content = b'My hovercraft is full of eels.'
+    content = 'My hovercraft is full of eels.'
     localfile = tempfile_containing(contents=content)
 
     assert hash(localfile) == hash(localfile)
