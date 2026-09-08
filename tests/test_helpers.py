@@ -59,7 +59,7 @@ def test_hash_algorithm(algorithm, tempfile_containing):
     localfile = tempfile_containing(contents=content)
 
     assert hash(localfile, algorithm=algorithm) == expected
-    assert hash(content.decode(), algorithm=algorithm) == expected
+    assert hash(content, algorithm=algorithm) == expected
 
 
 @pytest.mark.parametrize('blocksize', (1, 7, 65536),
