@@ -4,7 +4,8 @@ import pytest
 
 from hashlib import md5, new, sha1, sha256, sha3_512
 from io import BytesIO
-from sftpretty.helpers import _callback, drivepath, hash
+from logging import getLogger, INFO
+from sftpretty.helpers import _callback, drivepath, hash, st_mode_to_int
 
 
 @pytest.mark.parametrize('current, total, percent', (
@@ -163,3 +164,33 @@ def test_hash_repeatable(tempfile_containing):
 def test_hash_unreadable(unreadable):
     '''test a string that cannot be opened is digested as a string'''
     assert hash(unreadable) == sha3_512(unreadable.encode()).hexdigest()
+
+
+@pytest.mark.parametrize('mode,expected', (
+    (0o100400, 400), (0o100644, 644), (0o100711, 711),
+    (0o40755, 755), (0o40777, 777)),
+    ids=('400', '644', '711', '755', '777'))
+def test_st_mode_to_int(mode, expected):
+    '''test file type bits are trimmed from the mode'''
+    assert st_mode_to_int(mode) == expected
+ 
+ 
+@pytest.mark.parametrize('mode,expected', ((0o41777, 777), (0o104755, 755)),
+                         ids=('sticky', 'setuid'))
+def test_st_mode_to_int_special(mode, expected):
+    '''test set user ID, set group ID and sticky bits are dropped'''
+    assert st_mode_to_int(mode) == expected
+ 
+ 
+@pytest.mark.parametrize('val', ('0755', None, 7.55),
+                         ids=('string', 'none', 'float'))
+def test_st_mode_to_int_unsupported(val):
+    '''test a non integer mode raises'''
+    with pytest.raises(TypeError):
+        st_mode_to_int(val)
+ 
+ 
+@pytest.mark.xfail(raises=ValueError, reason='oct(0) renders as 0o0')
+def test_st_mode_to_int_zero():
+    '''test a mode carrying no permission bits converts to zero'''
+    assert st_mode_to_int(0o100000) == 0
