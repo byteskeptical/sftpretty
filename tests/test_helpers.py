@@ -11,8 +11,8 @@ from sftpretty.helpers import _callback, drivepath, hash, st_mode_to_int
 @pytest.mark.parametrize('current, total, percent', (
     (1024, 1024, '100.0%'),
     (512, 1024, '50.0%'),
-    (1, 3, '33.3%')),
-    (0, 1024, '0.0%'),
+    (1, 3, '33.3%'),
+    (0, 1024, '0.0%')),
     ids=('complete', 'half', 'rounded', 'start'))
 def test_callback(current, total, percent, capsys):
     '''test progress prints as a percentage of the total'''
