@@ -4,7 +4,37 @@ import pytest
 
 from hashlib import md5, new, sha1, sha256, sha3_512
 from io import BytesIO
-from sftpretty.helpers import drivepath, hash
+from sftpretty.helpers import _callback, drivepath, hash
+
+
+@pytest.mark.parametrize('current, total, percent', (
+    (1024, 1024, '100.0%'),
+    (512, 1024, '50.0%'),
+    (1, 3, '33.3%')),
+    (0, 1024, '0.0%'),
+    ids=('complete', 'half', 'rounded', 'start'))
+def test_callback(current, total, percent, capsys):
+    '''test progress prints as a percentage of the total'''
+    _callback('eels.txt', current, total)
+    printed = capsys.readouterr().out
+ 
+    assert 'eels.txt' in printed
+    assert percent in printed
+    assert f'{current}:{total}' in printed
+ 
+ 
+def test_callback_logger(caplog):
+    '''test progress is logged when a logger is provided'''
+    with caplog.at_level(INFO):
+        _callback('eels.txt', 512, 1024, logger=getLogger('sftpretty'))
+ 
+    assert '50.0%' in caplog.text
+ 
+ 
+def test_callback_zero():
+    '''test a zero byte total raises'''
+    with pytest.raises(ZeroDivisionError):
+        _callback('eels.txt', 0, 0)
 
 
 @pytest.mark.parametrize('path,expected', (
