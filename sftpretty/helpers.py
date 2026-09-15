@@ -27,7 +27,6 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
         when bytes_so_far or bytes_total is not an integer
     :raises ZeroDivisionError:
         when bytes_total is zero
-
     '''
     message = (f'Transfer of File: [{filename}] @ '
                f'{100.0 * bytes_so_far / bytes_total:.1f}% '
@@ -48,7 +47,6 @@ def drivepath(filepath):
 
     :raises TypeError:
         when filepath is not a string
-
     '''
     if filepath:
         if '\\' in filepath or PureWindowsPath(filepath).drive:
@@ -94,7 +92,6 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
     :raises ValueError:
         when algorithm.name is not a supported digest or filename is a
         closed file object
-
     '''
     buffer = new(algorithm.name)
     if isinstance(filename, str):
@@ -144,7 +141,6 @@ def localtree(container, localdir, remotedir, recurse=True):
         when localdir is not a directory
     :raises PermissionError:
         when a directory in the tree cannot be read
-
     '''
     if localdir.startswith(':', 1) or localdir.startswith('\\'):
         localdir = Path(PureWindowsPath(localdir).as_posix())
@@ -218,7 +214,6 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
     :raises TypeError:
         when exceptions holds anything that is not an exception type or
         instance raised from the decorated call
-
     '''
     try:
         len(exceptions)

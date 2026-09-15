@@ -1,14 +1,16 @@
+'''test sftpretty.helpers.retry'''
+
 import pytest
 
 from logging import DEBUG, getLogger, StreamHandler
 from sftpretty.helpers import retry
 
 
-class RetryableError(Exception):
+class AnotherRetryableError(Exception):
     pass
 
 
-class AnotherRetryableError(Exception):
+class RetryableError(Exception):
     pass
 
 
@@ -16,25 +18,35 @@ class UnexpectedError(Exception):
     pass
 
 
-def test_no_retry_required():
-    counter = 0
+def test_disabled_returns_undecorated():
 
-    @retry(RetryableError, tries=4, delay=0.1)
     def succeeds():
-        nonlocal counter
-        counter += 1
         return 'success'
 
-    r = succeeds()
+    assert retry(RetryableError, silent=True)(succeeds) is succeeds
+    assert retry(RetryableError, tries=0, silent=True)(succeeds) is succeeds
+    assert retry(RetryableError, tries=None, silent=True)(succeeds) is succeeds
 
-    assert r == 'success'
+
+def test_exception_instance_ignores_other_args():
+    counter = 0
+
+    @retry(RetryableError('failed'), tries=4, delay=0.1)
+    def raises_other_args():
+        nonlocal counter
+        counter += 1
+        raise RetryableError('a different message')
+
+    with pytest.raises(RetryableError, match='a different message'):
+        raises_other_args()
+
     assert counter == 1
 
 
-def test_retries_once():
+def test_exception_instance_matches_args():
     counter = 0
 
-    @retry(RetryableError, tries=4, delay=0.1)
+    @retry(RetryableError('failed'), tries=4, delay=0.1)
     def fails_once():
         nonlocal counter
         counter += 1
@@ -47,6 +59,16 @@ def test_retries_once():
 
     assert r == 'success'
     assert counter == 2
+
+
+def test_invalid_exception_type_raises():
+
+    @retry('failed', tries=4, delay=0.1)
+    def raise_retryable_error():
+        raise RetryableError('failed')
+
+    with pytest.raises(TypeError):
+        raise_retryable_error()
 
 
 def test_limit_is_reached():
@@ -84,6 +106,39 @@ def test_multiple_exception_types():
     assert counter == 3
 
 
+def test_no_retry_required():
+    counter = 0
+
+    @retry(RetryableError, tries=4, delay=0.1)
+    def succeeds():
+        nonlocal counter
+        counter += 1
+        return 'success'
+
+    r = succeeds()
+
+    assert r == 'success'
+    assert counter == 1
+
+
+def test_retries_once():
+    counter = 0
+
+    @retry(RetryableError, tries=4, delay=0.1)
+    def fails_once():
+        nonlocal counter
+        counter += 1
+        if counter < 2:
+            raise RetryableError('failed')
+        else:
+            return 'success'
+
+    r = fails_once()
+
+    assert r == 'success'
+    assert counter == 2
+
+
 def test_unexpected_exception_does_not_retry():
 
     @retry(RetryableError, tries=4, delay=0.1)
@@ -94,7 +149,6 @@ def test_unexpected_exception_does_not_retry():
         raise_unexpected_error()
 
 
-@pytest.fixture(autouse=True)
 def test_using_a_logger(caplog):
     _caplog = caplog
     counter = 0
