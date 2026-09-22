@@ -101,6 +101,8 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
                     buffer.update(chunk)
         except OSError:
             buffer.update(bytes(filename.encode('utf-8')))
+    elif isinstance(filename, bytes):
+        buffer.update(filename)
     elif isinstance(filename, BytesIO):
         for chunk in iter(lambda: filename.read1(blocksize), b''):
             buffer.update(chunk)
@@ -113,10 +115,9 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
 
 def localtree(container, localdir, remotedir, recurse=True):
     '''descend local directory mapping the tree to a dictionary container.
-
-    Sub-directories are paired with the remote directory they are created
-    in, not with their final path, as put_d appends the name of the
-    local directory it is handed to remotedir.
+    Subdirectories are paired with the remote directory they are created
+    in, not with their final path. Upstream function is responsible for
+    appending the name of the local directory it is handed to remotedir.
 
     :param dict container:
         dictionary object to save directory tree

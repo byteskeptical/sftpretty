@@ -495,7 +495,7 @@ class Connection(object):
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
-                remote_fingerprint = hash(remote_hostkey)
+                remote_fingerprint = hash(remote_hostkey.asbytes())
                 log.info((f'[{host}] Host Key: \n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
@@ -508,7 +508,7 @@ class Connection(object):
                         knownhost_name = host
                     log.debug(f'Hostkey Name: {knownhost_name}')
                     user_hostkey = self._cnopts.get_hostkey(knownhost_name)
-                    user_fingerprint = hash(user_hostkey)
+                    user_fingerprint = hash(user_hostkey.asbytes())
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
