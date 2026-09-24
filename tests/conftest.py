@@ -3,9 +3,17 @@
 import pytest
 
 from common import LOCAL, remote_rmdir, STARS8192, USER_HOME
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey)
+from cryptography.hazmat.primitives.serialization import (Encoding,
+                                                          NoEncryption,
+                                                          PrivateFormat)
+from io import StringIO
 from os import close
+from paramiko import Ed25519Key
 from paramiko.hostkeys import HostKeys
 from pathlib import Path
+from pytest_sftpserver.sftp.server import SFTPRequestHandler
 from sftpretty import CnOpts, Connection
 from tempfile import mkstemp
 from uuid import uuid4
@@ -23,18 +31,20 @@ def lsftp(request):
 
 
 @pytest.fixture(autouse=True, scope='module')
-def knownhosts(sftpserver, key_type='ssh-ed25519'):
+def knownhosts(sftpserver):
     '''setup host key for test server in local knownhosts'''
     if sftpserver.port != 22:
         host = f'[{sftpserver.host}]:{sftpserver.port}'
     else:
         host = sftpserver.host
     host_hashed = HostKeys().hash_host(host)
-    hostkey = \
-        'AAAAC3NzaC1lZDI1NTE5AAAAIB0g3SG/bbyysJ7f0kqdoWMXhHxxFR7aLJYNIHO/MtsD'
+    private = Ed25519PrivateKey.generate().private_bytes(
+        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption())
+    hostkey = Ed25519Key(file_obj=StringIO(private.decode()))
+    SFTPRequestHandler.host_key = hostkey
     hostkeys = f'''\
-        {host} {key_type} {hostkey}
-        {host_hashed} {key_type} {hostkey}'''
+        {host} {hostkey.get_name()} {hostkey.get_base64()}
+        {host_hashed} {hostkey.get_name()} {hostkey.get_base64()}'''
     knownhosts = Path('sftpserver.pub')
     knownhosts.write_bytes(bytes(hostkeys, 'utf-8'))
 

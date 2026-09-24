@@ -588,8 +588,11 @@ passed without remnants carrying over between calls. Files are read in
 .. code-block:: python
 
     >>> from hashlib import md5
+    >>> from pathlib import Path
     >>> from sftpretty.helpers import hash
 
+    >>> Path('/tmp/eels.txt').write_text('My hovercraft is full of eels.')
+    30
     >>> hash('/tmp/eels.txt') == hash('My hovercraft is full of eels.')
     True
     >>> hash(open('/tmp/eels.txt', 'rb')) == hash('/tmp/eels.txt')
