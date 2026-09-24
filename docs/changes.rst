@@ -1,4 +1,4 @@
-1.2.4 (current, released 2026-9-22)
+1.2.4 (current, released 2026-9-24)
 -----------------------------------
     * adding new tests for localtree and retry helpers.
     * fix remote path nesting and duplicate sub-directory names in localtree.
