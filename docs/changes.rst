@@ -1,5 +1,12 @@
-1.2.3 (current, released 2026-9-08)
+1.2.4 (current, released 2026-9-24)
 -----------------------------------
+    * adding new tests for localtree and retry helpers.
+    * adding key_type parameter to get_hostkey to pull specific key.
+    * change hostkey verification comparison to pass bytes to hash function.
+    * fix remote path nesting and duplicate sub-directory names in localtree.
+
+1.2.3 (released 2026-9-08)
+--------------------------
     * adding new tests for connections, hash, drivepath and read-only servers.
     * reworking tests to incorporate self-cleaning of all artifacts.
     * fix for error handling catches in _set_authentication function.  

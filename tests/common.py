@@ -2,7 +2,6 @@
 
 import pytest
 
-from contextlib import contextmanager
 from os import environ
 from pathlib import Path
 from sftpretty import CnOpts

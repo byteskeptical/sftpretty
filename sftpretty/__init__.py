@@ -145,11 +145,14 @@ class CnOpts(object):
         cval = self.ssh_config.lookup(host)
         return cval or {}
 
-    def get_hostkey(self, host):
+    def get_hostkey(self, host, key_type=None):
         '''Return the matching known hostkey to be used for verification or
         raise an SSHException.
 
         :param str host: The Hostname or IP of the remote machine.
+        :param str|None key_type: *Default: None* - Key type negotiated with
+            the remote such as ``ssh-ed25519``. When None the first hostkey
+            known for a host is returned.
 
         :returns: (obj) PKey - Public key(s) associated with host or None.
 
@@ -159,6 +162,12 @@ class CnOpts(object):
         # None | {key_type: private_key}
         if kval is None:
             raise SSHException(f'No hostkey for host [{host}] found.')
+        if key_type is not None:
+            hostkey = kval.get(key_type)
+            if hostkey is None:
+                raise SSHException(f'No [{key_type}] hostkey for host '
+                                   f'[{host}] found.')
+            return hostkey
 
         # Return the public key from the dictionary
         return list(kval.values())[0]
@@ -495,7 +504,7 @@ class Connection(object):
 
             if self._transport.is_active():
                 remote_hostkey = self._transport.get_remote_server_key()
-                remote_fingerprint = hash(remote_hostkey)
+                remote_fingerprint = hash(remote_hostkey.asbytes())
                 log.info((f'[{host}] Host Key: \n\t'
                           f'Name: {remote_hostkey.get_name()}\n\t'
                           f'Fingerprint: {remote_fingerprint}\n\t'
@@ -507,8 +516,9 @@ class Connection(object):
                     else:
                         knownhost_name = host
                     log.debug(f'Hostkey Name: {knownhost_name}')
-                    user_hostkey = self._cnopts.get_hostkey(knownhost_name)
-                    user_fingerprint = hash(user_hostkey)
+                    user_hostkey = self._cnopts.get_hostkey(
+                        knownhost_name, remote_hostkey.get_name())
+                    user_fingerprint = hash(user_hostkey.asbytes())
                     log.info(f'Known Fingerprint: {user_fingerprint}')
                     if user_fingerprint != remote_fingerprint:
                         raise HostKeysException((f'{host} key verification: '
@@ -521,6 +531,7 @@ class Connection(object):
         except (AttributeError, gaierror, UnicodeError):
             raise ConnectionException(host, port)
         except Exception as err:
+            self.close()
             raise err
 
     def get(self, remotefile, localpath=None, callback=None,

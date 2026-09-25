@@ -21,7 +21,7 @@ Code
 
         a. Setup CI testing for your fork. Currently testing is done on Github Actions but feel free to use the framework of your choosing.
         b. Testing features that concern chmod, chown on Windows is NOT supported. Testing compression has to be ran against a local compatible sshd and not the pytest-sftpserver plugin as it does NOT support this feature.
-        c. You will need to setup an ssh daemon on your local machine and create a user: copy the contents of id_sftpretty.pub to the newly created user's authorized_keys file -- Tests that can only be ran locally are skipped using the @skip_if_ci decorator so they don't fail when the test suite runs on the CI server.
+        c. You will need to setup an ssh daemon on your local machine and create a user. Copy the contents of id_sftpretty.pub to the newly created user's authorized_keys file. Tests that can only be ran locally are skipped using the @SKIP_IF_CI decorator so they don't fail when the test suite runs on the CI server.
 
     #. Ensure that your name is added to the end of the :doc:`authors` file using the format Name <email@domain.com> (url), where the (url) portion is optional.
     #. Submit a Pull Request to the project.
@@ -36,9 +36,9 @@ This section lists the priority that will be assigned to an issue:
     #. Developer Issues
     #. Issues that have a pull request with a test(s) displaying the issue and code change(s) that satisfies the test suite
     #. Issues that have a pull request with a test(s) displaying the issue
-    #. Naked pull requests - a code change request with no accompaning test
+    #. Naked pull requests. A code change request with no accompaning test
     #. An issue without a pull request with a test displaying the issue
-    #. Badly documented issue with no code or test - sftpretty is not an end-user tool, it is a developer tool and it is expected that issues will be submitted like a developer and not an end-user. Issues in the realm of "the internet is broken" will be marked as invalid with a comment pointing the submitter to this section.
+    #. Badly documented issue with no code or test. sftpretty is not an end-user tool, it is a developer tool and it is expected that issues will be submitted like a developer and not an end-user. Issues in the realm of "the internet is broken" will be marked as invalid with a comment pointing the submitter to this section.
 
 Testing
 -------

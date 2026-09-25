@@ -532,37 +532,145 @@ Don't like how we have modified a paramiko method? Use this attribute to get
 at the original version. Our goal is to augment not supplant paramiko.
 
 
-:func:`sftpretty.localtree`
----------------------------
+:func:`sftpretty.helpers._callback`
+-----------------------------------
+A progress reporter implementation :meth:`sftpretty.Connection.get` and
+:meth:`sftpretty.Connection.put` reach for when you hand them no ``callback``
+of your own. Paramiko calls it once per chunk with the bytes moved so far and
+the total. A large file can fill your terminal, give it a ``logger`` and let
+your handler save the transfer output to a preferred location. Roll your own
+callable that takes two integers if you dare.
+
+.. code-block:: python
+
+    >>> from logging import getLogger
+    >>> from sftpretty.helpers import _callback
+
+    >>> _callback('eels.txt', 512, 1024)
+    Transfer of File: [eels.txt] @ 50.0% 512:1024 bytes
+
+    >>> log = getLogger('LoggyMcLogs')
+    >>> _callback('eels.txt', 512, 1024, logger=log)
+
+
+:func:`sftpretty.helpers.drivepath`
+-----------------------------------
+A painful shim that attempts to convert Windows based pathing into a valid
+POSIX one, that the remote will accept. It's purely lexical, nothing is opened,
+resolved or checked for existence. A path already in POSIX form returns
+untouched.
+
+.. code-block:: python
+
+    >>> from sftpretty.helpers import drivepath
+
+    >>> drivepath('C:\\Users\\nick\\file.txt')
+    '/C:/Users/nick/file.txt'
+    >>> drivepath('C:tmp\\test.txt')
+    '/C:/tmp/test.txt'
+    >>> drivepath('\\\\server\\share\\file.txt')
+    '//server/share/file.txt'
+    >>> drivepath('/home/user/file.txt')
+    '/home/user/file.txt'
+
+
+:func:`sftpretty.helpers.hash`
+------------------------------
+
+One digest, five types of input. Give it a path, an open file object, a
+:class:`io.BytesIO`, some bytes or a string and get back the hexdigest. Anything
+other than the five input types digest as an empty buffer rather than
+complianing. A string that cannot be opened is digested as text rather than
+raising. Only the ``algorithm.name`` is read, so any spent hash object can be
+passed without remnants carrying over between calls. Files are read in
+``blocksize`` chunks, so size shouldn't be a concern.
+
+.. code-block:: python
+
+    >>> from hashlib import md5
+    >>> from pathlib import Path
+    >>> from sftpretty.helpers import hash
+
+    >>> Path('/tmp/eels.txt').write_text('My hovercraft is full of eels.')
+    30
+    >>> hash('/tmp/eels.txt') == hash('My hovercraft is full of eels.')
+    True
+    >>> hash(open('/tmp/eels.txt', 'rb')) == hash('/tmp/eels.txt')
+    True
+    >>> hash('/tmp/eels.txt', algorithm=md5())
+    '5d5bc914f200b729e1c64c927cafe8c3'
+    >>> hash('/tmp/eels.txt', blocksize=8192)
+    '4953167ab20a15c0...'
+
+
+:func:`sftpretty.helpers.localtree`
+-----------------------------------
 Similar to :meth:`sftpretty.Connection.remotetree` except that it walks a
 **local** directory structure. It has the same output format and likewise
-stores the resulting tree in a dictionary.
+stores the resulting tree in a dictionary. Each sub-directory is paired with
+its own finished path. This is the parent :meth:`sftpretty.Connection.put_d`
+appends a directory name to. Links are followed once per target, so a directory
+pointing back at one of its own parents is mapped rather than chased.
 
 .. code-block:: python
 
     import sftpretty
 
     >>> directories = {}
-    >>> sftpretty.localtree(directories, '/home/user/downloads', '/tmp')
+    >>> sftpretty.helpers.localtree(directories, '/home/user/downloads', '/tmp')
     >>> directories
-    {'/home/user/downloads': [('/home/user/downloads/percona', '/tmp/downloads/percona'),
-                              ('/home/user/downloads/wallstreet', '/tmp/downloads/wallstreet')
-                             ]
+    {'/home/user/downloads': [('/home/user/downloads/percona', '/tmp/downloads'),
+                              ('/home/user/downloads/wallstreet', '/tmp/downloads')
+                             ],
+     '/home/user/downloads/wallstreet': [('/home/user/downloads/wallstreet/bets',
+                                          '/tmp/downloads/wallstreet')
+                                        ]
     }
 
 
-:func:`sftpretty.st_mode_to_int`
---------------------------------
-Converts an octal mode result back to an integer representation. The information
-returned in SFTPAttribute object ``.stat(*fname*).st_mode`` contains extra
-things you probably don't care about, in a form that has been converted from
-octal to int so you won't recognize it at first. This function clips the extra
-bits and hands you the file mode in a way you'll recognize.
+:func:`sftpretty.helpers.retry`
+-------------------------------
+For the stubborn programmer in all of us. Calls sometimes fail for no good
+reason and work on subsequent attempts. Name the exceptions worth another
+attempt and wait ``delay`` seconds, multiplied by ``backoff``, then try again.
+Specify a *type* to catch that whole family or an *instance* to catch exactly
+one error while letting it siblings through. So ``IOError(errno.ECOMM)`` will
+sit out a comms failure while a missing file still fails. Set ``silent`` to not
+hear about it or ``logger`` to send the whole song and dance somewhere useful.
+A value of 0 or None for ``tries`` returns your function undecorated. Its count
+refers to total attempts rather than retries, so ``tries=3`` calls three times
+at most.
+
+.. code-block:: python
+
+    >>> from sftpretty.helpers import retry
+
+    >>> @retry(TimeoutError, tries=3, delay=1, backoff=2)
+    ... def flaky():
+    ...     return connection.read()
+
+    >>> flaky()
+    Retry (3/3):
+    connection reset
+    Retrying in 1 second(s)...
+    Retry (2/3):
+    connection reset
+    Retrying in 2 second(s)...
+    'connected'
+
+
+:func:`sftpretty.helpers.st_mode_to_int`
+----------------------------------------
+Converts an octal mode result back to an integer representation. The
+information returned in SFTPAttribute object ``.stat(*fname*).st_mode``
+contains extra things you probably don't care about, in a form that has been
+converted from octal to int so you won't recognize it at first. This function
+clips the extra bits and hands you the file mode in a way you'll recognize.
 
 .. code-block:: python
 
     >>> attr = sftp.stat('readme.txt')
     >>> attr.st_mode
     33188
-    >>> sftpretty.st_mode_to_int(attr.st_mode)
+    >>> sftpretty.helpers.st_mode_to_int(attr.st_mode)
     644

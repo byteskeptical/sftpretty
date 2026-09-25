@@ -1,6 +1,8 @@
+from errno import EBADF, ELOOP, ENOENT, ENOTDIR
 from functools import wraps
 from hashlib import new, sha3_512
 from io import BytesIO, IOBase
+from os import scandir
 from pathlib import Path, PureWindowsPath
 from re import sub
 from stat import S_IMODE
@@ -8,6 +10,24 @@ from time import sleep
 
 
 def _callback(filename, bytes_so_far, bytes_total, logger=None):
+    '''log transfer progress as a percentage of the total
+
+    :param str filename:
+        name of the file being transferred
+    :param int bytes_so_far:
+        bytes transferred so far
+    :param int bytes_total:
+        total bytes to transfer
+    :param logging.Logger logger:
+        logger instance to use. If None, print
+
+    :returns: None
+
+    :raises TypeError:
+        when bytes_so_far or bytes_total is not an integer
+    :raises ZeroDivisionError:
+        when bytes_total is zero
+    '''
     message = (f'Transfer of File: [{filename}] @ '
                f'{100.0 * bytes_so_far / bytes_total:.1f}% '
                f'{bytes_so_far:d}:{bytes_total:d} bytes ')
@@ -20,10 +40,13 @@ def _callback(filename, bytes_so_far, bytes_total, logger=None):
 def drivepath(filepath):
     '''Normalize a filepath to POSIX form, retaining any drive letter
 
-    :param str filename:
+    :param str filepath:
         path to file or string to process
 
-    :returns str: normalized POSIX path
+    :returns str: normalized POSIX path, empty input is passed through
+
+    :raises TypeError:
+        when filepath is not a string
     '''
     if filepath:
         if '\\' in filepath or PureWindowsPath(filepath).drive:
@@ -53,17 +76,22 @@ def drivepath(filepath):
 def hash(filename, algorithm=sha3_512(), blocksize=65536):
     '''hash contents of a file, file like object or string
 
-    :param bytesIO,IObase,str filename:
+    :param BytesIO,IOBase,str filename:
         path to file, file object, or string to process
     :param hashlib.hash algorithm:
         hash object to use as digest algorithm
     :param int blocksize:
         size of chunk to read in avoiding memory exhaustion
 
-    :returns: hexdigest
+    :returns str: hexdigest
 
-    :raises: Exception
-
+    :raises AttributeError:
+        when algorithm has no name attribute
+    :raises OSError:
+        when reading from a file object fails
+    :raises ValueError:
+        when algorithm.name is not a supported digest or filename is a
+        closed file object
     '''
     buffer = new(algorithm.name)
     if isinstance(filename, str):
@@ -73,6 +101,8 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
                     buffer.update(chunk)
         except OSError:
             buffer.update(bytes(filename.encode('utf-8')))
+    elif isinstance(filename, bytes):
+        buffer.update(filename)
     elif isinstance(filename, BytesIO):
         for chunk in iter(lambda: filename.read1(blocksize), b''):
             buffer.update(chunk)
@@ -84,46 +114,77 @@ def hash(filename, algorithm=sha3_512(), blocksize=65536):
 
 
 def localtree(container, localdir, remotedir, recurse=True):
-    '''recursively descend local directory mapping the tree to a
-    dictionary container.
+    '''descend local directory mapping the tree to a dictionary container.
+    Subdirectories are paired with the remote directory they are created
+    in, not with their final path. Upstream function is responsible for
+    appending the name of the local directory it is handed to remotedir.
 
-    :param dict container: dictionary object to save directory tree
-            {localdir:
-                 [(localdir/sub-directory,
-                   remotedir/localdir/sub-directory)],}
-        {localdir: [(content path, remotedir/content path)],}
+    :param dict container:
+        dictionary object to save directory tree
+            {localdir: [(localdir/sub-directory, remotedir/localdir)],}
+            {localdir: [(content path, remote parent of content path)],}
     :param str localdir:
         root of local directory to descend, use '.' to start at
         :attr:`.pwd`
     :param str remotedir:
-        root of remote directory to append localdir too
-        path
-    :param bool recurse: *Default: True*. To recurse or not to recurse
-        that is the question
+        root of remote directory localdir is created in
+    :param bool recurse:
+        *Default: True*. To recurse or not to recurse that is the
+        question
 
     :returns: None
 
-    :raises: Exception
-
+    :raises AttributeError:
+        when localdir is not a string
+    :raises FileNotFoundError:
+        when localdir does not exist
+    :raises NotADirectoryError:
+        when localdir is not a directory
+    :raises PermissionError:
+        when a directory in the tree cannot be read
     '''
-    try:
-        if localdir.startswith(':', 1) or localdir.startswith('\\'):
-            localdir = PureWindowsPath(localdir)
-        else:
-            localdir = Path(localdir).expanduser().absolute()
-        for localpath in Path(localdir).iterdir():
-            if localpath.is_dir():
-                local = localpath.as_posix()
-                remote = Path(remotedir).joinpath(localpath.relative_to(
-                    localdir).as_posix()).as_posix()
-                if localdir.as_posix() in container.keys():
-                    container[localdir.as_posix()].append((local, remote))
-                else:
-                    container[localdir.as_posix()] = [(local, remote)]
+    if localdir.startswith(':', 1) or localdir.startswith('\\'):
+        localdir = Path(PureWindowsPath(localdir).as_posix())
+    else:
+        localdir = Path(localdir).expanduser().absolute()
+
+    branches = [(localdir.as_posix(),
+                 Path(remotedir).joinpath(localdir.name).as_posix())]
+    seen = set()
+
+    while branches:
+        branch = None
+        localroot, remotedir = branches.pop()
+        rootstat = None
+
+        with scandir(localroot) as localpaths:
+            for localpath in localpaths:
+                try:
+                    if not localpath.is_dir():
+                        continue
+                    if localpath.is_symlink():
+                        if rootstat is None:
+                            rootstat = Path(localroot).stat()
+                            seen.add((rootstat.st_dev, rootstat.st_ino))
+                        symstat = localpath.stat()
+                        softlink = (symstat.st_dev, symstat.st_ino)
+                        if softlink in seen:
+                            continue
+                        seen.add(softlink)
+                except OSError as err:
+                    if (err.errno in (EBADF, ELOOP, ENOENT, ENOTDIR) or
+                            getattr(err, 'winerror', None)
+                            in (21, 123, 1921)):
+                        continue
+                    raise
+                if branch is None:
+                    branch = container.get(localroot)
+                    if branch is None:
+                        container[localroot] = branch = []
+                local = f'{localroot}/{localpath.name}'
+                branch.append((local, remotedir))
                 if recurse:
-                    localtree(container, local, remote, recurse=recurse)
-    except Exception as err:
-        raise err
+                    branches.append((local, f'{remotedir}/{localpath.name}'))
 
 
 def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
@@ -134,20 +195,26 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
         IOError or IOError(errno.ECOMM) or (IOError,) or
         (ValueError, IOError(errno.ECOMM)
     :param int tries:
-        number of times to try (not retry) before giving up.
+        number of times to try (not retry) before giving up
     :param int delay:
-        initial delay between retries in seconds.
+        initial delay between retries in seconds
     :param int backoff:
-        backoff multiplier.
+        backoff multiplier
     :param bool silent:
         if set then no logging will be attempted.
-    :param logging.logger logger:
-        logger instance to use. If None, print.
+    :param logging.Logger logger:
+        logger instance to use. If None, print
 
-    :returns: wrapped function
+    :returns function:
+        decorated function or the function unchanged when tries is None
+        or 0
 
-    :raises: Exception
-
+    :raises Exception:
+        whatever the decorated function raises, immediately when it is
+        not listed in exceptions, otherwise after tries are exhausted
+    :raises TypeError:
+        when exceptions holds anything that is not an exception type or
+        instance raised from the decorated call
     '''
     try:
         len(exceptions)
@@ -200,14 +267,17 @@ def retry(exceptions, tries=0, delay=3, backoff=2, silent=False, logger=None):
 
 
 def st_mode_to_int(val):
-    '''SFTAttributes st_mode returns an stat type that shows more than what
+    '''SFTPAttributes st_mode returns an stat type that shows more than what
     can be set. Trim off those bits and convert to an int representation.
-    if you want an object that was `chmod 711` to return a value of 711, use
-    this function
+    If you want an object that was `chmod 711` to return a value of 711, use
+    this function.
 
-    :param int val: the value of an st_mode attr returned by SFTPAttributes
+    :param int val:
+        the value of an st_mode attr returned by SFTPAttributes
 
     :returns int: integer representation of octal mode
 
+    :raises TypeError:
+        when val is not an integer
     '''
     return int(str(oct(S_IMODE(val)))[-3:])
