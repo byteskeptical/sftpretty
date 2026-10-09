@@ -16,19 +16,18 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Build
         run: |
           python -m pip install -e ../.[doc]
-          mkdir _static
           make clean
           make html
         working-directory: ./docs
