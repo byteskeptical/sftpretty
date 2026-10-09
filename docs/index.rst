@@ -108,21 +108,23 @@ Example
                    exceptions=socket.timeout, preserve_mtime=True, tries=11)
 
 
-+-------------------+--------------------------+
-|                    API Diff                  |
-+-------------------+--------------------------+
-|      pysftp       |        sftpretty         |
-+===================+==========================+
-|        cwd        |          cd [#]_         |
-+-------------------+--------------------------+
-|     makedirs      |         mkdir_p          |
-+-------------------+--------------------------+
-|     walktree      |  {local,remote}tree [#]_ |
-+-------------------+--------------------------+
+.. table:: API Diff
+   :class: center-cells
+
+   +-------------------+--------------------------+
+   |      pysftp       |        sftpretty         |
+   +===================+==========================+
+   |        cwd        |          cd [#]_         |
+   +-------------------+--------------------------+
+   |     makedirs      |         mkdir_p          |
+   +-------------------+--------------------------+
+   |     walktree      |  {local,remote}tree [#]_ |
+   +-------------------+--------------------------+
 
 .. [#] cwd() is a synonym for chdir(), use cd it's shorter and does the same thing.
 .. [#] Connection.walktree & sftp.walktree with explicit naming.
-.. [*] [path_advance, path_retreat, reparent] no longer needed.
+.. note:: ``path_advance``, ``path_retreat`` and ``reparent`` are no longer
+   needed and have been removed.
 
 
 Additional Information
